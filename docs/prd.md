@@ -4,10 +4,9 @@
 
 | Field | Value |
 | :---- | :---- |
-| Document ID | NX-FE-PRD-001 · Revision 0.4 · 22 October 2026 |
-| Scope | `client-frontend` — the responsive, mobile-first web client (public marketplace and member app) for the NextOwn one-city pilot. **The staff admin console is out of scope** and specified separately in [admin-prd.md](./admin-prd.md) |
+| Document ID | NX-FE-PRD-001 · Revision 0.5 · 22 October 2026 |
+| Scope | `client-frontend` — the responsive, mobile-first web client (public marketplace and member app) for the NextOwn one-city pilot. **The staff admin console is out of scope** and is built in its own repository |
 | Parent documents | [NX-PRD-001 Product Requirements](./NextOwn%20Product%20Requirements%20Document.md) · [NX-UX-001 UI/UX Design & Agent-Ready Template](./NextOwn%20UIUX%20Design%20Agent%20Ready%20Template.md) · [Brand Kit & Design System](./NextOwn%20Brand%20Kit%20and%20Design%20System.md) |
-| Sibling document | [NX-ADM-PRD-001 Admin Console PRD](./admin-prd.md): standalone staff console (UX-27, UX-28) |
 | Status | Draft for review by product owner, frontend lead and design |
 | Audience | Frontend engineers, product designers, QA, and the backend team that owns the API contract |
 
@@ -86,7 +85,7 @@ Escrow or wallets; "secure/protected payment" badges; bank-transfer verification
 | Member | Everything public plus listing wizard, offers, messages, transactions, saved, notifications, profile, settings | Requires terms/privacy acknowledgment and 18+ confirmation before first listing or offer (ACC-04) |
 | Restricted member | Own account, own records, support and appeal path | Create-listing, offer, comment and post actions are hidden or disabled with an explanation and appeal link. Own transaction records stay accessible (MSG-05) |
 
-Staff roles (support agent, moderator, administrator) use the separate admin console ([admin-prd.md](./admin-prd.md)); this app has no staff screens.
+Staff roles (support agent, moderator, administrator) use the separate admin console; this app has no staff screens.
 
 **Rule (R):** the client hides actions a role cannot take, for clarity. It never treats hiding as security. Every protected route also handles `401`, `403` and `404` from the API gracefully, without revealing whether a private object exists (QA-16).
 
@@ -100,7 +99,7 @@ The parent PRD is stack-agnostic (PRD §10.2). The stack below is the **confirme
 
 | Concern | Choice | Role in NextOwn |
 | :---- | :---- | :---- |
-| Language | **TypeScript** (strict mode) | Compile-time safety on money, enums and API payloads |
+| Language | **TypeScript** 6 (strict mode, the version the official Vite template uses) | Compile-time safety on money, enums and API payloads |
 | Build tool / dev server | **Vite** | Fast dev server, route-level code splitting, env handling (`import.meta.env`) |
 | UI framework | **React** | Single-page application for the public marketplace and member app |
 | Routing | **React Router** (data router: `createBrowserRouter`) | Nested layouts, lazy-loaded routes, auth/role guards, URL-synced filters |
@@ -111,7 +110,7 @@ The parent PRD is stack-agnostic (PRD §10.2). The stack below is the **confirme
 | Client state | **Zustand** | UI and session-view state only (§4.5). Never a second copy of server data |
 | Forms and validation | **React Hook Form + Zod** | Accessible per-field errors, input preservation, schemas for every form and offer payload |
 | SEO and document head | **React Helmet** (`react-helmet-async`, the maintained async-safe version) | Per-route `<title>`, meta description, canonical URL, Open Graph / Twitter tags and `robots` directives |
-| Testing | **Vitest** + React Testing Library + MSW + `vitest-axe` | Unit, component, integration and accessibility tests. In-browser flow tests at mobile and desktop sizes through Vitest Browser Mode |
+| Testing | **Vitest** + React Testing Library + MSW (+ `axe-core` for accessibility checks) | Unit, component, integration and accessibility tests. In-browser flow tests at mobile and desktop sizes through Vitest Browser Mode |
 | HTTP client | **Axios** (one shared instance) with TypeScript types generated from the backend OpenAPI spec | All API calls; interceptors for credentials, request IDs, error normalisation and session expiry; upload progress for photos (§4.4) |
 | Realtime | Polling through TanStack Query `refetchInterval` (pauses when the tab is hidden) | Resilient on unstable mobile data; WebSockets only if pilot evidence demands it |
 | Dates/times | `Intl.DateTimeFormat` with `timeZone: 'Africa/Lagos'` | Store and send UTC; display WAT (PRD §3.2) |
@@ -196,11 +195,10 @@ client-frontend/
 ├── vite.config.ts
 ├── vitest.config.ts               # or the `test` block in vite.config.ts
 ├── tsconfig.json
-├── hero.ts                        # HeroUI Tailwind plugin + NextOwn theme (brand tokens)
 └── src/
     ├── main.tsx                   # mounts <App />
     ├── app/
-    │   ├── App.tsx                # providers: HelmetProvider, QueryClientProvider, HeroUIProvider, RouterProvider
+    │   ├── App.tsx                # providers: HelmetProvider, QueryClientProvider, RouterProvider
     │   ├── router.tsx             # route tree; lazy() for member and auth routes
     │   ├── query-client.ts        # TanStack Query defaults (retry, staleTime, focus refetch)
     │   ├── layouts/               # PublicLayout, AuthLayout, MemberLayout (bottom nav)
@@ -251,7 +249,7 @@ client-frontend/
     │   └── index.css              # Tailwind entry, brand tokens as CSS variables, @font-face
     ├── assets/                    # logo placeholder, illustrations
     └── test/
-        ├── setup.ts               # Testing Library, vitest-axe, MSW server
+        ├── setup.ts               # Testing Library, jest-dom matchers, MSW server
         ├── msw/                   # handlers per API resource, including every error code
         ├── utils.tsx              # renderWithProviders (Query, HeroUI, Router, Helmet)
         └── flows/                 # Vitest Browser Mode flow tests (F-01 to F-08, QA cases)
@@ -286,7 +284,7 @@ The [Brand Kit](./NextOwn%20Brand%20Kit%20and%20Design%20System.md) is the **onl
 | `color.text.muted` | Slate `#486067` | Secondary copy |
 | `color.action.primary` | Exchange Teal `#0B6159` | Primary buttons, links |
 | `color.action.hover` | Teal Hover `#084B46` | Hover/pressed primary |
-| `color.accent` | Warm Gold `#F9BB55` | Highlights and genuine urgency tint; **Ink text only, never white** |
+| `color.highlight` | Warm Gold `#F9BB55` | Highlights and genuine urgency tint; **Ink text only, never white** |
 | `color.surface.page` | Cloud `#F7F9F7` | Page background |
 | `color.surface.default` | Paper `#FFFFFF` | Cards, overlays |
 | `color.surface.tinted` | Mint Mist `#E8F4EF` | Info surfaces, normal status chips |
@@ -355,40 +353,48 @@ Components are built **on HeroUI** and live in `src/components/ui` (brand wrappe
 | Progress Stepper | Listing wizard; handover progress | Accessible step descriptions |
 | Review Module | 1–5 stars, optional note, distribution when enough data | Only on eligible completed transactions |
 
-### 5.4 Tailwind and HeroUI theming
+### 5.4 Tailwind and HeroUI theming (as implemented)
 
-**Tailwind.** Brand tokens are declared once as CSS variables in `src/styles/index.css`, then mapped into the Tailwind theme so classes read semantically: `bg-surface-page`, `text-ink`, `text-muted`, `bg-action`, `hover:bg-action-hover`, `bg-accent`, `border-default`, `text-success`/`warning`/`danger`/`info`. The spacing scale, radii (`rounded-control`, `rounded-card`), shadows (`shadow-card`, `shadow-overlay`), durations and breakpoints come from the same tokens. Arbitrary hex values in class names (`bg-[#…]`) are disallowed by lint.
+HeroUI v3 has no Tailwind plugin and no provider. It is themed entirely through CSS variables, which `src/styles/` sets from the Brand Kit:
 
-**HeroUI theme** (`hero.ts`, loaded as the HeroUI Tailwind plugin) maps the Brand Kit onto HeroUI's semantic colours:
+| File | Role |
+| :---- | :---- |
+| `tokens.css` | Brand values as `--nx-*` variables, plus their mapping onto HeroUI's theme variables |
+| `theme.css` | Tailwind `@theme` names built on the brand variables |
+| `heroui-overrides.css` | Brand rules on HeroUI component classes, in the `components` layer so per-instance utilities still win |
+| `index.css` | Entry: Inter variable font, `@heroui/styles` (includes Tailwind), tokens, base styles |
 
-| HeroUI theme key | Brand token | Notes |
+**Tailwind names:** `text-ink`, `text-muted`, `bg-action`, `hover:bg-action-hover`, `text-action-foreground`, `bg-highlight` / `text-highlight-foreground` (Warm Gold), `bg-background` (Cloud), `bg-surface` (Paper), `bg-mint`, `border-border`, `text-success` / `warning` / `danger` / `info`, the type scale `text-display` … `text-price`, `rounded-control` / `card` / `feature`, `shadow-card` / `overlay`, `max-w-content`, and breakpoints `tablet:` / `desktop:` / `wide:`. Arbitrary hex values in class names (`bg-[#…]`) are not allowed.
+
+**HeroUI variable mapping** (`tokens.css`):
+
+| HeroUI variable | Brand token | Notes |
 | :---- | :---- | :---- |
-| `background` | Cloud `#F7F9F7` | Page canvas |
-| `foreground` | Ink `#142D32` | Default text |
-| `content1` | Paper `#FFFFFF` | Cards, modals, drawers |
-| `content2` | Mint Mist `#E8F4EF` | Tinted surfaces |
-| `divider` | Border `#D6E2DE` | Dividers only |
-| `default` | Slate `#486067` scale | Neutral/secondary elements |
-| `primary` | Exchange Teal `#0B6159` (foreground `#FFFFFF`); hover/pressed `#084B46` | Primary actions |
-| `secondary` | Ink `#142D32` (foreground `#FFFFFF`) | Dark emphasis; used sparingly |
-| `success` | `#147D52` | Always with text + icon |
-| `warning` | `#9A5900` | Text/icon colour, used for Reserved and caution states |
-| `danger` | `#B42318` | Errors, destructive actions only (never Quick Sell) |
-| `focus` | Exchange Teal `#0B6159` | Visible focus ring |
-| Custom `accent` (Tailwind) | Warm Gold `#F9BB55` with Ink text | Quick Sell tint and highlights; not a HeroUI semantic colour, so it can't leak into warnings |
-| `layout.radius` | small 8 · medium 12 · large 16 | Controls use medium (12), cards use large (16) |
-| `layout.fontSize` / `lineHeight` | Brand type scale (§5.2) | Body 16/24 |
+| `--background` / `--foreground` | Cloud / Ink | Page canvas and default text |
+| `--surface`, `--overlay` | Paper | Cards; modals, popovers, menus |
+| `--surface-secondary`, `--default` | Mint Mist | Tinted surfaces, neutral fills |
+| `--muted` | Slate | Secondary text |
+| `--accent` / `--accent-hover` | Exchange Teal / Teal Hover (foreground white) | HeroUI's **primary interactive colour** |
+| `--success`, `--warning`, `--danger` | Brand semantic colours, white foreground | Always with text + icon |
+| `--border`, `--separator`, `--field-border` | Border | Lines and input outlines |
+| `--focus`, `--link` | Exchange Teal | Focus ring, links |
+| `--radius` | 8 px | HeroUI scale becomes lg 8 · xl 12 · 2xl 16 · 3xl 24, matching the Brand Kit radii |
+| `--surface-shadow`, `--overlay-shadow` | Brand card / overlay shadows | |
 
-**Brand overrides on HeroUI defaults** (applied in the `components/ui` wrappers):
+**Naming note:** in HeroUI v3 "accent" means the primary interactive colour, so it maps to Exchange Teal. Warm Gold is exposed only as `highlight`, so it can never leak into interactive or status styles. The pilot ships a light theme only.
 
-- Buttons and inputs: minimum height 48 px (`size="lg"` or a custom class); hit area ≥ 44 × 44 px.
-- No gradient, glow or `shadow` variants; flat or bordered styles only. Cards use a border plus `shadow-card` at most.
+**Brand overrides on HeroUI defaults:**
+
+- Buttons: 48 px high (44 px for `size="sm"`), 12 px control radius, 16/24 semibold labels. `variant="primary"` is Teal; `secondary` is white with a Teal border and label; `tertiary` is a Teal text action; `danger` is for destructive actions only.
+- Inputs: at least 48 px high, 16 px text at every breakpoint (prevents iOS zoom), visible Border outline.
+- No gradient, glow or heavy shadow styles. Cards use a border plus `shadow-card` at most.
 - `Chip`/badge always shows a text label and, for status, an icon. Colour is never the only signal.
 - Warm Gold surfaces always use Ink text.
 - Toasts for critical transaction errors are replaced by persistent inline banners (Brand §8).
-- Modals and drawers keep HeroUI/React Aria focus management; mobile filter and comment sheets use HeroUI `Drawer` with `placement="bottom"`.
-- Motion uses brand durations (120/200/320 ms) and HeroUI's reduced-motion handling stays enabled.
-- `HeroUIProvider` receives React Router's `navigate` and `useHref` so HeroUI links use client-side routing.
+- Modals and drawers keep HeroUI/React Aria focus management; mobile filter and comment sheets use HeroUI `Drawer` from the bottom.
+- Motion uses brand durations (120/200/320 ms); `prefers-reduced-motion` disables non-essential motion.
+- React Aria's `RouterProvider` (re-exported by `@heroui/react`) receives React Router's `navigate` and `useHref` in `RootLayout`, so HeroUI links use client-side routing.
+- A dev-only `/dev/tokens` route renders every token for visual checks.
 
 ---
 
@@ -809,7 +815,7 @@ Every event carries a client-generated `event_id` (UUID), `occurred_at` (UTC), s
 | Layer | Tooling | Coverage focus |
 | :---- | :---- | :---- |
 | Unit | Vitest | Money conversion/formatting, payer sentence generator, status label map, time/countdown with server offset, phone normalisation, offer payload builder per mode |
-| Component | Vitest + React Testing Library + `vitest-axe` (jsdom) | Every `components/ui` and `components/domain` component and state; focus management; error association |
+| Component | Vitest + React Testing Library + `axe-core` (jsdom) | Every `components/ui` and `components/domain` component and state; focus management; error association |
 | Contract | Generated types + MSW handlers from OpenAPI | Client compiles against the current spec; mocks cover each error code |
 | Integration | Vitest + Testing Library + MSW, full providers (`renderWithProviders`) | Feature screens with TanStack Query, React Router, Zustand and RHF/Zod wired together; every API error code path |
 | Flow (in-browser) | Vitest Browser Mode (mobile 390 × 844 and 320 px, desktop 1440 × 900) | Flows F-01 to F-08 and adverse branches; real layout, focus and scrolling |
@@ -860,7 +866,7 @@ Aligned with PRD §15.1. Week numbers are relative to the project start and are 
 
 | Phase | Weeks | Frontend deliverables |
 | :---- | :---- | :---- |
-| 0. Foundations | 1–3 | Repo setup, CI (lint, types, tests, Lighthouse, banned copy), Vite + TypeScript scaffold, Tailwind brand tokens, HeroUI theme (`hero.ts`), fonts, `components/ui` wrappers, React Helmet `<Seo>` component, Zustand stores, TanStack Query client, Axios instance with interceptors and generated API types, MSW mocks, React Router app shell, layouts and auth guards |
+| 0. Foundations | 1–3 | Repo setup, CI (lint, types, tests, Lighthouse, banned copy), Vite + TypeScript scaffold, Tailwind brand tokens, HeroUI theme variables, fonts, `components/ui` wrappers, React Helmet `<Seo>` component, Zustand stores, TanStack Query client, Axios instance with interceptors and generated API types, MSW mocks, React Router app shell, layouts and auth guards |
 | 1. Accounts and listings | 3–5 | Phone auth, onboarding, settings, listing wizard, photo uploader, My listings, listing detail, Explore and filters, listing share-preview edge function |
 | 2. Offers and feed | 4–6 | Offer composer (all modes), offers inbox and thread, counters, accept flow, feed and comments (flagged), saves |
 | 3. Transactions and trust | 6–8 | Transaction/handover, confirmations, cancellation/dispute, reports, blocks, reviews, notifications, messaging |

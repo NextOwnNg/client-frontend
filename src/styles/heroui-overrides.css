@@ -1,0 +1,55 @@
+/*
+ * Brand overrides on HeroUI component defaults (Brand §5, §8).
+ * Kept in the components layer so per-instance Tailwind utilities still win.
+ */
+
+@layer components {
+  /* Buttons: 48px controls, 12px control radius, 16/24 semibold labels */
+  .button {
+    @apply h-control rounded-control px-6 text-body font-semibold md:h-control;
+    transition-duration: var(--nx-motion-fast);
+  }
+
+  .button--sm {
+    @apply h-touch px-4 md:h-touch;
+  }
+
+  .button--lg {
+    @apply h-control md:h-control;
+  }
+
+  .button--icon-only {
+    @apply size-control px-0 md:size-control;
+  }
+
+  .button--icon-only.button--sm {
+    @apply size-touch md:size-touch;
+  }
+
+  /* Secondary: white surface, Teal border and label (Counter, Save, Review terms) */
+  .button--secondary {
+    @apply border border-action;
+    --button-bg: var(--nx-paper);
+    --button-bg-hover: var(--nx-mint);
+    --button-bg-pressed: var(--nx-mint);
+    --button-fg: var(--nx-teal);
+  }
+
+  /* Tertiary: text action in Teal */
+  .button--tertiary {
+    --button-bg: transparent;
+    --button-bg-hover: var(--nx-mint);
+    --button-bg-pressed: var(--nx-mint);
+    --button-fg: var(--nx-teal);
+  }
+
+  /* Fields: 48px height, 16px text at every breakpoint (avoids iOS zoom), visible outline */
+  .input,
+  .textarea {
+    @apply text-body sm:text-body;
+  }
+
+  .input {
+    @apply min-h-control;
+  }
+}
