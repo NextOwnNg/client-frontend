@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'msw'
+import { handlers as mockApiHandlers } from '@/mocks/handlers'
 
-/** Default API handlers shared by all tests. Add one file per API resource as features land. */
-export const handlers: RequestHandler[] = []
+/** Tests share the dev mock API; individual tests override with server.use(). */
+export const handlers: RequestHandler[] = [...mockApiHandlers]

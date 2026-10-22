@@ -1,5 +1,6 @@
 import { Button, Chip } from '@heroui/react'
 import { Logo, LogoMark } from '@/components/brand/Logo'
+import { Link } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 
 /** Dev-only reference for the brand tokens (route /dev/tokens, excluded from production builds). */
@@ -44,6 +45,7 @@ export function TokensPage() {
     <div className="flex flex-col gap-12">
       <Seo title="Design tokens" noindex />
       <h1 className="text-h1 text-ink">Design tokens</h1>
+      <Link to="/dev/components" className="text-body font-medium text-action underline">Component gallery</Link>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-h2 text-ink">Logo</h2>

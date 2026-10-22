@@ -35,8 +35,9 @@
     --button-fg: var(--nx-teal);
   }
 
-  /* Tertiary: text action in Teal */
+  /* Tertiary: text action in Teal, with just enough padding for its hover fill */
   .button--tertiary {
+    @apply px-3;
     --button-bg: transparent;
     --button-bg-hover: var(--nx-mint);
     --button-bg-pressed: var(--nx-mint);
@@ -51,5 +52,43 @@
 
   .input {
     @apply min-h-control;
+  }
+}
+
+/* Brand form input used by TextField / MoneyField / PhoneField */
+@layer components {
+  .field-input {
+    @apply block h-control w-full rounded-control border border-border bg-field px-4 text-body text-ink;
+    caret-color: var(--nx-teal);
+    transition:
+      border-color var(--nx-motion-fast) ease-out,
+      box-shadow var(--nx-motion-fast) ease-out;
+
+    &::placeholder {
+      color: var(--nx-slate);
+      opacity: 1;
+    }
+
+    &:hover:not(:focus) {
+      border-color: color-mix(in oklab, var(--nx-border) 60%, var(--nx-slate));
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--nx-teal);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--nx-teal) 22%, transparent);
+    }
+
+    &[aria-invalid="true"] {
+      border-color: var(--nx-danger);
+    }
+
+    &[aria-invalid="true"]:focus {
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--nx-danger) 20%, transparent);
+    }
+
+    &:disabled {
+      @apply cursor-not-allowed bg-cloud text-muted;
+    }
   }
 }

@@ -4,12 +4,12 @@ import { routes } from '@/app/router'
 import { renderWithProviders } from '@/test/utils'
 
 describe('app routes', () => {
-  it('renders the home page inside the public layout', async () => {
+  it('renders the home page inside the app shell', async () => {
     renderWithProviders(routes)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Find your next thing.' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'NextOwn home' })).toHaveAttribute('href', '/')
-    expect(screen.getByRole('button', { name: 'Explore items' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'NextOwn home' })[0]).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Explore items' })).toHaveAttribute('href', '/explore')
   })
 
   it('renders the not-found page for unknown routes', async () => {

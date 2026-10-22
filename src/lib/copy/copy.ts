@@ -1,0 +1,21 @@
+/** Required interface copy (PRD §10.1). Use these strings verbatim; don't restate them inline. */
+export const copy = {
+  hero: 'Find your next thing.',
+  brandLine: 'Turn what you own into what you want.',
+  supportingLine: 'Sell what you no longer need, swap for something better, or add cash to make the exchange work.',
+  primaryModes: 'Sell it. Swap it. Add cash if you need to.',
+  phoneBadgeExplainer: 'Phone confirmed. This does not verify identity or ownership.',
+  quickSellNote: 'Quick Sell puts your deadline in view. It does not guarantee a buyer.',
+  beforeSend: 'Review what each person gives and receives. Offers can be countered or rejected.',
+  offerAccepted: 'Both items are reserved. Arrange an inspection and handover with the other person.',
+  handoverCaution: 'Inspect the items first. NextOwn does not hold or independently verify payments in this pilot.',
+  partialConfirmation: 'Your confirmation is recorded. Waiting for the other person to confirm.',
+  unavailable: 'This item is no longer available. Your offer was not sent.',
+  staleVersion: 'The offer has changed. Review the latest version before deciding.',
+  expiredListing: 'The deadline passed. Renew, update or close your listing.',
+  reviewGate: 'Reviews are available after both people confirm the exchange.',
+  supportLimit: 'We can review reports and account activity. We cannot reverse a transfer made outside NextOwn.',
+  commentsNote: 'To make an offer, use Make an offer. Agreements made in comments are not tracked.',
+  chatNote: 'Accept or counter through an offer card so the agreed terms are recorded.',
+  offline: "You're offline. You can keep browsing what's loaded. Offers and confirmations need a connection.",
+} as const
