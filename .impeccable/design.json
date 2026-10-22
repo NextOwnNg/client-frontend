@@ -1,0 +1,513 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T14:08:22+00:00",
+  "title": "Design System: NextOwn",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(27.9% 0.032 212)",
+        "cssVar": "--nx-ink",
+        "tonalRamp": [
+          "#000e12",
+          "#0f282d",
+          "#2c4449",
+          "#4b6267",
+          "#6c8286",
+          "#8ea3a7",
+          "#b5c8cc",
+          "#e1f2f6"
+        ]
+      },
+      "exchange-teal": {
+        "role": "primary",
+        "displayName": "Exchange Teal",
+        "canonical": "oklch(44.4% 0.075 185)",
+        "cssVar": "--nx-teal",
+        "tonalRamp": [
+          "#00120e",
+          "#002e28",
+          "#004c45",
+          "#1f6b63",
+          "#498b82",
+          "#70aca3",
+          "#9ad1c9",
+          "#d3f7f2"
+        ]
+      },
+      "teal-hover": {
+        "role": "primary",
+        "displayName": "Teal Hover",
+        "canonical": "oklch(37.3% 0.062 187)",
+        "cssVar": "--nx-teal-hover",
+        "tonalRamp": [
+          "#00110f",
+          "#002d29",
+          "#074a45",
+          "#336863",
+          "#578882",
+          "#7ba9a3",
+          "#a4cec9",
+          "#d3f7f3"
+        ]
+      },
+      "warm-gold": {
+        "role": "secondary",
+        "displayName": "Warm Gold",
+        "canonical": "oklch(83.0% 0.137 77)",
+        "cssVar": "--nx-gold",
+        "tonalRamp": [
+          "#1c0300",
+          "#3b1b00",
+          "#5c3600",
+          "#7f5400",
+          "#a47314",
+          "#ca9334",
+          "#e4bd84",
+          "#fdecd2"
+        ]
+      },
+      "cloud": {
+        "role": "neutral",
+        "displayName": "Cloud",
+        "canonical": "oklch(98.0% 0.003 146)",
+        "cssVar": "--nx-cloud",
+        "tonalRamp": [
+          "#0a0c0a",
+          "#232423",
+          "#3f403f",
+          "#5c5e5c",
+          "#7c7e7c",
+          "#9d9f9d",
+          "#c3c5c3",
+          "#edefed"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "cssVar": "--nx-paper",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "mint-mist": {
+        "role": "neutral",
+        "displayName": "Mint Mist",
+        "canonical": "oklch(95.7% 0.014 169)",
+        "cssVar": "--nx-mint",
+        "tonalRamp": [
+          "#080c0b",
+          "#202523",
+          "#3b413f",
+          "#58605d",
+          "#777f7c",
+          "#98a19d",
+          "#bcc7c3",
+          "#e6f2ed"
+        ]
+      },
+      "slate": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "oklch(47.2% 0.031 218)",
+        "cssVar": "--nx-slate",
+        "tonalRamp": [
+          "#010e12",
+          "#14272d",
+          "#2e444a",
+          "#4a6269",
+          "#6b8289",
+          "#8da3a9",
+          "#b3c8cf",
+          "#dff2f8"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "oklch(90.3% 0.014 174)",
+        "cssVar": "--nx-border",
+        "tonalRamp": [
+          "#080c0b",
+          "#202524",
+          "#3b413f",
+          "#58605d",
+          "#77807d",
+          "#97a19e",
+          "#bcc7c3",
+          "#e6f2ee"
+        ]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Success",
+        "canonical": "oklch(52.3% 0.113 160)",
+        "cssVar": "--nx-success",
+        "tonalRamp": [
+          "#001400",
+          "#003112",
+          "#004f2b",
+          "#007047",
+          "#379166",
+          "#62b288",
+          "#92d6b0",
+          "#daf7e6"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warning",
+        "canonical": "oklch(52.7% 0.120 64)",
+        "cssVar": "--nx-warning",
+        "tonalRamp": [
+          "#220000",
+          "#431300",
+          "#662f00",
+          "#8a4c00",
+          "#ac6c28",
+          "#cd8f53",
+          "#ecb889",
+          "#ffead5"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "canonical": "oklch(50.0% 0.182 30)",
+        "cssVar": "--nx-danger",
+        "tonalRamp": [
+          "#330000",
+          "#5a0000",
+          "#820000",
+          "#ac1c12",
+          "#cf4a3b",
+          "#e47d6d",
+          "#f7afa3",
+          "#ffe6e0"
+        ]
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "Info",
+        "canonical": "oklch(45.8% 0.144 261)",
+        "cssVar": "--nx-info",
+        "tonalRamp": [
+          "#00003b",
+          "#001b5f",
+          "#0e3a86",
+          "#2b5aac",
+          "#4e7ccb",
+          "#729eea",
+          "#a4c5fd",
+          "#e0efff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Desktop home hero only.",
+        "tailwind": "text-display"
+      },
+      "h1": {
+        "displayName": "H1",
+        "purpose": "Page titles; mobile hero.",
+        "tailwind": "text-h1"
+      },
+      "h2": {
+        "displayName": "H2",
+        "purpose": "Section headings.",
+        "tailwind": "text-h2"
+      },
+      "h3": {
+        "displayName": "H3",
+        "purpose": "Sub-sections; large swap-only price text.",
+        "tailwind": "text-h3"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default copy and field text at every breakpoint.",
+        "tailwind": "text-body"
+      },
+      "compact": {
+        "displayName": "Compact",
+        "purpose": "Secondary facts: condition, defect line, nav links, banner detail.",
+        "tailwind": "text-compact"
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Badges, bottom-nav labels, worked-sum heading, timestamps.",
+        "tailwind": "text-caption"
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Prominent asking prices, tabular figures.",
+        "tailwind": "text-price"
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "All button labels.",
+        "tailwind": "text-body font-semibold"
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 2px 12px rgba(20, 45, 50, 0.06)",
+        "purpose": "Hovered listing tiles, the bottom-nav List button, badges floated over photos.",
+        "cssVar": "--nx-shadow-card"
+      },
+      {
+        "name": "overlay",
+        "value": "0 14px 36px rgba(20, 45, 50, 0.18)",
+        "purpose": "Modals, sheets, popovers.",
+        "cssVar": "--nx-shadow-overlay"
+      },
+      {
+        "name": "field-focus",
+        "value": "0 0 0 3px color-mix(in oklab, #0b6159 22%, transparent)",
+        "purpose": "Focus ring on fields."
+      },
+      {
+        "name": "backdrop",
+        "value": "rgba(20, 45, 50, 0.5)",
+        "purpose": "Modal backdrop."
+      }
+    ],
+    "motion": [
+      {
+        "name": "fast",
+        "value": "120ms",
+        "purpose": "Hover, press, field border and ring.",
+        "cssVar": "--nx-motion-fast"
+      },
+      {
+        "name": "standard",
+        "value": "200ms",
+        "purpose": "Default MotionConfig transition, entrances, worked-sum line write-in.",
+        "cssVar": "--nx-motion-standard"
+      },
+      {
+        "name": "slow",
+        "value": "320ms",
+        "purpose": "Drawn tick on completed progress steps.",
+        "cssVar": "--nx-motion-slow"
+      },
+      {
+        "name": "ease-brand",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Ease-out for every transition.",
+        "cssVar": "--nx-ease"
+      },
+      {
+        "name": "spring-sheet",
+        "value": "spring stiffness 420 damping 40",
+        "purpose": "Bottom sheets, no visible bounce."
+      },
+      {
+        "name": "spring-press",
+        "value": "spring stiffness 600 damping 35",
+        "purpose": "Press feedback (scale 0.98) and small toggles."
+      },
+      {
+        "name": "spring-indicator",
+        "value": "spring stiffness 500 damping 40",
+        "purpose": "Sliding nav and tab indicators."
+      },
+      {
+        "name": "fade-rise",
+        "value": "opacity 0 to 1, y 8px to 0, standard",
+        "purpose": "Entrances."
+      },
+      {
+        "name": "step-slide",
+        "value": "x 16px in direction of travel; enter standard, exit fast",
+        "purpose": "Wizard and composer steps."
+      },
+      {
+        "name": "sum-stagger",
+        "value": "40ms per line",
+        "purpose": "Worked-sum write-in, first appearance only."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "MotionConfig reducedMotion=\"user\" plus global CSS collapse",
+        "purpose": "All movement has a reduced-motion path."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tablet",
+        "value": "768px"
+      },
+      {
+        "name": "desktop",
+        "value": "1024px"
+      },
+      {
+        "name": "wide",
+        "value": "1440px"
+      },
+      {
+        "name": "content-max",
+        "value": "1200px"
+      }
+    ],
+    "sources": {
+      "tokens": "src/styles/tokens.css",
+      "tailwindTheme": "src/styles/theme.css",
+      "heroOverrides": "src/styles/heroui-overrides.css",
+      "motion": "src/lib/motion/presets.ts",
+      "statusCopy": "src/lib/copy/status.ts",
+      "brandKit": "docs/NextOwn Brand Kit and Design System.md (v0.9)",
+      "directionContract": ".impeccable/surfaces/src-app.md (seed:b02862ec5b57c896)"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled Teal action for Offer, List, Confirm; 48px tall.",
+      "html": "<button class=\"ds-btn-primary\">Make an offer</button>",
+      "css": ".ds-btn-primary{font-family:'Inter Variable',Inter,system-ui,sans-serif;font-size:16px;line-height:24px;font-weight:600;height:48px;padding:0 24px;border-radius:var(--nx-radius-control,12px);cursor:pointer;transition:background-color 120ms cubic-bezier(0.16,1,0.3,1),transform 120ms cubic-bezier(0.16,1,0.3,1);background:var(--nx-teal,#0b6159);color:#fff;border:none;}.ds-btn-primary:hover{background:var(--nx-teal-hover,#084b46);}.ds-btn-primary:active{transform:scale(0.98);}.ds-btn-primary:focus-visible{outline:2px solid var(--nx-teal);outline-offset:2px;}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "White surface, Teal border and label for Counter, Save, Review terms.",
+      "html": "<button class=\"ds-btn-secondary\">Counter</button>",
+      "css": ".ds-btn-secondary{font-family:'Inter Variable',Inter,system-ui,sans-serif;font-size:16px;line-height:24px;font-weight:600;height:48px;padding:0 24px;border-radius:var(--nx-radius-control,12px);cursor:pointer;transition:background-color 120ms cubic-bezier(0.16,1,0.3,1),transform 120ms cubic-bezier(0.16,1,0.3,1);background:var(--nx-paper,#fff);color:var(--nx-teal,#0b6159);border:1px solid var(--nx-teal,#0b6159);}.ds-btn-secondary:hover,.ds-btn-secondary:active{background:var(--nx-mint,#e8f4ef);}.ds-btn-secondary:focus-visible{outline:2px solid var(--nx-teal);outline-offset:2px;}"
+    },
+    {
+      "name": "Tertiary Button",
+      "kind": "button",
+      "refersTo": "button-tertiary",
+      "description": "Teal text action with a Mint hover fill.",
+      "html": "<button class=\"ds-btn-tertiary\">Design tokens</button>",
+      "css": ".ds-btn-tertiary{font-family:'Inter Variable',Inter,system-ui,sans-serif;font-size:16px;line-height:24px;font-weight:600;height:48px;padding:0 12px;border-radius:var(--nx-radius-control,12px);cursor:pointer;transition:background-color 120ms cubic-bezier(0.16,1,0.3,1),transform 120ms cubic-bezier(0.16,1,0.3,1);background:transparent;color:var(--nx-teal,#0b6159);border:none;}.ds-btn-tertiary:hover{background:var(--nx-mint,#e8f4ef);}.ds-btn-tertiary:focus-visible{outline:2px solid var(--nx-teal);outline-offset:2px;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field-input",
+      "description": "Shared 48px field for text, money and phone input; Teal focus ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Cash you add</span><span class=\"ds-field-wrap\"><span class=\"ds-field-prefix\">₦</span><input class=\"ds-field-input\" placeholder=\"0\" inputmode=\"numeric\"></span></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:'Inter Variable',Inter,system-ui,sans-serif;max-width:320px;}.ds-field-label{font-size:16px;line-height:24px;font-weight:500;color:var(--nx-ink,#142d32);}.ds-field-wrap{position:relative;}.ds-field-prefix{position:absolute;left:16px;top:0;bottom:0;display:flex;align-items:center;color:var(--nx-slate,#486067);font-weight:500;pointer-events:none;}.ds-field-input{display:block;width:100%;height:48px;padding:0 16px 0 36px;border:1px solid var(--nx-border,#d6e2de);border-radius:var(--nx-radius-control,12px);background:#fff;color:var(--nx-ink,#142d32);font:inherit;font-size:16px;caret-color:var(--nx-teal,#0b6159);transition:border-color 120ms ease-out,box-shadow 120ms ease-out;}.ds-field-input::placeholder{color:var(--nx-slate,#486067);opacity:1;}.ds-field-input:hover:not(:focus){border-color:color-mix(in oklab,#d6e2de 60%,#486067);}.ds-field-input:focus{outline:none;border-color:var(--nx-teal,#0b6159);box-shadow:0 0 0 3px color-mix(in oklab,#0b6159 22%,transparent);}"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Pill status: always a word plus an icon; Gold only for Quick Sell.",
+      "html": "<span class=\"ds-badges\"><span class=\"ds-badge ds-badge-info\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/></svg>Swap ok</span><span class=\"ds-badge ds-badge-highlight\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\"/><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\"/><circle cx=\"12\" cy=\"14\" r=\"8\"/></svg>Quick Sell · 29h</span><span class=\"ds-badge ds-badge-neutral\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m4.9 4.9 14.2 14.2\"/></svg>Sold</span></span>",
+      "css": ".ds-badges{display:flex;gap:8px;flex-wrap:wrap;}.ds-badge{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:9999px;font-family:'Inter Variable',Inter,system-ui,sans-serif;font-size:12px;line-height:18px;font-weight:600;white-space:nowrap;}.ds-badge-info{background:var(--nx-mint,#e8f4ef);color:var(--nx-teal,#0b6159);}.ds-badge-highlight{background:var(--nx-gold,#f9bb55);color:var(--nx-ink,#142d32);}.ds-badge-neutral{background:var(--nx-cloud,#f7f9f7);color:var(--nx-slate,#486067);box-shadow:0 0 0 1px var(--nx-border,#d6e2de);}"
+    },
+    {
+      "name": "Worked Sum",
+      "kind": "custom",
+      "refersTo": "offer-sum",
+      "description": "Signature: the trade written as a sum, Teal margin rule, double-ruled total, Teal payer sentence.",
+      "html": "<section class=\"ds-sum\"><span class=\"ds-sum-rule\"></span><h3 class=\"ds-sum-h\">The trade, worked out</h3><div class=\"ds-sum-line\"><span class=\"ds-op\"></span><span class=\"ds-sum-t\">Your PS5 Disc Edition</span><span class=\"ds-sum-item\">item</span></div><div class=\"ds-sum-line\"><span class=\"ds-op\">+</span><span class=\"ds-sum-t\">Cash you add</span><span class=\"ds-sum-cash\">₦120,000</span></div><div class=\"ds-sum-line ds-sum-total\"><span class=\"ds-op\">=</span><span class=\"ds-sum-t\"><b>MacBook Air M1, 2020</b></span></div><p class=\"ds-sum-ans\">You pay ₦120,000 directly at the exchange.</p></section>",
+      "css": ".ds-sum{position:relative;max-width:380px;padding:12px 16px 12px 28px;background:#fff;border:1px solid var(--nx-border,#d6e2de);border-radius:var(--nx-radius-card,16px);font-family:'Inter Variable',Inter,system-ui,sans-serif;color:var(--nx-ink,#142d32);font-variant-numeric:tabular-nums;}.ds-sum-rule{position:absolute;top:12px;bottom:12px;left:16px;width:2px;border-radius:9999px;background:var(--nx-teal,#0b6159);}.ds-sum-h{margin:0;font-size:12px;line-height:18px;font-weight:600;color:var(--nx-slate,#486067);}.ds-sum-line{display:flex;align-items:baseline;gap:8px;line-height:24px;font-size:16px;}.ds-op{width:12px;flex-shrink:0;color:var(--nx-slate,#486067);}.ds-sum-t{flex:1;min-width:0;}.ds-sum-item{font-size:12px;color:var(--nx-slate,#486067);}.ds-sum-cash{font-weight:600;}.ds-sum-total{margin-top:4px;padding-top:4px;border-top:3px double var(--nx-ink,#142d32);}.ds-sum-ans{margin:4px 0 0;font-size:14px;line-height:21px;font-weight:600;color:var(--nx-teal,#0b6159);}"
+    },
+    {
+      "name": "Progress Line",
+      "kind": "custom",
+      "refersTo": "progress-line",
+      "description": "Signature: single corridor of steps; Teal for done with drawn ticks, ringed current step.",
+      "html": "<ol class=\"ds-pl\"><li class=\"ds-pl-step ds-done\"><span class=\"ds-pl-bar ds-pl-bar-done\"></span><span class=\"ds-pl-mk ds-mk-done\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\"><path d=\"M5 12.5l4.5 4.5L19 7.5\" stroke=\"#fff\" stroke-width=\"2.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span><span>Offer accepted</span></li><li class=\"ds-pl-step\"><span class=\"ds-pl-bar\"></span><span class=\"ds-pl-mk ds-mk-cur\"><span class=\"ds-dot\"></span></span><span class=\"ds-cur\">Agree a meeting place</span></li><li class=\"ds-pl-step\"><span class=\"ds-pl-mk\"></span><span class=\"ds-todo\">Exchange and confirm</span></li></ol>",
+      "css": ".ds-pl{list-style:none;margin:0;padding:0;font-family:'Inter Variable',Inter,system-ui,sans-serif;font-size:16px;line-height:24px;color:var(--nx-ink,#142d32);}.ds-pl-step{position:relative;display:flex;gap:12px;min-height:48px;padding-bottom:24px;}.ds-pl-step:last-child{padding-bottom:0;}.ds-pl-bar{position:absolute;top:24px;bottom:0;left:11px;width:2px;border-radius:9999px;background:var(--nx-border,#d6e2de);}.ds-pl-bar-done{background:var(--nx-teal,#0b6159);}.ds-pl-mk{position:relative;z-index:1;flex-shrink:0;width:24px;height:24px;box-sizing:border-box;border-radius:9999px;border:2px solid var(--nx-border,#d6e2de);background:#fff;display:flex;align-items:center;justify-content:center;}.ds-mk-done{border:none;background:var(--nx-teal,#0b6159);}.ds-mk-cur{border-color:var(--nx-teal,#0b6159);}.ds-dot{width:10px;height:10px;border-radius:9999px;background:var(--nx-teal,#0b6159);}.ds-cur{font-weight:600;}.ds-todo{color:var(--nx-slate,#486067);}"
+    },
+    {
+      "name": "Listing Row",
+      "kind": "card",
+      "refersTo": "listing-row",
+      "description": "Phone listing card: 112px photo, Teal margin rule as internal divider, facts on 24px lines, tabular price.",
+      "html": "<a class=\"ds-row\" href=\"#\"><span class=\"ds-row-img\"></span><span class=\"ds-row-facts\"><span class=\"ds-row-rule\"></span><span class=\"ds-row-title\">iPhone 12 Pro · 128GB</span><span class=\"ds-row-cond\">Good · Small scratch on frame</span><span class=\"ds-row-foot\"><span class=\"ds-row-price\">₦385,000</span><span class=\"ds-row-tag\">Swap ok</span></span></span></a>",
+      "css": ".ds-row{display:flex;height:120px;max-width:400px;overflow:hidden;border:1px solid var(--nx-border,#d6e2de);border-radius:var(--nx-radius-card,16px);background:#fff;text-decoration:none;color:var(--nx-ink,#142d32);font-family:'Inter Variable',Inter,system-ui,sans-serif;transition:transform 120ms ease-out,border-color 120ms ease-out;}.ds-row:hover{border-color:color-mix(in oklab,#0b6159 40%,transparent);}.ds-row:active{transform:scale(0.98);}.ds-row:focus-visible{outline:2px solid var(--nx-teal,#0b6159);outline-offset:2px;}.ds-row-img{width:112px;flex-shrink:0;background:var(--nx-mint,#e8f4ef);}.ds-row-facts{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;padding:12px 12px 12px 16px;}.ds-row-rule{position:absolute;top:12px;bottom:12px;left:0;width:2px;border-radius:9999px;background:var(--nx-teal,#0b6159);}.ds-row-title{font-size:16px;line-height:24px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-row-cond{font-size:14px;line-height:24px;color:var(--nx-slate,#486067);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.ds-row-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;}.ds-row-price{font-weight:700;font-size:18px;line-height:24px;font-variant-numeric:tabular-nums;}.ds-row-tag{border-radius:9999px;background:var(--nx-mint,#e8f4ef);color:var(--nx-teal,#0b6159);padding:0 8px;font-size:12px;line-height:24px;font-weight:600;}"
+    },
+    {
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "refersTo": "bottom-nav",
+      "description": "Five-item phone nav; active is Teal with a top bar; List is the filled Teal action.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-i ds-active\" href=\"#\"><span class=\"ds-nav-bar\"></span><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m16.24 7.76-1.8 5.41a2 2 0 0 1-1.27 1.27l-5.41 1.8 1.8-5.41a2 2 0 0 1 1.27-1.27z\"/></svg>Explore</a><a class=\"ds-nav-i\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"3\" width=\"16\" height=\"18\" rx=\"2\"/><path d=\"M8 7h8M8 11h8M8 15h5\"/></svg>Feed</a><a class=\"ds-nav-i\" href=\"#\"><span class=\"ds-nav-list\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><path d=\"M5 12h14M12 5v14\"/></svg></span>List</a><a class=\"ds-nav-i\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 10h10l-3-3M17 14H7l3 3\"/></svg>Offers</a><a class=\"ds-nav-i\" href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21a8 8 0 0 1 16 0\"/></svg>Profile</a></nav>",
+      "css": ".ds-nav{display:grid;grid-template-columns:repeat(5,1fr);height:64px;max-width:420px;background:rgba(255,255,255,0.95);border-top:1px solid var(--nx-border,#d6e2de);font-family:'Inter Variable',Inter,system-ui,sans-serif;}.ds-nav-i{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;line-height:18px;font-weight:500;color:var(--nx-slate,#486067);text-decoration:none;transition:color 120ms ease-out,transform 120ms ease-out;}.ds-nav-i:active{transform:scale(0.95);}.ds-nav-i:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--nx-teal,#0b6159);}.ds-active{color:var(--nx-teal,#0b6159);font-weight:600;}.ds-nav-bar{position:absolute;top:0;width:32px;height:2px;border-radius:9999px;background:var(--nx-teal,#0b6159);}.ds-nav-list{display:flex;width:36px;height:36px;align-items:center;justify-content:center;border-radius:var(--nx-radius-control,12px);background:var(--nx-teal,#0b6159);color:#fff;box-shadow:0 2px 12px rgba(20,45,50,0.06);}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Exercise Book",
+    "overview": "Every trade is written out like a neat exercise-book sum: the items and the cash in the working, the answer under a double rule, and a tick only when both sides check out. The page is a Cloud sheet with white cards laid on it, set in Ink on a 24px ruled rhythm. A thin Exchange Teal margin rule, the exercise book's red margin translated into the brand, runs down the left of every worked sum, separates each listing's photo from its facts, and becomes the single corridor of a transaction timeline.\n\nThe system is calm, light and factual. Item photographs carry attention; the interface around them is quiet Ink and Slate type, hairline Border outlines and one Teal voice for action. Warm Gold is rationed: it appears only for real urgency (Quick Sell) and as a deadline bar whose length is the true share of time left. Money is always set in tabular figures so amounts compare at a glance. The pilot ships a light theme only.\n\nHeroUI v3 provides the component primitives and is themed entirely through CSS variables in `src/styles/tokens.css`; its `accent` is Exchange Teal. All brand tokens are `--nx-*` custom properties mapped to Tailwind theme names in `src/styles/theme.css`; components never use raw hex.",
+    "keyCharacteristics": [
+      "Cloud page, white cards, Ink type, one Teal action voice.",
+      "A 2px Teal margin rule as the recurring structural mark.",
+      "Totals under a 3px double rule; ticks only for completed steps.",
+      "Gold only for real urgency and its deadline bar.",
+      "Tabular numerals on every ₦ amount.",
+      "48px controls, 44px minimum targets, status always text plus icon."
+    ],
+    "rules": [
+      {
+        "name": "The One Voice Rule",
+        "body": "Exchange Teal is the only interactive colour. If something is clickable or selected, it speaks in Teal; nothing decorative does.",
+        "section": "colors"
+      },
+      {
+        "name": "The Real Urgency Rule",
+        "body": "Warm Gold appears only when there is a real deadline (Quick Sell). It never decorates, never marks a primary action, and always carries Ink text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Word and Icon Rule",
+        "body": "Status is never colour alone. Every status shows a word and a Lucide icon via the status badge; copy and icons come from `src/lib/copy/status.ts`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Money Rule",
+        "body": "Every ₦ amount, ID and time uses tabular figures (`.tabular`), so ₦300,000 and ₦350,000 line up and compare precisely.",
+        "section": "typography"
+      },
+      {
+        "name": "The 24px Ruling Rule",
+        "body": "Text sits on a 24px line: body line height, sum lines, fact lines in listing rows (compact text set to a 24px line) and timeline step spacing all step in 24px.",
+        "section": "typography"
+      },
+      {
+        "name": "The Outline-First Rule",
+        "body": "Cards at rest have a 1px Border and no shadow. Do not stack shadows on nested elements.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use the Tailwind theme names (`text-ink`, `text-muted`, `bg-action`, `bg-highlight`, `bg-mint`, `rounded-control`, `rounded-card`, `rounded-feature`, `shadow-card`, `shadow-overlay`, `text-display` through `text-price`, `tablet:`/`desktop:`/`wide:`, `max-w-content`); never raw hex in components.",
+      "**Do** run the 2px Teal margin rule through worked sums, listing facts and timelines; it is the system's structural mark.",
+      "**Do** put every total under the 3px double Ink rule, and tick a step only when the server confirms it.",
+      "**Do** set every ₦ amount in tabular figures.",
+      "**Do** keep primary controls and fields at 48px and every target at 44px or more.",
+      "**Do** pair every status colour with a word and an icon through the status badge.",
+      "**Do** take durations and easings from the motion presets, and respect reduced motion."
+    ],
+    "donts": [
+      "**Don't** use Warm Gold for anything but real urgency, and never put white text on it.",
+      "**Don't** map Gold into HeroUI's accent, status or interactive variables.",
+      "**Don't** use Teal decoratively; it means action, selection or the margin rule.",
+      "**Don't** communicate status or clickability by colour alone.",
+      "**Don't** use Border as a text colour.",
+      "**Don't** add shadows to cards at rest or to nested elements.",
+      "**Don't** add a dark theme; the pilot is light only.",
+      "**Don't** use auto-dismissing toasts for critical transaction errors; use a persistent banner."
+    ]
+  }
+}

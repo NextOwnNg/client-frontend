@@ -4,7 +4,7 @@
 
 | Field | Value |
 | :---- | :---- |
-| Document ID | NX-FE-PRD-001 · Revision 0.5 · 22 October 2026 |
+| Document ID | NX-FE-PRD-001 · Revision 0.6 · 22 October 2026 |
 | Scope | `client-frontend` — the responsive, mobile-first web client (public marketplace and member app) for the NextOwn one-city pilot. **The staff admin console is out of scope** and is built in its own repository |
 | Parent documents | [NX-PRD-001 Product Requirements](./NextOwn%20Product%20Requirements%20Document.md) · [NX-UX-001 UI/UX Design & Agent-Ready Template](./NextOwn%20UIUX%20Design%20Agent%20Ready%20Template.md) · [Brand Kit & Design System](./NextOwn%20Brand%20Kit%20and%20Design%20System.md) |
 | Status | Draft for review by product owner, frontend lead and design |
@@ -267,7 +267,7 @@ Conventions:
 - Environments: local (MSW mocks), staging (real API, test SMS), production.
 - Build-time config through Vite env variables (`VITE_API_BASE_URL`, `VITE_ANALYTICS_KEY`, feature flags). Nothing secret goes in `VITE_*` variables, because they ship in the bundle.
 - **Runtime config fetched from the API, never hard-coded** (PRD §3.2, ADM-03): pilot city and areas, categories, offer lifetime, Quick Sell deadline options, reservation duration, photo limits, support contacts.
-- Feature flags for D-08 (feed posts and comments at day 1) and any P1 work.
+- Feature flags only for P1 work. The feed ships without a flag (product owner decision, 22 Oct 2026).
 - The host serves `index.html` for all unknown paths (SPA fallback) and long-cache headers for hashed assets.
 
 ---
@@ -581,7 +581,7 @@ Each requirement lists the parent PRD IDs and UX screens it implements. Acceptan
 | FE-FED-04 | P0 | Always-visible "Explore marketplace" path from the feed | DSC-05 | Present at top of feed and in empty state |
 | FE-FED-05 | P0 | Infinite scroll with cursor pagination, loading/error/retry and end-of-feed state | DSC-07 | No duplicate posts across pages |
 | FE-FED-06 | P0 | Member can post a feed highlight linked to one of **their own active listings** (caption only) | DSC-04 | No standalone posts, no separate price fields |
-| FE-FED-07 | P0 | Feed and comments are behind a feature flag pending decision D-08 | D-08 | Feed can be hidden without breaking navigation |
+| FE-FED-07 | P0 | Feed and comments ship at pilot launch without a feature flag (product owner decision, 22 Oct 2026) | D-08 | Feed reachable from primary navigation on all breakpoints |
 
 ### 8.4 Authentication and onboarding
 
@@ -606,7 +606,7 @@ Each requirement lists the parent PRD IDs and UX screens it implements. Acceptan
 | FE-LST-06 | P0 | Preview renders the **real listing detail component** with a "Preview" banner, plus per-section Edit links | UX-13 | Preview and public detail share one component |
 | FE-LST-07 | P0 | Post-publish states: live, under moderation review, duplicate-item rejection | LST-05/09/10 | Each state has explanatory copy and next step |
 | FE-LST-08 | P0 | My listings tabs: Draft · Active · Reserved · Expired · Closed; actions edit, close, renew/revise (expired Quick Sell) | LST-08, QA-10 | Editing a reserved listing explains that accepted deal terms will not change |
-| FE-LST-09 | P1 | Category-specific fields (storage, battery health, accessories) with "Not known" option | LST-11 | Irrelevant fields hidden per category config |
+| FE-LST-09 | P1 | Category-specific fields (storage, battery health, accessories) with "Not known" option. Until categories are confirmed, mock categories and fields come from one replaceable config | LST-11 | Irrelevant fields hidden per category config; swapping the config needs no component changes |
 
 ### 8.6 Offers and negotiation
 
@@ -868,7 +868,7 @@ Aligned with PRD §15.1. Week numbers are relative to the project start and are 
 | :---- | :---- | :---- |
 | 0. Foundations | 1–3 | Repo setup, CI (lint, types, tests, Lighthouse, banned copy), Vite + TypeScript scaffold, Tailwind brand tokens, HeroUI theme variables, fonts, `components/ui` wrappers, React Helmet `<Seo>` component, Zustand stores, TanStack Query client, Axios instance with interceptors and generated API types, MSW mocks, React Router app shell, layouts and auth guards |
 | 1. Accounts and listings | 3–5 | Phone auth, onboarding, settings, listing wizard, photo uploader, My listings, listing detail, Explore and filters, listing share-preview edge function |
-| 2. Offers and feed | 4–6 | Offer composer (all modes), offers inbox and thread, counters, accept flow, feed and comments (flagged), saves |
+| 2. Offers and feed | 4–6 | Offer composer (all modes), offers inbox and thread, counters, accept flow, feed and comments, saves |
 | 3. Transactions and trust | 6–8 | Transaction/handover, confirmations, cancellation/dispute, reports, blocks, reviews, notifications, messaging |
 | 4. Hardening and beta | 8–9 | Full QA matrix, accessibility and device testing, performance tuning, analytics QA, closed beta fixes |
 | 5. Pilot | 9–10+ | One-city launch, RUM monitoring, weekly UX fixes from evidence |

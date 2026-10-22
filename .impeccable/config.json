@@ -1,0 +1,32 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-22T14:05:13.090Z",
+        "reason": "Brand commitment: Brand Kit v0.9 (docs/NextOwn Brand Kit and Design System.md) pins Inter / Inter Display as the product typeface"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-10-22T14:05:13.106Z",
+        "reason": "Spent decision-round sketch (unchosen card), not shipped UI"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-10-22T14:05:13.121Z",
+        "reason": "Spent decision-round sketch (unchosen card), not shipped UI"
+      }
+    ]
+  }
+}

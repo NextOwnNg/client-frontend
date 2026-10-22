@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:390px;height:844px;overflow:hidden}
+body{background:#F7F9F7;color:#142D32;font:400 16px/24px Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 16px;background:#fff;border-bottom:1px solid #D6E2DE}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:19px;letter-spacing:-.01em}
+.mark{position:relative;width:24px;height:24px}
+.mark i{position:absolute;width:16px;height:16px;border-radius:4px}
+.mark .a{left:0;bottom:0;background:#0B6159}.mark .b{right:0;top:0;background:#F9BB55}
+.area{font-size:14px;line-height:21px;color:#486067;border:1px solid #D6E2DE;border-radius:999px;padding:4px 12px}
+.page{padding:16px}
+h1{font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.015em}
+.search{margin-top:12px;height:48px;border:1px solid #D6E2DE;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 16px;color:#486067}
+.chips{display:flex;gap:8px;margin-top:12px}
+.chip{height:36px;padding:0 14px;border-radius:999px;border:1px solid #D6E2DE;background:#fff;font-size:14px;display:flex;align-items:center;font-weight:500}
+.chip.on{background:#0B6159;color:#fff;border-color:#0B6159}
+/* the sum: signature move */
+.sum{margin-top:16px;background:#fff;border:1px solid #D6E2DE;border-radius:16px;padding:12px 16px 12px 28px;position:relative}
+.sum:before{content:"";position:absolute;left:16px;top:12px;bottom:12px;width:2px;background:#0B6159;border-radius:2px}
+.sum .k{font-size:12px;line-height:18px;font-weight:600;color:#486067;letter-spacing:.02em}
+.row{display:flex;justify-content:space-between;line-height:24px}
+.row b{font-weight:600}
+.op{color:#486067;width:16px;display:inline-block}
+.total{border-top:3px double #142D32;margin-top:4px;padding-top:4px;font-weight:700}
+.ans{font-size:14px;line-height:21px;color:#0B6159;font-weight:600;margin-top:4px}
+.sect{display:flex;justify-content:space-between;margin-top:20px;font-size:14px;line-height:24px}
+.sect b{font-size:16px}
+.sect span{color:#486067}
+.item{display:flex;gap:0;background:#fff;border:1px solid #D6E2DE;border-radius:16px;margin-top:8px;overflow:hidden;height:120px}
+.ph{width:112px;flex:none}
+.p1{background:linear-gradient(160deg,#3b4a50,#1c262a)}.p2{background:linear-gradient(160deg,#c9cfd1,#8d979b)}.p3{background:linear-gradient(160deg,#e5e2da,#b6b1a6)}
+.info{flex:1;padding:12px 12px 12px 14px;border-left:2px solid #0B6159;display:flex;flex-direction:column}
+.t{font-weight:600;line-height:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m{font-size:14px;line-height:24px;color:#486067}
+.price{font-size:18px;line-height:24px;font-weight:700;margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+.tag{font-size:12px;line-height:18px;font-weight:600;padding:2px 8px;border-radius:999px;background:#E8F4EF;color:#0B6159}
+.tag.q{background:#F9BB55;color:#142D32}
+.bar{height:4px;border-radius:2px;background:#E8F4EF;margin-top:4px}.bar i{display:block;height:4px;width:38%;background:#F9BB55;border-radius:2px}
+.nav{position:fixed;left:0;right:0;bottom:0;height:64px;background:#fff;border-top:1px solid #D6E2DE;display:flex;justify-content:space-around;align-items:center;font-size:12px;color:#486067;font-weight:500}
+.nav .on{color:#0B6159;font-weight:700}
+.plus{width:40px;height:40px;border-radius:12px;background:#0B6159;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px}
+</style></head><body>
+<div class="top"><div class="logo"><span class="mark"><i class="a"></i><i class="b"></i></span>NextOwn</div><div class="area">[Pilot Area] ▾</div></div>
+<div class="page">
+<h1>Find your next thing.</h1>
+<div class="search">Search phones, laptops, consoles…</div>
+<div class="chips"><span class="chip on">For sale</span><span class="chip">Open to swap</span><span class="chip">Quick Sell</span></div>
+<div class="sum">
+<div class="k">A SWAP + CASH, WORKED OUT</div>
+<div class="row"><span><span class="op"></span>Your PS5 Disc Edition</span><b>item</b></div>
+<div class="row"><span><span class="op">+</span>Cash you add</span><b>₦120,000</b></div>
+<div class="row total"><span><span class="op">=</span>MacBook Air M1, 2020</span><span>✓</span></div>
+<div class="ans">You pay ₦120,000 directly at the exchange.</div>
+</div>
+<div class="sect"><b>Near [Pilot Area]</b><span>24 items</span></div>
+<div class="item"><div class="ph p1"></div><div class="info"><div class="t">iPhone 12 Pro · 128GB</div><div class="m">Good · small scratch on frame</div><div class="price">₦385,000<span class="tag">Swap ok</span></div></div></div>
+<div class="item"><div class="ph p2"></div><div class="info"><div class="t">MacBook Air M1, 2020</div><div class="m">Like new · battery 91%</div><div class="price">₦610,000<span class="tag q">Quick Sell</span></div><div class="bar"><i></i></div></div></div>
+<div class="item"><div class="ph p3"></div><div class="info"><div class="t">PS5 Disc Edition</div><div class="m">Fair · one controller</div><div class="price">Open to swap<span class="tag">Swap</span></div></div></div>
+</div>
+<div class="nav"><span class="on">Explore</span><span>Feed</span><span class="plus">+</span><span>Offers</span><span>Profile</span></div>
+</body></html>

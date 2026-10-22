@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { toApiError } from '@/lib/api/api-error'
+import { recordServerDate } from '@/lib/time/server-clock'
 
 /**
  * The one Axios instance for the NextOwn API (PRD §4.4).
@@ -18,7 +19,10 @@ apiClient.interceptors.request.use((config) => {
 })
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    recordServerDate(response.headers['date'] as string | undefined)
+    return response
+  },
   (error: unknown) => Promise.reject(toApiError(error)),
 )
 

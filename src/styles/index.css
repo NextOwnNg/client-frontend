@@ -33,6 +33,26 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /* Browser surfaces carry the brand too */
+  ::selection {
+    background: color-mix(in oklab, var(--nx-teal) 22%, transparent);
+    color: var(--nx-ink);
+  }
+
+  input,
+  textarea {
+    caret-color: var(--nx-teal);
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+  }
+
+  html {
+    scrollbar-color: color-mix(in oklab, var(--nx-slate) 40%, transparent) transparent;
+  }
+
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
