@@ -79,11 +79,11 @@
       box-shadow: 0 0 0 3px color-mix(in oklab, var(--nx-teal) 22%, transparent);
     }
 
-    &[aria-invalid="true"] {
+    &[aria-invalid='true'] {
       border-color: var(--nx-danger);
     }
 
-    &[aria-invalid="true"]:focus {
+    &[aria-invalid='true']:focus {
       box-shadow: 0 0 0 3px color-mix(in oklab, var(--nx-danger) 20%, transparent);
     }
 

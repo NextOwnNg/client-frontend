@@ -65,7 +65,11 @@ export const handlers: RequestHandler[] = [
     const q = new URL(request.url).searchParams.get('q')?.trim().toLowerCase() ?? ''
     if (q.length < 2) return HttpResponse.json<ListingSuggestion[]>([])
 
-    const titles = [...new Set(listings.filter((l) => l.status === 'ACTIVE' && l.title.toLowerCase().includes(q)).map((l) => l.title))]
+    const titles = [
+      ...new Set(
+        listings.filter((l) => l.status === 'ACTIVE' && l.title.toLowerCase().includes(q)).map((l) => l.title),
+      ),
+    ]
     const suggestions: ListingSuggestion[] = [
       ...categories
         .filter((c) => c.name.toLowerCase().includes(q))
@@ -100,7 +104,9 @@ export const handlers: RequestHandler[] = [
       .filter(
         (l) =>
           modes.length === 0 ||
-          modes.some((m) => (m === 'QUICK_SELL' ? Boolean(l.urgencyEndsAt) : l.acceptedModes.includes(m as 'CASH' | 'SWAP'))),
+          modes.some((m) =>
+            m === 'QUICK_SELL' ? Boolean(l.urgencyEndsAt) : l.acceptedModes.includes(m as 'CASH' | 'SWAP'),
+          ),
       )
       .filter((l) => !urgent || Boolean(l.urgencyEndsAt))
       .filter((l) => conditions.length === 0 || conditions.includes(l.condition))

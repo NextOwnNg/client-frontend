@@ -20,12 +20,25 @@ const chipOff = 'border-border bg-surface text-ink pointer-fine:hover:border-act
 const chipOn = 'border-action bg-mint text-action pointer-fine:hover:border-action'
 
 /** A horizontal row that scrolls on phones and bleeds to the screen edge, so it reads as "more this way". */
-export function ChipRow({ label, as = 'div', className, children }: { label?: string; as?: 'div' | 'nav'; className?: string; children: React.ReactNode }) {
+export function ChipRow({
+  label,
+  as = 'div',
+  className,
+  children,
+}: {
+  label?: string
+  as?: 'div' | 'nav'
+  className?: string
+  children: React.ReactNode
+}) {
   const Tag = as
   return (
     <Tag
       aria-label={label}
-      className={cx('-mx-4 -my-1 flex gap-2 overflow-x-auto px-4 py-1.5 [scrollbar-width:none] tablet:-mx-6 tablet:px-6 [&::-webkit-scrollbar]:hidden', className)}
+      className={cx(
+        '-mx-4 -my-1 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 py-1.5 tablet:-mx-6 tablet:px-6 [&::-webkit-scrollbar]:hidden',
+        className,
+      )}
     >
       {children}
     </Tag>
@@ -35,7 +48,13 @@ export function ChipRow({ label, as = 'div', className, children }: { label?: st
 const modes: ModeFilter[] = ['CASH', 'SWAP', 'QUICK_SELL']
 
 /** For sale · Open to swap · Quick Sell toggles. They widen each other, so several can be on. */
-export function ModeToggles({ filters, onChange }: { filters: ListingFilters; onChange: (next: ListingFilters) => void }) {
+export function ModeToggles({
+  filters,
+  onChange,
+}: {
+  filters: ListingFilters
+  onChange: (next: ListingFilters) => void
+}) {
   return (
     <>
       {modes.map((mode) => {
@@ -45,7 +64,9 @@ export function ModeToggles({ filters, onChange }: { filters: ListingFilters; on
             key={mode}
             type="button"
             aria-pressed={on}
-            onClick={() => onChange({ ...filters, modes: on ? filters.modes.filter((m) => m !== mode) : [...filters.modes, mode] })}
+            onClick={() =>
+              onChange({ ...filters, modes: on ? filters.modes.filter((m) => m !== mode) : [...filters.modes, mode] })
+            }
             className={cx(chipBase, on ? chipOn : chipOff)}
           >
             {on ? (
@@ -61,7 +82,15 @@ export function ModeToggles({ filters, onChange }: { filters: ListingFilters; on
   )
 }
 
-export function FiltersButton({ filters, onPress, onPreload }: { filters: ListingFilters; onPress: () => void; onPreload?: () => void }) {
+export function FiltersButton({
+  filters,
+  onPress,
+  onPreload,
+}: {
+  filters: ListingFilters
+  onPress: () => void
+  onPreload?: () => void
+}) {
   const count = countPanelFilters(filters)
   return (
     <button
@@ -140,20 +169,23 @@ export function ActiveChips({
           onClick={() => onChange(chip.remove())}
           className={cx(
             // Hover reads as "remove": Teal ring, and the × turns Ink and grows slightly
-            'group inline-flex h-8 max-w-full cursor-pointer items-center gap-1 rounded-full bg-cloud pr-1.5 pl-3 text-compact text-ink ring-1 ring-border outline-none transition-[box-shadow,background-color,transform] duration-120 ease-out active:scale-[0.97] pointer-fine:hover:bg-surface pointer-fine:hover:ring-action/60 focus-visible:ring-2 focus-visible:ring-focus',
+            'group inline-flex h-8 max-w-full cursor-pointer items-center gap-1 rounded-full bg-cloud pr-1.5 pl-3 text-compact text-ink ring-1 ring-border transition-[box-shadow,background-color,transform] duration-120 ease-out outline-none focus-visible:ring-2 focus-visible:ring-focus active:scale-[0.97] pointer-fine:hover:bg-surface pointer-fine:hover:ring-action/60',
             // 32px chips keep a 44px hit area through their padding box on touch
-            'relative after:absolute after:-inset-y-1.5 after:inset-x-0',
+            'relative after:absolute after:inset-x-0 after:-inset-y-1.5',
             desktopOnly(chip.key) && 'max-desktop:hidden',
           )}
         >
           <span className="truncate">{chip.label}</span>
-          <X aria-hidden className="size-4 shrink-0 text-muted transition-[color,transform] duration-120 ease-out pointer-fine:group-hover:scale-110 pointer-fine:group-hover:text-ink" />
+          <X
+            aria-hidden
+            className="size-4 shrink-0 text-muted transition-[color,transform] duration-120 ease-out pointer-fine:group-hover:scale-110 pointer-fine:group-hover:text-ink"
+          />
         </button>
       ))}
       <button
         type="button"
         onClick={() => onChange({ ...defaultFilters })}
-        className="relative h-8 cursor-pointer rounded-control px-2 text-compact font-semibold text-action underline-offset-4 outline-none after:absolute after:-inset-y-1.5 after:inset-x-0 hover:underline focus-visible:ring-2 focus-visible:ring-focus"
+        className="relative h-8 cursor-pointer rounded-control px-2 text-compact font-semibold text-action underline-offset-4 outline-none after:absolute after:inset-x-0 after:-inset-y-1.5 hover:underline focus-visible:ring-2 focus-visible:ring-focus"
       >
         Clear all
       </button>

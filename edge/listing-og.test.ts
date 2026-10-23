@@ -38,7 +38,9 @@ describe('handleListingOg', () => {
   it('serves the default tags with 200 when the API is slower than the timeout', async () => {
     const fetchListing = vi.fn(
       (_slug: string, signal: AbortSignal) =>
-        new Promise<ListingMetaInput>((_resolve, reject) => signal.addEventListener('abort', () => reject(new Error('aborted')))),
+        new Promise<ListingMetaInput>((_resolve, reject) =>
+          signal.addEventListener('abort', () => reject(new Error('aborted'))),
+        ),
     )
     const res = await handleListingOg(request('/listings/ps5-disc-edition'), { fetchListing, indexHtml, timeoutMs: 20 })
     const html = await res.text()
@@ -59,7 +61,10 @@ describe('handleListingOg', () => {
   })
 
   it('serves the default tags for an unknown slug, and noindex for a removed listing', async () => {
-    const unknown = await handleListingOg(request('/listings/nope'), { fetchListing: vi.fn().mockResolvedValue(null), indexHtml })
+    const unknown = await handleListingOg(request('/listings/nope'), {
+      fetchListing: vi.fn().mockResolvedValue(null),
+      indexHtml,
+    })
     const removed = await handleListingOg(request('/listings/ps5-disc-edition'), {
       fetchListing: vi.fn().mockResolvedValue({ ...listing, status: 'REMOVED' }),
       indexHtml,
@@ -92,7 +97,10 @@ describe('createApiFetcher', () => {
 
     const found = await fetchListing('ps5-disc-edition', signal)
     expect(found).toEqual(listing)
-    expect(fetchImpl).toHaveBeenCalledWith('https://api.nextown.ng/v1/listings/ps5-disc-edition', expect.objectContaining({ signal }))
+    expect(fetchImpl).toHaveBeenCalledWith(
+      'https://api.nextown.ng/v1/listings/ps5-disc-edition',
+      expect.objectContaining({ signal }),
+    )
     expect(await fetchListing('nope', signal)).toBeNull()
     await expect(fetchListing('ps5-disc-edition', signal)).rejects.toThrow()
   })

@@ -35,7 +35,9 @@ describe('Listing detail', () => {
   it('says plainly when the seller has disclosed no defects', async () => {
     renderDetail('ipad-9th-gen-64gb')
 
-    expect(await screen.findByText('No defects disclosed by the seller. Inspect the item before you pay.')).toBeInTheDocument()
+    expect(
+      await screen.findByText('No defects disclosed by the seller. Inspect the item before you pay.'),
+    ).toBeInTheDocument()
   })
 
   it('sets the listing title and share tags in the head', async () => {
@@ -56,7 +58,9 @@ describe('Listing detail', () => {
     expect(within(gallery).getByText('2 of 3')).toBeInTheDocument()
     await user.click(within(gallery).getByRole('button', { name: 'Show photo 3 of 3' }))
     expect(within(gallery).getByText('3 of 3')).toBeInTheDocument()
-    fireEvent.keyDown(within(gallery).getByRole('group', { name: /Photo 3 of 3/ }), { key: 'ArrowLeft' })
+    fireEvent.keyDown(within(within(gallery).getByRole('group', { name: /Photo 3 of 3/ })).getByRole('button'), {
+      key: 'ArrowLeft',
+    })
     expect(within(gallery).getByText('2 of 3')).toBeInTheDocument()
   })
 
@@ -78,7 +82,10 @@ describe('Listing detail', () => {
 
     const prompt = await screen.findByRole('dialog', { name: 'Sign in to make an offer' })
     const next = encodeURIComponent('/offers/new?listing=l1')
-    expect(within(prompt).getByRole('link', { name: 'Continue with your phone number' })).toHaveAttribute('href', `/login?next=${next}`)
+    expect(within(prompt).getByRole('link', { name: 'Continue with your phone number' })).toHaveAttribute(
+      'href',
+      `/login?next=${next}`,
+    )
   })
 
   it('asks a guest to sign in before saving', async () => {
@@ -97,7 +104,9 @@ describe('Listing detail', () => {
     const cta = await offerButton()
 
     const iphone = listings.find((l) => l.slug === 'iphone-12-pro-128gb')!
-    server.use(http.get(`${API}/listings/iphone-12-pro-128gb`, () => HttpResponse.json({ ...iphone, status: 'RESERVED' })))
+    server.use(
+      http.get(`${API}/listings/iphone-12-pro-128gb`, () => HttpResponse.json({ ...iphone, status: 'RESERVED' })),
+    )
     await user.click(cta)
 
     expect(await screen.findByText('Reserved: this item is no longer accepting offers.')).toBeInTheDocument()
@@ -121,7 +130,9 @@ describe('Listing detail', () => {
 
     expect(await screen.findByRole('heading', { name: 'This listing is no longer available' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Photos' })).not.toBeInTheDocument()
-    await waitFor(() => expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, nofollow'))
+    await waitFor(() =>
+      expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, nofollow'),
+    )
     expect(screen.getByRole('link', { name: 'Explore items' })).toHaveAttribute('href', '/explore')
   })
 
@@ -178,7 +189,13 @@ describe('Listing detail', () => {
 
   it('shows a retry when the listing fails to load', async () => {
     const user = userEvent.setup()
-    server.use(http.get(`${API}/listings/iphone-12-pro-128gb`, () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 }), { once: true }))
+    server.use(
+      http.get(
+        `${API}/listings/iphone-12-pro-128gb`,
+        () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 }),
+        { once: true },
+      ),
+    )
     renderDetail('iphone-12-pro-128gb')
 
     await user.click(await screen.findByRole('button', { name: 'Try again' }))

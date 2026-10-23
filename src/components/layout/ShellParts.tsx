@@ -21,7 +21,7 @@ export function OfflineBanner() {
 export function RouteProgress() {
   const navigation = useNavigation()
   if (navigation.state !== 'loading') return null
-  return <div aria-hidden className="animate-route-progress fixed inset-x-0 top-0 z-50 h-0.5 origin-left bg-action" />
+  return <div aria-hidden className="fixed inset-x-0 top-0 z-50 h-0.5 origin-left animate-route-progress bg-action" />
 }
 
 const footerLinks = [
@@ -43,7 +43,10 @@ export function Footer() {
         <ul className="flex flex-wrap gap-x-4 gap-y-2">
           {footerLinks.map((link) => (
             <li key={link.to}>
-              <Link to={link.to} className="text-compact text-muted underline-offset-4 pointer-fine:hover:text-ink pointer-fine:hover:underline">
+              <Link
+                to={link.to}
+                className="text-compact text-muted underline-offset-4 pointer-fine:hover:text-ink pointer-fine:hover:underline"
+              >
                 {link.label}
               </Link>
             </li>

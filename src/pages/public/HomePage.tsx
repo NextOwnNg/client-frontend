@@ -1,7 +1,14 @@
 import { Seo } from '@/components/seo/Seo'
 import { useAreaSheet } from '@/components/layout/use-area-sheet'
 import { useRuntimeConfig } from '@/features/config/api'
-import { CategoryShortcuts, ExampleSum, HeroActions, HomeSearch, HowItWorks, TradeRoutes } from '@/features/home/components/HomeSections'
+import {
+  CategoryShortcuts,
+  ExampleSum,
+  HeroActions,
+  HomeSearch,
+  HowItWorks,
+  TradeRoutes,
+} from '@/features/home/components/HomeSections'
 import { RecentListings } from '@/features/listings/components/RecentListings'
 import { copy } from '@/lib/copy/copy'
 import { siteOrigin } from '@/lib/seo/origin'

@@ -1,4 +1,16 @@
-import { ArrowLeftRight, Banknote, Check, Gamepad2, Laptop, Refrigerator, Search, Shapes, Smartphone, Timer, type LucideIcon } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  Banknote,
+  Check,
+  Gamepad2,
+  Laptop,
+  Refrigerator,
+  Search,
+  Shapes,
+  Smartphone,
+  Timer,
+  type LucideIcon,
+} from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { OfferSum } from '@/components/domain/OfferSum'
@@ -19,7 +31,7 @@ export function HomeSearch() {
       onSubmit={(e) => {
         e.preventDefault()
         const q = text.trim()
-        navigate(q ? `/explore?${new URLSearchParams({ q })}` : '/explore')
+        void navigate(q ? `/explore?${new URLSearchParams({ q })}` : '/explore')
       }}
     >
       <Search aria-hidden className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" />
@@ -38,8 +50,20 @@ export function HomeSearch() {
 
 const tradeRoutes: { label: string; hint: string; href: string; icon: LucideIcon; iconClass: string }[] = [
   { label: 'For sale', hint: 'Pay cash', href: '/explore?mode=cash', icon: Banknote, iconClass: 'text-action' },
-  { label: 'Open to swap', hint: 'Trade, add cash', href: '/explore?mode=swap', icon: ArrowLeftRight, iconClass: 'text-action' },
-  { label: 'Quick Sell', hint: 'Real deadlines', href: '/explore?mode=quick-sell', icon: Timer, iconClass: 'text-warning' },
+  {
+    label: 'Open to swap',
+    hint: 'Trade, add cash',
+    href: '/explore?mode=swap',
+    icon: ArrowLeftRight,
+    iconClass: 'text-action',
+  },
+  {
+    label: 'Quick Sell',
+    hint: 'Real deadlines',
+    href: '/explore?mode=quick-sell',
+    icon: Timer,
+    iconClass: 'text-warning',
+  },
 ]
 
 /** The three ways to trade (Sell / Swap / Quick Sell), each a filtered Explore. */
@@ -50,7 +74,7 @@ export function TradeRoutes() {
         <Link
           key={label}
           to={href}
-          className="flex min-h-11 flex-col justify-center gap-0.5 rounded-full border border-border bg-surface px-4 py-2 outline-none tablet:rounded-control tablet:px-3 tablet:py-2.5 transition-[border-color,transform] duration-120 ease-out active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-focus pointer-fine:hover:border-action/50"
+          className="flex min-h-11 flex-col justify-center gap-0.5 rounded-full border border-border bg-surface px-4 py-2 transition-[border-color,transform] duration-120 ease-out outline-none focus-visible:ring-2 focus-visible:ring-focus active:scale-[0.97] tablet:rounded-control tablet:px-3 tablet:py-2.5 pointer-fine:hover:border-action/50"
         >
           <span className="flex items-center gap-1.5 text-compact font-semibold text-ink">
             <Icon aria-hidden className={`size-4 shrink-0 ${iconClass}`} />
@@ -79,7 +103,9 @@ export function ExampleSum() {
         animateIn
         className="shadow-card"
       />
-      <figcaption className="px-1 text-caption text-muted">Every offer is written out like this, so both people see who gives what.</figcaption>
+      <figcaption className="px-1 text-caption text-muted">
+        Every offer is written out like this, so both people see who gives what.
+      </figcaption>
     </figure>
   )
 }
@@ -97,7 +123,12 @@ export function HeroActions() {
   )
 }
 
-const categoryIcons: Record<string, LucideIcon> = { phones: Smartphone, laptops: Laptop, gaming: Gamepad2, home: Refrigerator }
+const categoryIcons: Record<string, LucideIcon> = {
+  phones: Smartphone,
+  laptops: Laptop,
+  gaming: Gamepad2,
+  home: Refrigerator,
+}
 
 export function CategoryShortcuts({ categories }: { categories: Category[] }) {
   return (
@@ -110,7 +141,7 @@ export function CategoryShortcuts({ categories }: { categories: Category[] }) {
             <li key={c.id}>
               <Link
                 to={`/explore?category=${encodeURIComponent(c.id)}`}
-                className="flex min-h-14 items-center gap-3 rounded-control border border-border bg-surface px-3 text-compact font-semibold text-ink outline-none transition-[border-color,transform] duration-120 ease-out active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-focus pointer-fine:hover:border-action/50"
+                className="flex min-h-14 items-center gap-3 rounded-control border border-border bg-surface px-3 text-compact font-semibold text-ink transition-[border-color,transform] duration-120 ease-out outline-none focus-visible:ring-2 focus-visible:ring-focus active:scale-[0.97] pointer-fine:hover:border-action/50"
               >
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-mint text-action">
                   <Icon aria-hidden className="size-5" />
@@ -127,21 +158,33 @@ export function CategoryShortcuts({ categories }: { categories: Category[] }) {
 
 const steps = [
   { title: 'Find or list an item', body: 'Every listing shows its condition and any defects, with real photos.' },
-  { title: 'Make a structured offer', body: 'Offer cash, your own item, or your item plus cash. Each offer says who pays whom.' },
-  { title: 'Meet, inspect, confirm', body: 'Inspect in person and pay directly. The trade completes when you both confirm.' },
+  {
+    title: 'Make a structured offer',
+    body: 'Offer cash, your own item, or your item plus cash. Each offer says who pays whom.',
+  },
+  {
+    title: 'Meet, inspect, confirm',
+    body: 'Inspect in person and pay directly. The trade completes when you both confirm.',
+  },
 ]
 
 /** Three steps on the margin rule, each ticked: how a trade moves from listing to confirmation. */
 export function HowItWorks() {
   return (
-    <section aria-labelledby="how-heading" className="flex flex-col gap-4 rounded-card bg-surface p-5 ring-1 ring-border tablet:p-8">
+    <section
+      aria-labelledby="how-heading"
+      className="flex flex-col gap-4 rounded-card bg-surface p-5 ring-1 ring-border tablet:p-8"
+    >
       <h2 id="how-heading" className="text-h3 text-ink tablet:text-h2">
         How a trade works
       </h2>
       <ol className="relative flex flex-col gap-5 tablet:grid tablet:grid-cols-3 tablet:gap-8">
         {steps.map((step) => (
           <li key={step.title} className="relative flex gap-3 tablet:flex-col">
-            <span aria-hidden className="flex size-7 shrink-0 items-center justify-center rounded-full bg-action text-action-foreground">
+            <span
+              aria-hidden
+              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-action text-action-foreground"
+            >
               <Check className="size-4" strokeWidth={3} />
             </span>
             <div className="flex flex-col gap-1">

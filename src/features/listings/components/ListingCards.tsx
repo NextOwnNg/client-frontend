@@ -14,7 +14,11 @@ import type { ListingSummary } from '@/types/api'
 /** Swap-ok tag when a cash listing also takes swaps; swap-only listings already say "Open to swap". */
 function ModeTag({ listing }: { listing: ListingSummary }) {
   if (listing.acceptedModes.includes('SWAP') && listing.askingKobo !== null) {
-    return <span className="shrink-0 rounded-full bg-mint px-2 text-caption font-semibold leading-6 whitespace-nowrap text-action">Swap ok</span>
+    return (
+      <span className="shrink-0 rounded-full bg-mint px-2 text-caption leading-6 font-semibold whitespace-nowrap text-action">
+        Swap ok
+      </span>
+    )
   }
   return null
 }
@@ -23,12 +27,27 @@ function ModeTag({ listing }: { listing: ListingSummary }) {
  * Link to a listing: starts loading its detail on hover or touch (PRD §12) and morphs the cover photo
  * into the detail gallery with a view transition.
  */
-function CardLink({ listing, className, children }: { listing: ListingSummary; className: string; children: ReactNode }) {
+function CardLink({
+  listing,
+  className,
+  children,
+}: {
+  listing: ListingSummary
+  className: string
+  children: ReactNode
+}) {
   const prefetch = usePrefetchListing()
   const warm = () => void prefetch(listing.slug)
 
   return (
-    <Link to={`/listings/${listing.slug}`} viewTransition onPointerEnter={warm} onTouchStart={warm} onFocus={warm} className={className}>
+    <Link
+      to={`/listings/${listing.slug}`}
+      viewTransition
+      onPointerEnter={warm}
+      onTouchStart={warm}
+      onFocus={warm}
+      className={className}
+    >
       {children}
     </Link>
   )
@@ -58,14 +77,27 @@ export function ListingRow({ listing, priority }: { listing: ListingSummary; pri
       />
       <div className="relative flex min-w-0 flex-1 flex-col py-3 pr-3 pl-4">
         <span aria-hidden className="absolute top-3 bottom-3 left-0 w-0.5 rounded-full bg-action" />
-        <h3 className={cx('truncate text-body font-semibold', available ? 'text-ink' : 'text-muted')}>{listing.title}</h3>
+        <h3 className={cx('truncate text-body font-semibold', available ? 'text-ink' : 'text-muted')}>
+          {listing.title}
+        </h3>
         <p className="truncate text-compact leading-6 text-muted">
           {conditionLabel(listing.condition)}
           {listing.defectSummary && ` · ${listing.defectSummary}`}
         </p>
         <div className="mt-auto flex min-w-0 items-center justify-between gap-2">
-          {available ? <Price kobo={listing.askingKobo} /> : <StatusBadge tone={status.tone} icon={status.icon}>{status.label}</StatusBadge>}
-          {available && (listing.urgencyEndsAt ? <Deadline endsAt={listing.urgencyEndsAt} variant="compact" /> : <ModeTag listing={listing} />)}
+          {available ? (
+            <Price kobo={listing.askingKobo} />
+          ) : (
+            <StatusBadge tone={status.tone} icon={status.icon}>
+              {status.label}
+            </StatusBadge>
+          )}
+          {available &&
+            (listing.urgencyEndsAt ? (
+              <Deadline endsAt={listing.urgencyEndsAt} variant="compact" />
+            ) : (
+              <ModeTag listing={listing} />
+            ))}
         </div>
         <AreaLabel name={listing.areaName} className="sr-only" />
       </div>
@@ -103,12 +135,18 @@ export function ListingTile({ listing, priority }: { listing: ListingSummary; pr
       </span>
       <div className="relative flex flex-col py-3 pr-3 pl-4">
         <span aria-hidden className="absolute top-3 bottom-3 left-0 w-0.5 rounded-full bg-action" />
-        <h3 className={cx('truncate text-body font-semibold', available ? 'text-ink' : 'text-muted')}>{listing.title}</h3>
+        <h3 className={cx('truncate text-body font-semibold', available ? 'text-ink' : 'text-muted')}>
+          {listing.title}
+        </h3>
         <p className="truncate text-compact leading-6 text-muted">
           {conditionLabel(listing.condition)} · {listing.areaName}
         </p>
         <div className="mt-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-          {available ? <Price kobo={listing.askingKobo} /> : <span className="text-compact text-muted">Not accepting offers</span>}
+          {available ? (
+            <Price kobo={listing.askingKobo} />
+          ) : (
+            <span className="text-compact text-muted">Not accepting offers</span>
+          )}
           {available && <ModeTag listing={listing} />}
         </div>
       </div>

@@ -114,16 +114,21 @@ export function SearchBox({ defaultValue = '', onSearch, onCategory, className }
         className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-72 overflow-auto rounded-control border border-border bg-surface py-1 shadow-overlay"
       >
         {suggestions.map((s, i) => (
+          // Combobox pattern: keyboard selection happens on the input (aria-activedescendant), not on options
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
           <li
             key={`${s.kind}:${s.label}`}
             id={optionId(i)}
             role="option"
             aria-selected={i === active}
+            onClick={() => choose(s)}
             // mousedown keeps focus in the input, so blur doesn't close the list before the click lands
             onMouseDown={(e) => e.preventDefault()}
-            onClick={() => choose(s)}
             onMouseEnter={() => setActive(i)}
-            className={cx('flex min-h-11 cursor-pointer items-center gap-3 px-4 text-body text-ink', i === active && 'bg-mint')}
+            className={cx(
+              'flex min-h-11 cursor-pointer items-center gap-3 px-4 text-body text-ink',
+              i === active && 'bg-mint',
+            )}
           >
             {s.kind === 'category' ? (
               <>

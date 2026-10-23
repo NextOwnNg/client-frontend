@@ -9,7 +9,8 @@ export const worker = setupWorker(...handlers)
 // The dev toolbar's persona signs the mock session in or out. "Member" is a sample seller, so own-listing
 // states (Manage instead of Make an offer) can be reviewed on their listings.
 function applyPersona(persona: 'guest' | 'member') {
-  if (persona === 'member') useSessionStore.getState().setSession({ userId: MEMBER_PERSONA_ID, onboarded: true, restricted: false })
+  if (persona === 'member')
+    useSessionStore.getState().setSession({ userId: MEMBER_PERSONA_ID, onboarded: true, restricted: false })
   else useSessionStore.getState().clearSession()
 }
 applyPersona(useDevSettings.getState().persona)

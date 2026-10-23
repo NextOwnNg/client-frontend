@@ -33,7 +33,12 @@ export function DevToolbar() {
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="font-semibold">Mock API · fictional sample data</p>
-        <button type="button" aria-label="Close developer tools" onClick={() => setOpen(false)} className="rounded p-1 hover:bg-white/10">
+        <button
+          type="button"
+          aria-label="Close developer tools"
+          onClick={() => setOpen(false)}
+          className="rounded p-1 hover:bg-white/10"
+        >
           <X aria-hidden className="size-4" />
         </button>
       </div>

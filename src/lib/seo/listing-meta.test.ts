@@ -38,9 +38,15 @@ describe('buildListingMeta', () => {
   })
 
   it('states unavailability truthfully for reserved, expired and closed listings', () => {
-    expect(buildListingMeta({ ...iphone, status: 'RESERVED' }, { origin }).description).toMatch(/^Reserved: no longer accepting offers\./)
-    expect(buildListingMeta({ ...iphone, status: 'EXPIRED' }, { origin }).description).toMatch(/^Expired: no longer accepting offers\./)
-    expect(buildListingMeta({ ...iphone, status: 'CLOSED' }, { origin }).description).toMatch(/^Closed: no longer accepting offers\./)
+    expect(buildListingMeta({ ...iphone, status: 'RESERVED' }, { origin }).description).toMatch(
+      /^Reserved: no longer accepting offers\./,
+    )
+    expect(buildListingMeta({ ...iphone, status: 'EXPIRED' }, { origin }).description).toMatch(
+      /^Expired: no longer accepting offers\./,
+    )
+    expect(buildListingMeta({ ...iphone, status: 'CLOSED' }, { origin }).description).toMatch(
+      /^Closed: no longer accepting offers\./,
+    )
     expect(buildListingMeta({ ...iphone, status: 'RESERVED' }, { origin }).noindex).toBe(false)
   })
 
@@ -104,7 +110,10 @@ describe('injectMeta', () => {
   })
 
   it('escapes listing text so a title cannot break out of the tag', () => {
-    const out = injectMeta(html, buildListingMeta({ ...iphone, title: 'Fan "big" <script>alert(1)</script> & co' }, { origin }).tags)
+    const out = injectMeta(
+      html,
+      buildListingMeta({ ...iphone, title: 'Fan "big" <script>alert(1)</script> & co' }, { origin }).tags,
+    )
 
     expect(out).not.toContain('<script>alert(1)</script>')
     expect(out).toContain('Fan &quot;big&quot; &lt;script&gt;alert(1)&lt;/script&gt; &amp; co')

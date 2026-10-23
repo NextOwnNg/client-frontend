@@ -17,7 +17,9 @@ function useAutoLoad(onVisible: () => void, enabled: boolean) {
   useEffect(() => {
     const el = ref.current
     if (!el || !enabled || typeof IntersectionObserver === 'undefined') return
-    const observer = new IntersectionObserver((entries) => entries[0]?.isIntersecting && onVisible(), { rootMargin: '600px 0px' })
+    const observer = new IntersectionObserver((entries) => entries[0]?.isIntersecting && onVisible(), {
+      rootMargin: '600px 0px',
+    })
     observer.observe(el)
     return () => observer.disconnect()
   }, [onVisible, enabled])
@@ -31,13 +33,28 @@ function useAutoLoad(onVisible: () => void, enabled: boolean) {
 export function Results({ filters, onClearFilters }: { filters: ListingFilters; onClearFilters: () => void }) {
   const tiles = useMediaQuery(breakpoints.tablet)
   const query = useListings(filters)
-  const { data, isPending, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage, isFetchNextPageError, isPlaceholderData } = query
-  const loadMore = useAutoLoad(() => void fetchNextPage(), Boolean(hasNextPage) && !isFetchingNextPage && !isFetchNextPageError)
+  const {
+    data,
+    isPending,
+    isError,
+    refetch,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    isPlaceholderData,
+  } = query
+  const loadMore = useAutoLoad(
+    () => void fetchNextPage(),
+    Boolean(hasNextPage) && !isFetchingNextPage && !isFetchNextPageError,
+  )
 
   if (isPending) {
     return (
       <div aria-busy="true" aria-label="Loading items" className={grid}>
-        {Array.from({ length: 6 }, (_, i) => (tiles ? <ListingTileSkeleton key={i} /> : <ListingRowSkeleton key={i} />))}
+        {Array.from({ length: 6 }, (_, i) =>
+          tiles ? <ListingTileSkeleton key={i} /> : <ListingRowSkeleton key={i} />,
+        )}
       </div>
     )
   }
@@ -48,7 +65,9 @@ export function Results({ filters, onClearFilters }: { filters: ListingFilters; 
 
   const items = data.pages.flatMap((p) => p.items)
   const total = data.pages[0]?.total ?? items.length
-  const filtered = Object.values({ ...filters, sort: undefined }).some((v) => (Array.isArray(v) ? v.length > 0 : v !== undefined))
+  const filtered = Object.values({ ...filters, sort: undefined }).some((v) =>
+    Array.isArray(v) ? v.length > 0 : v !== undefined,
+  )
 
   if (items.length === 0) {
     return (
@@ -79,16 +98,25 @@ export function Results({ filters, onClearFilters }: { filters: ListingFilters; 
       <p id="results-count" role="status" className="tabular text-compact text-muted">
         {total} {total === 1 ? 'item' : 'items'} · newest first
       </p>
-      <ul aria-label="Results" className={cx(grid, 'transition-opacity duration-200', isPlaceholderData && 'opacity-60')}>
+      <ul
+        aria-label="Results"
+        className={cx(grid, 'transition-opacity duration-200', isPlaceholderData && 'opacity-60')}
+      >
         {items.map((listing, i) => (
           <li key={listing.id} className="min-w-0">
-            {tiles ? <ListingTile listing={listing} priority={i < 4} /> : <ListingRow listing={listing} priority={i < 3} />}
+            {tiles ? (
+              <ListingTile listing={listing} priority={i < 4} />
+            ) : (
+              <ListingRow listing={listing} priority={i < 3} />
+            )}
           </li>
         ))}
       </ul>
       {isFetchingNextPage && (
         <div aria-hidden className={grid}>
-          {Array.from({ length: 3 }, (_, i) => (tiles ? <ListingTileSkeleton key={i} /> : <ListingRowSkeleton key={i} />))}
+          {Array.from({ length: 3 }, (_, i) =>
+            tiles ? <ListingTileSkeleton key={i} /> : <ListingRowSkeleton key={i} />,
+          )}
         </div>
       )}
       {isFetchNextPageError ? (

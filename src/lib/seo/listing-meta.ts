@@ -40,7 +40,8 @@ const unavailable: Partial<Record<ListingSummary['status'], string>> = {
 /** Statuses that must not be previewed or indexed: only generic tags go out. */
 const hidden: ListingSummary['status'][] = ['REMOVED', 'DRAFT', 'PENDING_REVIEW']
 
-const absolute = (url: string, origin: string) => (/^https?:\/\//.test(url) ? url : `${origin}${url.startsWith('/') ? '' : '/'}${url}`)
+const absolute = (url: string, origin: string) =>
+  /^https?:\/\//.test(url) ? url : `${origin}${url.startsWith('/') ? '' : '/'}${url}`
 
 function describe(listing: ListingMetaInput): string {
   const swap = listing.acceptedModes.includes('SWAP')
@@ -71,14 +72,16 @@ function toTags(meta: Omit<ListingMeta, 'tags'>, image: { alt: string; width?: n
     prop('og:image', meta.image),
     prop('og:image:alt', image.alt),
   ]
-  if (image.width && image.height) tags.push(prop('og:image:width', String(image.width)), prop('og:image:height', String(image.height)))
+  if (image.width && image.height)
+    tags.push(prop('og:image:width', String(image.width)), prop('og:image:height', String(image.height)))
   tags.push(
     name('twitter:card', 'summary_large_image'),
     name('twitter:title', meta.title),
     name('twitter:description', meta.description),
     name('twitter:image', meta.image),
   )
-  if (meta.canonical) tags.push({ kind: 'link', rel: 'canonical', href: meta.canonical }, prop('og:url', meta.canonical))
+  if (meta.canonical)
+    tags.push({ kind: 'link', rel: 'canonical', href: meta.canonical }, prop('og:url', meta.canonical))
   if (meta.noindex) tags.push(name('robots', 'noindex, nofollow'))
   return tags
 }
@@ -106,7 +109,12 @@ export function buildListingMeta(listing: ListingMetaInput | null, { origin }: {
 }
 
 const escapeHtml = (value: string) =>
-  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 
 function renderTag(tag: MetaTag): string {
   if (tag.kind === 'title') return `<title>${escapeHtml(tag.content)}</title>`

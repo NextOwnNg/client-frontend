@@ -1,4 +1,11 @@
-import { keepPreviousData, useInfiniteQuery, useQuery, useQueryClient, type InfiniteData, type QueryClient } from '@tanstack/react-query'
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+  type QueryClient,
+} from '@tanstack/react-query'
 import { apiClient } from '@/lib/api/client'
 import { toApiParams, type ListingFilters } from '@/features/listings/filters'
 import type { ListingDetail, ListingSuggestion, ListingSummary, Paginated } from '@/types/api'
@@ -18,7 +25,10 @@ export function useListings(filters: ListingFilters, { enabled = true }: { enabl
     queryKey: listingKeys.list(filters),
     queryFn: ({ pageParam, signal }) =>
       apiClient
-        .get<Paginated<ListingSummary>>('/listings', { params: { ...toApiParams(filters), cursor: pageParam ?? undefined }, signal })
+        .get<Paginated<ListingSummary>>('/listings', {
+          params: { ...toApiParams(filters), cursor: pageParam ?? undefined },
+          signal,
+        })
         .then((r) => r.data),
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
@@ -51,7 +61,11 @@ function syncCards(queryClient: QueryClient, detail: ListingDetail) {
       ...page,
       items: page.items.map((item) => {
         if (item.slug !== detail.slug) return item
-        if (item.status === detail.status && item.urgencyEndsAt === detail.urgencyEndsAt && item.askingKobo === detail.askingKobo) {
+        if (
+          item.status === detail.status &&
+          item.urgencyEndsAt === detail.urgencyEndsAt &&
+          item.askingKobo === detail.askingKobo
+        ) {
           return item
         }
         changed = true
@@ -98,7 +112,8 @@ export function useListingSuggestions(q: string) {
   const term = q.trim()
   return useQuery({
     queryKey: listingKeys.suggest(term.toLowerCase()),
-    queryFn: ({ signal }) => apiClient.get<ListingSuggestion[]>('/listings/suggest', { params: { q: term }, signal }).then((r) => r.data),
+    queryFn: ({ signal }) =>
+      apiClient.get<ListingSuggestion[]>('/listings/suggest', { params: { q: term }, signal }).then((r) => r.data),
     enabled: term.length >= 2,
     staleTime: 60_000,
   })

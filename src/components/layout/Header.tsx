@@ -56,7 +56,7 @@ export function Header() {
           <Link
             to="/explore"
             aria-label="Search"
-            className="hidden size-11 items-center justify-center rounded-full text-ink pointer-fine:hover:bg-mint desktop:flex"
+            className="hidden size-11 items-center justify-center rounded-full text-ink desktop:flex pointer-fine:hover:bg-mint"
           >
             <Search aria-hidden className="size-5.5" strokeWidth={1.75} />
           </Link>

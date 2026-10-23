@@ -6,7 +6,17 @@ import type { ListingDetail } from '@/types/api'
 export type Intent = 'offer' | 'save'
 
 /** Guest gate for Make an offer and Save. `next` brings them back to the same intent after sign-in (QA-01). */
-export function SignInPrompt({ intent, open, listing, onClose }: { intent: Intent; open: boolean; listing: ListingDetail; onClose: () => void }) {
+export function SignInPrompt({
+  intent,
+  open,
+  listing,
+  onClose,
+}: {
+  intent: Intent
+  open: boolean
+  listing: ListingDetail
+  onClose: () => void
+}) {
   const next = intent === 'save' ? `/listings/${listing.slug}?intent=save` : `/offers/new?listing=${listing.id}`
   return (
     <Sheet

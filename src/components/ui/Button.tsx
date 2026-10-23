@@ -12,7 +12,7 @@ type ButtonLinkProps = LinkProps & Pick<ButtonVariants, 'variant' | 'size' | 'fu
 export function ButtonLink({ variant = 'primary', size = 'md', fullWidth, className, ...props }: ButtonLinkProps) {
   return (
     <Link
-      className={cx('button', fullWidth && 'button--full-width', `button--${size}`, `button--${variant}`, className as string)}
+      className={cx('button', fullWidth && 'button--full-width', `button--${size}`, `button--${variant}`, className)}
       {...props}
     />
   )
@@ -25,7 +25,14 @@ type PlainButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & Pick<ButtonVar
  * For simple actions on first-load screens (Home, empty and error states): HeroUI's `Button` brings
  * react-aria and tailwind-variants into the entry chunk. Dialogs and forms keep using `Button`.
  */
-export function PlainButton({ variant = 'primary', size = 'md', fullWidth, className, type = 'button', ...props }: PlainButtonProps) {
+export function PlainButton({
+  variant = 'primary',
+  size = 'md',
+  fullWidth,
+  className,
+  type = 'button',
+  ...props
+}: PlainButtonProps) {
   return (
     <button
       type={type}

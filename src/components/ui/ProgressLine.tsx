@@ -58,7 +58,10 @@ export function ProgressLine({ steps, label }: { steps: ProgressStep[]; label: s
 function StepMarker({ state }: { state: ProgressStep['state'] }) {
   if (state === 'done') {
     return (
-      <span aria-hidden className="relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full bg-action">
+      <span
+        aria-hidden
+        className="relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full bg-action"
+      >
         <svg viewBox="0 0 24 24" className="size-4 text-action-foreground" fill="none">
           <m.path
             d="M5 12.5l4.5 4.5L19 7.5"

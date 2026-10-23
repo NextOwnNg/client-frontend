@@ -1,13 +1,13 @@
 /* Inter variable font with optical-size axis (Inter Display at large sizes); self-hosted */
-@import "@fontsource-variable/inter/opsz.css";
+@import '@fontsource-variable/inter/opsz.css';
 
 /* Tailwind CSS v4 + HeroUI v3 styles */
-@import "@heroui/styles";
+@import '@heroui/styles';
 
 /* NextOwn brand tokens, Tailwind theme and HeroUI overrides */
-@import "./tokens.css";
-@import "./theme.css";
-@import "./heroui-overrides.css";
+@import './tokens.css';
+@import './theme.css';
+@import './heroui-overrides.css';
 
 @layer base {
   html {

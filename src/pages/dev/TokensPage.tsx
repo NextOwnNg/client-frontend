@@ -45,7 +45,9 @@ export function TokensPage() {
     <div className="flex flex-col gap-12">
       <Seo title="Design tokens" noindex />
       <h1 className="text-h1 text-ink">Design tokens</h1>
-      <Link to="/dev/components" className="text-body font-medium text-action underline">Component gallery</Link>
+      <Link to="/dev/components" className="text-body font-medium text-action underline">
+        Component gallery
+      </Link>
 
       <section className="flex flex-col gap-4">
         <h2 className="text-h2 text-ink">Logo</h2>
@@ -79,7 +81,7 @@ export function TokensPage() {
               <div className={`h-16 ${c.className}`} />
               <div className="p-3">
                 <p className="text-compact font-semibold text-ink">{c.name}</p>
-                <p className="text-caption text-muted tabular">
+                <p className="tabular text-caption text-muted">
                   {c.token} · {c.hex}
                 </p>
               </div>

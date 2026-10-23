@@ -10,7 +10,10 @@ const API = import.meta.env.VITE_API_BASE_URL
 
 const renderExplore = (path = '/explore') => renderWithProviders(routes, { initialPath: path })
 const results = () => screen.getByRole('list', { name: 'Results' })
-const resultTitles = () => within(results()).getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
+const resultTitles = () =>
+  within(results())
+    .getAllByRole('heading', { level: 3 })
+    .map((h) => h.textContent)
 
 describe('Explore', () => {
   it('lists available items, newest first, with a count', async () => {
@@ -54,7 +57,11 @@ describe('Explore', () => {
 
     await user.type(search, 'mac')
     const list = await screen.findByRole('listbox', { name: 'Suggestions' })
-    expect(within(list).getAllByRole('option').map((o) => o.textContent)).toEqual(['MacBook Air M1, 2020', 'MacBook Air M1 · Space Grey'])
+    expect(
+      within(list)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual(['MacBook Air M1, 2020', 'MacBook Air M1 · Space Grey'])
 
     await user.keyboard('{ArrowDown}')
     expect(search).toHaveAttribute('aria-activedescendant', within(list).getAllByRole('option')[0]!.id)
@@ -110,7 +117,9 @@ describe('Explore', () => {
 
   it('shows a retry when results fail to load', async () => {
     const user = userEvent.setup()
-    server.use(http.get(`${API}/listings`, () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 }), { once: true }))
+    server.use(
+      http.get(`${API}/listings`, () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 }), { once: true }),
+    )
     renderExplore()
 
     expect(await screen.findByRole('heading', { name: "We couldn't load items" })).toBeInTheDocument()
@@ -127,7 +136,9 @@ describe('Explore', () => {
 
   it('keeps the filters when coming back from a listing', async () => {
     const { router } = renderExplore('/explore?mode=swap')
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Open to swap' })).toHaveAttribute('aria-pressed', 'true'))
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Open to swap' })).toHaveAttribute('aria-pressed', 'true'),
+    )
 
     await router.navigate('/listings/ps5-disc-edition')
     await router.navigate(-1)

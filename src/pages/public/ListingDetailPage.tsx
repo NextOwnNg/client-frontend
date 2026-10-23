@@ -7,7 +7,13 @@ import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { listingQueryOptions, useListing } from '@/features/listings/api'
 import { Gallery } from '@/features/listings/components/Gallery'
-import { ConditionAndDefects, ListingBody, ListingHeader, OfferActions, SellerCard } from '@/features/listings/components/ListingDetail'
+import {
+  ConditionAndDefects,
+  ListingBody,
+  ListingHeader,
+  OfferActions,
+  SellerCard,
+} from '@/features/listings/components/ListingDetail'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
 import { isApiError } from '@/lib/api/api-error'
 import { buildListingMeta } from '@/lib/seo/listing-meta'
@@ -15,7 +21,11 @@ import { siteOrigin } from '@/lib/seo/origin'
 
 function DetailSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading listing" className="flex flex-col gap-4 desktop:grid desktop:grid-cols-[minmax(0,1fr)_24rem] desktop:gap-10">
+    <div
+      aria-busy="true"
+      aria-label="Loading listing"
+      className="flex flex-col gap-4 desktop:grid desktop:grid-cols-[minmax(0,1fr)_24rem] desktop:gap-10"
+    >
       <div className="-mx-4 aspect-[4/3] animate-pulse bg-mint tablet:mx-0 tablet:rounded-card" />
       <div className="flex flex-col gap-3">
         <div className="h-5 w-1/3 animate-pulse rounded bg-cloud" />
@@ -30,7 +40,11 @@ function DetailSkeleton() {
 export function ListingDetailPage() {
   return (
     <>
-      <BackButton fallbackTo="/explore" fallbackLabel="Explore more items" className="-mt-2 mb-1 desktop:mt-0 desktop:mb-4" />
+      <BackButton
+        fallbackTo="/explore"
+        fallbackLabel="Explore more items"
+        className="-mt-2 mb-1 desktop:mt-0 desktop:mb-4"
+      />
       <ListingDetailContent />
     </>
   )
@@ -79,7 +93,8 @@ function ListingDetailContent() {
 
   // While the card's summary stands in for the detail, only summary fields are real
   const full = !isPlaceholderData
-  const recheck = () => queryClient.fetchQuery({ ...listingQueryOptions(queryClient, slug), staleTime: 0 }).catch(() => undefined)
+  const recheck = () =>
+    queryClient.fetchQuery({ ...listingQueryOptions(queryClient, slug), staleTime: 0 }).catch(() => undefined)
 
   return (
     <article className="pb-28 desktop:grid desktop:grid-cols-[minmax(0,1fr)_24rem] desktop:items-start desktop:gap-x-10 desktop:pb-0">

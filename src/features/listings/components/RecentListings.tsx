@@ -53,7 +53,13 @@ export function RecentListings({ areaId, config, onChooseArea, onPreloadArea, on
             <MapPin aria-hidden className="size-4 shrink-0 text-action" />
             Pick your area to see what's near you. We never ask for your location.
           </p>
-          <PlainButton variant="secondary" size="sm" onClick={onChooseArea} onPointerEnter={onPreloadArea} onFocus={onPreloadArea}>
+          <PlainButton
+            variant="secondary"
+            size="sm"
+            onClick={onChooseArea}
+            onPointerEnter={onPreloadArea}
+            onFocus={onPreloadArea}
+          >
             Choose your area
           </PlainButton>
         </div>
@@ -61,7 +67,9 @@ export function RecentListings({ areaId, config, onChooseArea, onPreloadArea, on
 
       {isPending ? (
         <div aria-busy="true" aria-label="Loading recent listings" className={grid}>
-          {Array.from({ length: 3 }, (_, i) => (tiles ? <ListingTileSkeleton key={i} /> : <ListingRowSkeleton key={i} />))}
+          {Array.from({ length: 3 }, (_, i) =>
+            tiles ? <ListingTileSkeleton key={i} /> : <ListingRowSkeleton key={i} />,
+          )}
         </div>
       ) : isError ? (
         <ErrorState title="We couldn't load recent listings" onRetry={() => void refetch()} />

@@ -91,7 +91,9 @@ describe('stale cards (FE-EXP-05)', () => {
     expect(within(card).getByText('₦385,000')).toBeInTheDocument()
 
     const iphone = listings.find((l) => l.slug === 'iphone-12-pro-128gb')!
-    server.use(http.get(`${API}/listings/iphone-12-pro-128gb`, () => HttpResponse.json({ ...iphone, status: 'RESERVED' })))
+    server.use(
+      http.get(`${API}/listings/iphone-12-pro-128gb`, () => HttpResponse.json({ ...iphone, status: 'RESERVED' })),
+    )
     await queryClient.fetchQuery(listingQueryOptions(queryClient, 'iphone-12-pro-128gb'))
 
     expect(await within(card).findByText('Reserved')).toBeInTheDocument()

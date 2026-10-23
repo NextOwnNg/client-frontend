@@ -23,7 +23,10 @@ const conditionOptions: { value: ItemCondition; label: string }[] = [
   { value: 'FOR_PARTS', label: 'For parts' },
 ]
 
-const modeOptions = (['CASH', 'SWAP', 'QUICK_SELL'] as ModeFilter[]).map((value) => ({ value, label: modeLabels[value] }))
+const modeOptions = (['CASH', 'SWAP', 'QUICK_SELL'] as ModeFilter[]).map((value) => ({
+  value,
+  label: modeLabels[value],
+}))
 
 const kobo = (naira?: number) => (naira === undefined ? null : naira * 100)
 const naira = (kobo: number | null) => (kobo === null ? undefined : Math.round(kobo / 100))
@@ -87,17 +90,33 @@ export function FilterPanel({
         label="Area"
         value={filters.area ?? 'all'}
         onChange={(v) => onChange({ ...filters, area: v === 'all' ? undefined : v })}
-        options={[{ value: 'all', label: `All of ${config?.cityName ?? 'the pilot city'}` }, ...(config?.areas ?? []).map((a) => ({ value: a.id, label: a.name }))]}
+        options={[
+          { value: 'all', label: `All of ${config?.cityName ?? 'the pilot city'}` },
+          ...(config?.areas ?? []).map((a) => ({ value: a.id, label: a.name })),
+        ]}
       />
       <RadioList
         label="Category"
         value={filters.category ?? 'all'}
         onChange={(v) => onChange({ ...filters, category: v === 'all' ? undefined : v })}
-        options={[{ value: 'all', label: 'All categories' }, ...(config?.categories ?? []).map((c) => ({ value: c.id, label: c.name }))]}
+        options={[
+          { value: 'all', label: 'All categories' },
+          ...(config?.categories ?? []).map((c) => ({ value: c.id, label: c.name })),
+        ]}
       />
-      <CheckList label="Trade type" options={modeOptions} value={filters.modes} onChange={(modes) => onChange({ ...filters, modes })} />
+      <CheckList
+        label="Trade type"
+        options={modeOptions}
+        value={filters.modes}
+        onChange={(modes) => onChange({ ...filters, modes })}
+      />
       <PriceRange filters={filters} onChange={onChange} resetKey={resetKey} />
-      <CheckList label="Condition" options={conditionOptions} value={filters.conditions} onChange={(conditions) => onChange({ ...filters, conditions })} />
+      <CheckList
+        label="Condition"
+        options={conditionOptions}
+        value={filters.conditions}
+        onChange={(conditions) => onChange({ ...filters, conditions })}
+      />
       <p className="text-compact text-muted">Results are sorted newest first.</p>
     </div>
   )
@@ -174,7 +193,8 @@ export function FilterSheet({
   )
 }
 
-const sameFilters = (a: ListingFilters, b: ListingFilters) => serializeFilters(a).toString() === serializeFilters(b).toString()
+const sameFilters = (a: ListingFilters, b: ListingFilters) =>
+  serializeFilters(a).toString() === serializeFilters(b).toString()
 
 /**
  * Desktop rail: applies changes after a short pause instead of on every keystroke, and picks up changes

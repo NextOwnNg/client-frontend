@@ -16,7 +16,16 @@ type MoneyFieldProps = {
 }
 
 /** Whole-naira amount input. Emits integer kobo; never rounds what the person typed (PRD §7.1). */
-export function MoneyField({ label, visibleLabel, value, onChange, hint, error, placeholder = '0', disabled }: MoneyFieldProps) {
+export function MoneyField({
+  label,
+  visibleLabel,
+  value,
+  onChange,
+  hint,
+  error,
+  placeholder = '0',
+  disabled,
+}: MoneyFieldProps) {
   const [text, setText] = useState(() => (value === null ? '' : formatNairaInput(value)))
   const [parseError, setParseError] = useState<string | null>(null)
 

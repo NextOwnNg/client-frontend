@@ -63,12 +63,18 @@ export function ListingHeader({ listing }: { listing: ListingDetail }) {
 export function SellerCard({ listing }: { listing: ListingDetail }) {
   const { seller } = listing
   return (
-    <section aria-labelledby="seller-heading" className="flex flex-col gap-2 rounded-card border border-border bg-surface p-4">
+    <section
+      aria-labelledby="seller-heading"
+      className="flex flex-col gap-2 rounded-card border border-border bg-surface p-4"
+    >
       <h2 id="seller-heading" className="text-caption font-semibold text-muted">
         Listed by
       </h2>
       <div className="flex items-center gap-3">
-        <span aria-hidden className="flex size-10 shrink-0 items-center justify-center rounded-full bg-mint text-body font-bold text-action">
+        <span
+          aria-hidden
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-mint text-body font-bold text-action"
+        >
           {seller.displayName.charAt(0)}
         </span>
         <div className="flex min-w-0 flex-col">
@@ -158,13 +164,18 @@ export function ListingBody({ listing }: { listing: ListingDetail }) {
       {listing.desiredSwap && listing.acceptedModes.includes('SWAP') && (
         <Block title="Would swap for">
           <p className="text-body text-ink">{listing.desiredSwap}</p>
-          <p className="text-compact text-muted">You can offer your item, add cash, or ask for cash on top. The offer shows who pays whom.</p>
+          <p className="text-compact text-muted">
+            You can offer your item, add cash, or ask for cash on top. The offer shows who pays whom.
+          </p>
         </Block>
       )}
       <Block title="Before you meet">
         <p className="max-w-prose text-body text-ink">{copy.handoverCaution}</p>
         <div className="flex flex-wrap gap-x-6 gap-y-1">
-          <Link to="/support" className="inline-flex min-h-11 items-center gap-1.5 text-compact font-semibold text-action underline-offset-4 hover:underline">
+          <Link
+            to="/support"
+            className="inline-flex min-h-11 items-center gap-1.5 text-compact font-semibold text-action underline-offset-4 hover:underline"
+          >
             <LifeBuoy aria-hidden className="size-4" />
             Safety tips
           </Link>
@@ -177,7 +188,11 @@ export function ListingBody({ listing }: { listing: ListingDetail }) {
           </Link>
         </div>
       </Block>
-      {listing.sample && <p className="text-caption text-muted">Sample listing: fictional data for development. Photo from Wikimedia Commons.</p>}
+      {listing.sample && (
+        <p className="text-caption text-muted">
+          Sample listing: fictional data for development. Photo from Wikimedia Commons.
+        </p>
+      )}
     </div>
   )
 }
@@ -213,8 +228,7 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
     if (!userId) {
       setIntent(next)
       setPromptOpen(true)
-    }
-    else if (next === 'offer') navigate(`/offers/new?listing=${fresh.id}`)
+    } else if (next === 'offer') void navigate(`/offers/new?listing=${fresh.id}`)
     // Saved items arrive with Phase 6; say so rather than pretend
     else void import('@heroui/react').then(({ toast }) => toast("Saved items aren't available yet in this preview."))
   }
@@ -281,7 +295,9 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
     <>
       {bar ? (
         <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-sm desktop:hidden">
-          {!available && !own && <p className="mb-2 text-compact font-semibold text-ink">{unavailableMessage(listing.status)}</p>}
+          {!available && !own && (
+            <p className="mb-2 text-compact font-semibold text-ink">{unavailableMessage(listing.status)}</p>
+          )}
           <div className="mx-auto flex max-w-content items-center gap-3">{actions}</div>
         </div>
       ) : (

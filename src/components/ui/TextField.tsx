@@ -12,7 +12,16 @@ type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   prefix?: string
 }
 
-export function TextField({ label, visibleLabel, hint, error, hideLabel, prefix, className, ...inputProps }: TextFieldProps) {
+export function TextField({
+  label,
+  visibleLabel,
+  hint,
+  error,
+  hideLabel,
+  prefix,
+  className,
+  ...inputProps
+}: TextFieldProps) {
   return (
     <Field label={label} visibleLabel={visibleLabel} hint={hint} error={error} hideLabel={hideLabel}>
       {({ inputId, describedBy, invalid }) => (

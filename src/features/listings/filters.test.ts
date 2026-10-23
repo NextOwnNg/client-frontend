@@ -26,10 +26,20 @@ describe('listing filters in the URL', () => {
       conditions: ['GOOD', 'LIKE_NEW'] as const,
       sort: 'recent' as const,
     }
-    const query = serializeFilters({ ...filters, modes: [...filters.modes], conditions: [...filters.conditions] }).toString()
+    const query = serializeFilters({
+      ...filters,
+      modes: [...filters.modes],
+      conditions: [...filters.conditions],
+    }).toString()
 
-    expect(query).toBe('q=iphone&category=phones&area=central&mode=cash%2Cquick-sell&min=100000&max=400000&condition=good%2Clike-new')
-    expect(parse(query).filters).toEqual({ ...filters, modes: ['CASH', 'QUICK_SELL'], conditions: ['GOOD', 'LIKE_NEW'] })
+    expect(query).toBe(
+      'q=iphone&category=phones&area=central&mode=cash%2Cquick-sell&min=100000&max=400000&condition=good%2Clike-new',
+    )
+    expect(parse(query).filters).toEqual({
+      ...filters,
+      modes: ['CASH', 'QUICK_SELL'],
+      conditions: ['GOOD', 'LIKE_NEW'],
+    })
   })
 
   it('serialises the defaults as an empty query', () => {
@@ -118,7 +128,9 @@ describe('active filter chips', () => {
 
 describe('canonical URL', () => {
   it('keeps only the meaningful filters: category and area', () => {
-    expect(canonicalSearch(parse('q=mac&category=laptops&area=north&mode=swap').filters)).toBe('?category=laptops&area=north')
+    expect(canonicalSearch(parse('q=mac&category=laptops&area=north&mode=swap').filters)).toBe(
+      '?category=laptops&area=north',
+    )
     expect(canonicalSearch(parse('q=mac').filters)).toBe('')
   })
 })

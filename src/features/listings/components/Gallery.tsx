@@ -8,7 +8,8 @@ import type { ListingImage } from '@/types/api'
 const loadViewer = () => import('@/features/listings/components/GalleryViewer')
 const GalleryViewer = lazy(() => loadViewer().then((m) => ({ default: m.GalleryViewer })))
 
-const prefersReducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 const arrow =
   'absolute top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-surface/90 text-ink shadow-card outline-none transition-[opacity,transform] duration-120 ease-out active:scale-[0.94] focus-visible:ring-2 focus-visible:ring-focus disabled:pointer-events-none disabled:opacity-0'
@@ -23,24 +24,27 @@ export function Gallery({ images, slug }: { images: ListingImage[]; slug: string
   const track = useRef<HTMLDivElement>(null)
   const count = images.length
 
-  function go(next: number) {
+  function go(next: number): number {
     const i = Math.max(0, Math.min(count - 1, next))
     setIndex(i)
     const el = track.current
     el?.scrollTo?.({ left: i * el.clientWidth, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    return i
   }
 
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'ArrowRight') go(index + 1)
-    else if (e.key === 'ArrowLeft') go(index - 1)
-    else return
+  // Arrow keys on the focused photo; focus follows to the photo now showing, so arrows keep working
+  function onKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
+    const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+    if (step === 0) return
     e.preventDefault()
+    const next = go(index + step)
+    requestAnimationFrame(() => track.current?.querySelectorAll('button')[next]?.focus())
   }
 
   if (count === 0) return null
 
   return (
-    <section aria-label="Photos" aria-roledescription="carousel" className="flex flex-col gap-3" onKeyDown={onKeyDown}>
+    <section aria-label="Photos" aria-roledescription="carousel" className="flex flex-col gap-3">
       <div className="relative -mx-4 overflow-hidden bg-cloud tablet:mx-0 tablet:rounded-card tablet:border tablet:border-border">
         <div
           ref={track}
@@ -49,7 +53,7 @@ export function Gallery({ images, slug }: { images: ListingImage[]; slug: string
             const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth))
             if (i !== index) setIndex(i)
           }}
-          className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex snap-x snap-mandatory [scrollbar-width:none] overflow-x-auto overscroll-x-contain [&::-webkit-scrollbar]:hidden"
         >
           {images.map((image, i) => (
             <div
@@ -65,6 +69,7 @@ export function Gallery({ images, slug }: { images: ListingImage[]; slug: string
                 tabIndex={i === index ? 0 : -1}
                 onPointerEnter={loadViewer}
                 onClick={() => setViewerOpen(true)}
+                onKeyDown={onKeyDown}
                 aria-label={`Open full view: ${image.alt}`}
                 className="group relative block w-full cursor-zoom-in outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset"
               >
@@ -90,21 +95,36 @@ export function Gallery({ images, slug }: { images: ListingImage[]; slug: string
 
         {count > 1 && (
           <>
-            <button type="button" aria-label="Previous photo" onClick={() => go(index - 1)} disabled={index === 0} className={cx(arrow, 'left-3')}>
+            <button
+              type="button"
+              aria-label="Previous photo"
+              onClick={() => go(index - 1)}
+              disabled={index === 0}
+              className={cx(arrow, 'left-3')}
+            >
               <ChevronLeft aria-hidden className="size-5" />
             </button>
-            <button type="button" aria-label="Next photo" onClick={() => go(index + 1)} disabled={index === count - 1} className={cx(arrow, 'right-3')}>
+            <button
+              type="button"
+              aria-label="Next photo"
+              onClick={() => go(index + 1)}
+              disabled={index === count - 1}
+              className={cx(arrow, 'right-3')}
+            >
               <ChevronRight aria-hidden className="size-5" />
             </button>
           </>
         )}
-        <p aria-live="polite" className="tabular absolute right-3 bottom-3 rounded-full bg-ink/75 px-2.5 py-0.5 text-caption text-paper">
+        <p
+          aria-live="polite"
+          className="tabular absolute right-3 bottom-3 rounded-full bg-ink/75 px-2.5 py-0.5 text-caption text-paper"
+        >
           {index + 1} of {count}
         </p>
       </div>
 
       {count > 1 && (
-        <div className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+        <div className="flex [scrollbar-width:none] gap-2 overflow-x-auto">
           {images.map((image, i) => (
             <button
               key={image.url}
@@ -113,7 +133,7 @@ export function Gallery({ images, slug }: { images: ListingImage[]; slug: string
               aria-current={i === index || undefined}
               onClick={() => go(i)}
               className={cx(
-                'relative size-14 shrink-0 overflow-hidden rounded-small outline-none transition-[box-shadow,opacity] duration-120 focus-visible:ring-2 focus-visible:ring-focus',
+                'relative size-14 shrink-0 overflow-hidden rounded-small transition-[box-shadow,opacity] duration-120 outline-none focus-visible:ring-2 focus-visible:ring-focus',
                 i === index ? 'ring-2 ring-action ring-offset-2' : 'opacity-70 hover:opacity-100',
               )}
             >
@@ -125,7 +145,13 @@ export function Gallery({ images, slug }: { images: ListingImage[]; slug: string
 
       {viewerOpen && (
         <Suspense fallback={null}>
-          <GalleryViewer images={images} index={index} onIndexChange={go} open={viewerOpen} onOpenChange={setViewerOpen} />
+          <GalleryViewer
+            images={images}
+            index={index}
+            onIndexChange={go}
+            open={viewerOpen}
+            onOpenChange={setViewerOpen}
+          />
         </Suspense>
       )}
     </section>

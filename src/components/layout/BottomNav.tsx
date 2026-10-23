@@ -34,7 +34,7 @@ export function BottomNav() {
               className={({ isActive }) =>
                 cx(
                   'relative flex flex-1 flex-col items-center justify-center gap-0.5 text-caption font-medium whitespace-nowrap outline-none',
-                  'transition-[color,transform] duration-120 ease-out active:scale-95 focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset',
+                  'transition-[color,transform] duration-120 ease-out focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset active:scale-95',
                   isActive ? 'text-action' : 'text-muted',
                 )
               }

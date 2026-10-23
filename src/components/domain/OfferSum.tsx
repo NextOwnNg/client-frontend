@@ -23,7 +23,15 @@ type OfferSumProps = {
  * The signature move: a trade written out like an exercise-book sum. Items and cash in the working,
  * the result under a double rule, and the payer sentence as the answer (direction contract).
  */
-export function OfferSum({ give, receive, sentence, delta, heading = 'The trade, worked out', animateIn = false, className }: OfferSumProps) {
+export function OfferSum({
+  give,
+  receive,
+  sentence,
+  delta,
+  heading = 'The trade, worked out',
+  animateIn = false,
+  className,
+}: OfferSumProps) {
   // Lines write in one after another, 40ms apart (CSS, so it stays smooth on a busy first load)
   const line = (index: number): { className?: string; style?: CSSProperties } =>
     animateIn ? { className: 'animate-rise', style: { animationDelay: `${index * 40}ms` } } : {}
@@ -39,12 +47,20 @@ export function OfferSum({ give, receive, sentence, delta, heading = 'The trade,
 
       <dl className="tabular mt-1">
         {give.map((item, i) => (
-          <div key={`${item.kind}-${item.title}`} style={line(i).style} className={cx('flex items-baseline gap-2 leading-6', line(i).className)}>
+          <div
+            key={`${item.kind}-${item.title}`}
+            style={line(i).style}
+            className={cx('flex items-baseline gap-2 leading-6', line(i).className)}
+          >
             <span aria-hidden className="w-3 shrink-0 text-muted">
               {i > 0 ? '+' : ''}
             </span>
             <dt className="min-w-0 flex-1 text-body text-ink">{item.title}</dt>
-            <dd className={item.kind === 'cash' ? 'shrink-0 text-body font-semibold text-ink' : 'shrink-0 text-caption text-muted'}>
+            <dd
+              className={
+                item.kind === 'cash' ? 'shrink-0 text-body font-semibold text-ink' : 'shrink-0 text-caption text-muted'
+              }
+            >
               {item.kind === 'cash' && item.kobo !== undefined ? formatNaira(item.kobo) : 'item'}
             </dd>
           </div>
@@ -52,7 +68,10 @@ export function OfferSum({ give, receive, sentence, delta, heading = 'The trade,
 
         <div
           style={line(give.length).style}
-          className={cx('mt-1 flex items-baseline gap-2 border-t-[3px] border-double border-ink pt-1 leading-6', line(give.length).className)}
+          className={cx(
+            'mt-1 flex items-baseline gap-2 border-t-[3px] border-double border-ink pt-1 leading-6',
+            line(give.length).className,
+          )}
         >
           <span aria-hidden className="w-3 shrink-0 text-muted">
             =
@@ -65,14 +84,20 @@ export function OfferSum({ give, receive, sentence, delta, heading = 'The trade,
         </div>
       </dl>
 
-      <p style={line(give.length + 1).style} className={cx('mt-1 text-compact font-semibold text-action', line(give.length + 1).className)}>
+      <p
+        style={line(give.length + 1).style}
+        className={cx('mt-1 text-compact font-semibold text-action', line(give.length + 1).className)}
+      >
         {sentence}
       </p>
 
       {delta && (
         <p
           style={animateIn ? { animationDelay: `${(give.length + 2) * 40}ms` } : undefined}
-          className={cx('mt-2 inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-caption text-ink', animateIn && 'animate-pop')}
+          className={cx(
+            'mt-2 inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-caption text-ink',
+            animateIn && 'animate-pop',
+          )}
         >
           <span className="tabular font-bold text-action">
             {delta.kobo >= 0 ? '+' : '−'}

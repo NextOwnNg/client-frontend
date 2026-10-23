@@ -16,7 +16,11 @@ describe('Home', () => {
     renderWithProviders(routes)
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Find your next thing.' })).toBeInTheDocument()
-    expect(screen.getByText('Sell what you no longer need, swap for something better, or add cash to make the exchange work.')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Sell what you no longer need, swap for something better, or add cash to make the exchange work.',
+      ),
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Explore items' })).toHaveAttribute('href', '/explore')
     expect(screen.getAllByRole('link', { name: 'List an item' })[0]).toHaveAttribute('href', '/listings/new')
   })
@@ -37,7 +41,10 @@ describe('Home', () => {
 
     expect(within(routesNav).getByRole('link', { name: /For sale/ })).toHaveAttribute('href', '/explore?mode=cash')
     expect(within(routesNav).getByRole('link', { name: /Open to swap/ })).toHaveAttribute('href', '/explore?mode=swap')
-    expect(within(routesNav).getByRole('link', { name: /Quick Sell/ })).toHaveAttribute('href', '/explore?mode=quick-sell')
+    expect(within(routesNav).getByRole('link', { name: /Quick Sell/ })).toHaveAttribute(
+      'href',
+      '/explore?mode=quick-sell',
+    )
   })
 
   it('shows categories from the pilot config', async () => {
@@ -89,7 +96,9 @@ describe('Home', () => {
   })
 
   it('shows skeletons while recent listings load, then a retry if they fail', async () => {
-    server.use(http.get(`${API}/listings`, () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 }), { once: true }))
+    server.use(
+      http.get(`${API}/listings`, () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 }), { once: true }),
+    )
     renderWithProviders(routes)
 
     expect(await screen.findByLabelText('Loading recent listings')).toBeInTheDocument()

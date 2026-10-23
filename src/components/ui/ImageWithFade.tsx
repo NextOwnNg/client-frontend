@@ -20,11 +20,23 @@ type ImageWithFadeProps = {
  * Real item photos: a Mint frame holds the layout, the photo fades in over 200ms once decoded,
  * and a failed image never collapses the card or blocks its actions.
  */
-export function ImageWithFade({ src, alt, aspect = '4/3', sizes, priority, transitionName, fit = 'cover', className }: ImageWithFadeProps) {
+export function ImageWithFade({
+  src,
+  alt,
+  aspect = '4/3',
+  sizes,
+  priority,
+  transitionName,
+  fit = 'cover',
+  className,
+}: ImageWithFadeProps) {
   const [state, setState] = useState<'loading' | 'loaded' | 'error'>('loading')
 
   return (
-    <span className={cx('relative block overflow-hidden bg-mint', className)} style={{ aspectRatio: aspect, viewTransitionName: transitionName }}>
+    <span
+      className={cx('relative block overflow-hidden bg-mint', className)}
+      style={{ aspectRatio: aspect, viewTransitionName: transitionName }}
+    >
       {state === 'error' ? (
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted">
           <ImageOff aria-hidden className="size-6" />

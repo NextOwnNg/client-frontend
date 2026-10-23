@@ -18,9 +18,15 @@ const LISTING_PATH = /^\/listings\/([^/]+)\/?$/
 const RESERVED_SLUGS = new Set(['new'])
 
 const html = (body: string, cacheControl: string) =>
-  new Response(body, { status: 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': cacheControl } })
+  new Response(body, {
+    status: 200,
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': cacheControl },
+  })
 
-export async function handleListingOg(request: Request, { fetchListing, indexHtml, timeoutMs = 800 }: Deps): Promise<Response> {
+export async function handleListingOg(
+  request: Request,
+  { fetchListing, indexHtml, timeoutMs = 800 }: Deps,
+): Promise<Response> {
   const url = new URL(request.url)
   const match = LISTING_PATH.exec(url.pathname)
   const slug = match?.[1] ? decodeURIComponent(match[1]) : null
@@ -31,7 +37,9 @@ export async function handleListingOg(request: Request, { fetchListing, indexHtm
   try {
     const listing = await Promise.race([
       fetchListing(slug, controller.signal),
-      new Promise<never>((_, reject) => controller.signal.addEventListener('abort', () => reject(new Error('timeout')))),
+      new Promise<never>((_, reject) =>
+        controller.signal.addEventListener('abort', () => reject(new Error('timeout'))),
+      ),
     ])
     const meta = buildListingMeta(listing, { origin: url.origin })
     // Short cache so price and availability stay close to real time
@@ -47,7 +55,10 @@ export async function handleListingOg(request: Request, { fetchListing, indexHtm
 /** Reads the public listing summary from the API; 404 means "unknown slug", other failures throw. */
 export function createApiFetcher(apiBase: string, fetchImpl: typeof fetch = fetch): FetchListing {
   return async (slug, signal) => {
-    const res = await fetchImpl(`${apiBase}/listings/${encodeURIComponent(slug)}`, { signal, headers: { accept: 'application/json' } })
+    const res = await fetchImpl(`${apiBase}/listings/${encodeURIComponent(slug)}`, {
+      signal,
+      headers: { accept: 'application/json' },
+    })
     if (res.status === 404) return null
     if (!res.ok) throw new Error(`Listing API responded ${res.status}`)
     const data = (await res.json()) as ListingMetaInput

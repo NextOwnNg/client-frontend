@@ -7,7 +7,7 @@ The user-facing web app for NextOwn, a person-to-person marketplace for selling,
 
 ## Stack
 
-React 19 · Vite · TypeScript · React Router · TanStack Query · Axios · Zustand · React Hook Form + Zod · HeroUI v3 · Tailwind CSS v4 · Lucide · React Helmet (async) · Vitest + Testing Library + MSW · oxlint
+React 19 · Vite · TypeScript · React Router · TanStack Query · Axios · Zustand · React Hook Form + Zod · HeroUI v3 · Tailwind CSS v4 · Lucide · React Helmet (async) · Vitest + Testing Library + MSW · oxlint + ESLint · Prettier
 
 ## Getting started
 
@@ -23,8 +23,13 @@ npm run dev                  # http://localhost:5173
 | `npm run build` | Typecheck and build for production |
 | `npm run preview` | Serve the production build locally |
 | `npm run typecheck` | TypeScript only |
-| `npm run lint` | oxlint |
+| `npm run lint` | oxlint (fast first pass), then ESLint (type-aware TypeScript, React Hooks, jsx-a11y) |
+| `npm run lint:fix` | Both linters with auto-fix |
+| `npm run format` / `npm run format:check` | Prettier write / check (also sorts Tailwind classes) |
+| `npm run check` | Typecheck, lint, format check and tests: run before committing |
 | `npm test` / `npm run test:run` | Vitest in watch mode / once |
+
+Formatting: Prettier (no semicolons, single quotes, 120 columns, Tailwind class sorting via `prettier-plugin-tailwindcss`, including inside `cx()`). Markdown docs are excluded so hand-written tables stay as authored. VS Code suggests the Prettier, ESLint, oxc, Tailwind and EditorConfig extensions (`.vscode/extensions.json`); turn on format-on-save with Prettier as the default formatter.
 
 ## Design tokens
 

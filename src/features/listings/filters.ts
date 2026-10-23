@@ -21,10 +21,19 @@ export type FilterIssue = 'min_gt_max'
 
 export const defaultFilters: ListingFilters = { modes: [], conditions: [], sort: 'recent' }
 
-export const modeLabels: Record<ModeFilter, string> = { CASH: 'For sale', SWAP: 'Open to swap', QUICK_SELL: 'Quick Sell' }
+export const modeLabels: Record<ModeFilter, string> = {
+  CASH: 'For sale',
+  SWAP: 'Open to swap',
+  QUICK_SELL: 'Quick Sell',
+}
 
 const modeSlugs: Record<ModeFilter, string> = { CASH: 'cash', SWAP: 'swap', QUICK_SELL: 'quick-sell' }
-const conditionSlugs: Record<ItemCondition, string> = { LIKE_NEW: 'like-new', GOOD: 'good', FAIR: 'fair', FOR_PARTS: 'for-parts' }
+const conditionSlugs: Record<ItemCondition, string> = {
+  LIKE_NEW: 'like-new',
+  GOOD: 'good',
+  FAIR: 'fair',
+  FOR_PARTS: 'for-parts',
+}
 
 function fromSlugs<T extends string>(value: string | null, slugs: Record<T, string>): T[] {
   const bySlug = new Map(Object.entries(slugs).map(([key, slug]) => [slug, key as T]))
@@ -55,7 +64,10 @@ export function priceDisabled(filters: ListingFilters): boolean {
  * Reads filters from the URL. Hand-edited or stale links never break the page: unknown values are dropped,
  * and an unknown category or area is dropped once the pilot config has loaded.
  */
-export function parseFilters(params: URLSearchParams, config?: RuntimeConfig): { filters: ListingFilters; issues: FilterIssue[] } {
+export function parseFilters(
+  params: URLSearchParams,
+  config?: RuntimeConfig,
+): { filters: ListingFilters; issues: FilterIssue[] } {
   const q = params.get('q')?.trim() || undefined
   let category = params.get('category') || undefined
   let area = params.get('area') || undefined
@@ -128,10 +140,15 @@ export function activeChips(filters: ListingFilters, config?: RuntimeConfig): Fi
     chips.push({ key: 'area', label: name, remove: () => ({ ...filters, area: undefined }) })
   }
   for (const mode of filters.modes) {
-    chips.push({ key: `mode-${mode}`, label: modeLabels[mode], remove: () => ({ ...filters, modes: filters.modes.filter((m) => m !== mode) }) })
+    chips.push({
+      key: `mode-${mode}`,
+      label: modeLabels[mode],
+      remove: () => ({ ...filters, modes: filters.modes.filter((m) => m !== mode) }),
+    })
   }
   const price = priceLabel(filters.priceMin, filters.priceMax)
-  if (price) chips.push({ key: 'price', label: price, remove: () => ({ ...filters, priceMin: undefined, priceMax: undefined }) })
+  if (price)
+    chips.push({ key: 'price', label: price, remove: () => ({ ...filters, priceMin: undefined, priceMax: undefined }) })
   for (const condition of filters.conditions) {
     chips.push({
       key: `condition-${condition}`,

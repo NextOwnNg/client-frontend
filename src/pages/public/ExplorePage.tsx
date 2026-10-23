@@ -1,6 +1,12 @@
 import { lazy, Suspense, useCallback, useState } from 'react'
 import { Seo } from '@/components/seo/Seo'
-import { ActiveChips, CategoryRail, ChipRow, FiltersButton, ModeToggles } from '@/features/listings/components/FilterChips'
+import {
+  ActiveChips,
+  CategoryRail,
+  ChipRow,
+  FiltersButton,
+  ModeToggles,
+} from '@/features/listings/components/FilterChips'
 import { Results } from '@/features/listings/components/Results'
 import { SearchBox } from '@/features/listings/components/SearchBox'
 import { canonicalSearch, defaultFilters } from '@/features/listings/filters'
@@ -73,7 +79,13 @@ export function ExplorePage() {
 
       {!desktop && sheetMounted && (
         <Suspense fallback={null}>
-          <FilterSheet open={sheetOpen} onOpenChange={setSheetOpen} filters={filters} onApply={setFilters} config={config} />
+          <FilterSheet
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            filters={filters}
+            onApply={setFilters}
+            config={config}
+          />
         </Suspense>
       )}
     </>

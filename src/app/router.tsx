@@ -46,7 +46,10 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, Component: HomePage },
           // Public routes after Home load as their own chunks, keeping the entry chunk inside budget (PRD §12)
-          { path: 'explore', lazy: async () => ({ Component: (await import('@/pages/public/ExplorePage')).ExplorePage }) },
+          {
+            path: 'explore',
+            lazy: async () => ({ Component: (await import('@/pages/public/ExplorePage')).ExplorePage }),
+          },
           {
             path: 'listings/:slug',
             lazy: async () => ({ Component: (await import('@/pages/public/ListingDetailPage')).ListingDetailPage }),

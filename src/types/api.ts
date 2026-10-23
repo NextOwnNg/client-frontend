@@ -1,14 +1,7 @@
 /** API resource shapes (PRD §6, NX-PRD-001 §6). Money is integer kobo; times are ISO UTC strings. */
 
 export type ListingStatus =
-  | 'DRAFT'
-  | 'PENDING_REVIEW'
-  | 'ACTIVE'
-  | 'RESERVED'
-  | 'EXPIRED'
-  | 'COMPLETED'
-  | 'CLOSED'
-  | 'REMOVED'
+  'DRAFT' | 'PENDING_REVIEW' | 'ACTIVE' | 'RESERVED' | 'EXPIRED' | 'COMPLETED' | 'CLOSED' | 'REMOVED'
 
 export type TradeMode = 'CASH' | 'SWAP'
 
@@ -74,7 +67,8 @@ export type ListingDetail = ListingSummary & {
   seller: PublicSeller
 }
 
-export type ListingSuggestion = { kind: 'query'; label: string } | { kind: 'category'; label: string; categoryId: string }
+export type ListingSuggestion =
+  { kind: 'query'; label: string } | { kind: 'category'; label: string; categoryId: string }
 
 export type Paginated<T> = { items: T[]; nextCursor: string | null; total?: number }
 
