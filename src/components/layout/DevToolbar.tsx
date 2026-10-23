@@ -17,7 +17,7 @@ export function DevToolbar() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] left-3 z-50 inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3 text-caption font-semibold text-paper shadow-overlay desktop:bottom-4"
+        className="fixed bottom-[calc(152px+env(safe-area-inset-bottom))] left-3 z-50 inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3 text-caption font-semibold text-paper shadow-overlay desktop:bottom-4"
       >
         <FlaskConical aria-hidden className="size-3.5" />
         Sample data
@@ -29,7 +29,7 @@ export function DevToolbar() {
     <div
       role="region"
       aria-label="Developer tools"
-      className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] left-3 z-50 w-72 rounded-card bg-ink p-4 text-compact text-paper shadow-overlay desktop:bottom-4"
+      className="fixed bottom-[calc(152px+env(safe-area-inset-bottom))] left-3 z-50 w-72 rounded-card bg-ink p-4 text-compact text-paper shadow-overlay desktop:bottom-4"
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="font-semibold">Mock API · fictional sample data</p>

@@ -60,6 +60,22 @@ export type ListingSummary = {
   sample?: boolean
 }
 
+/** Full public listing (PRD FE-LDT-01). Removed listings come back stripped: no photos, text or seller. */
+export type ListingDetail = ListingSummary & {
+  images: ListingImage[]
+  description: string
+  /** Disclosed defects, one per line; shown above the offer CTA. */
+  defects: string[]
+  repairs?: string
+  accessories?: string
+  /** What the owner would like in a swap. */
+  desiredSwap?: string
+  categoryFields: { label: string; value: string }[]
+  seller: PublicSeller
+}
+
+export type ListingSuggestion = { kind: 'query'; label: string } | { kind: 'category'; label: string; categoryId: string }
+
 export type Paginated<T> = { items: T[]; nextCursor: string | null; total?: number }
 
 export type RuntimeConfig = {

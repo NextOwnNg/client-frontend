@@ -23,7 +23,7 @@ export function Deadline({ endsAt, startedAt, variant, className }: DeadlineProp
       <span
         className={cx(
           'inline-flex h-6 items-center gap-1 rounded-full px-2 text-caption font-semibold whitespace-nowrap',
-          ended ? 'bg-cloud text-muted ring-1 ring-border' : 'bg-highlight text-highlight-foreground',
+          ended ? 'bg-cloud text-muted ring-1 ring-border' : 'bg-highlight-tint text-ink ring-1 ring-highlight',
           className,
         )}
       >

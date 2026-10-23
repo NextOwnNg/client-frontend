@@ -10,7 +10,7 @@ import {
   Timer,
   type LucideIcon,
 } from 'lucide-react'
-import type { ItemCondition, ListingStatus } from '@/types/api'
+import type { ListingStatus } from '@/types/api'
 
 export type StatusTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'highlight'
 
@@ -35,16 +35,7 @@ export function listingStatus(status: ListingStatus, opts: { urgencyLabel?: stri
   return listingStatuses[status]
 }
 
-const conditions: Record<ItemCondition, string> = {
-  LIKE_NEW: 'Like new',
-  GOOD: 'Good',
-  FAIR: 'Fair',
-  FOR_PARTS: 'For parts',
-}
-
-export function conditionLabel(condition: ItemCondition): string {
-  return conditions[condition]
-}
+export { conditionLabel } from '@/lib/copy/labels'
 
 /** Listings that can still receive offers. */
 export function isAvailable(status: ListingStatus): boolean {

@@ -56,6 +56,11 @@ typography:
     fontSize: "1.5rem"
     fontWeight: 700
     lineHeight: "1.875rem"
+  price-sm:
+    fontFamily: "Inter Variable, Inter, system-ui, Segoe UI, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 700
+    lineHeight: "1.5rem"
     fontFeature: "tnum"
   button:
     fontFamily: "Inter Variable, Inter, system-ui, Segoe UI, sans-serif"
@@ -225,6 +230,7 @@ A restrained, high-confidence palette: Ink foundation, one Teal action colour, l
 - **Compact** (400 to 600, 14/21px): secondary facts such as condition and defect lines, desktop nav links, banner detail.
 - **Caption** (500, 12/18px): badges, bottom-nav labels, the worked-sum heading, timestamps.
 - **Price** (700, 24/30px, tabular figures): prominent asking prices on detail views.
+- **Price small** (700, 18/24px, tabular figures, `text-price-sm`): prices in listing rows and tiles, sitting on the 24px ruling.
 - **Button** (600, 16/24px): all button labels.
 
 ### Named Rules
@@ -257,7 +263,7 @@ The header and bottom nav are 95% white with a small backdrop blur, divided from
 
 ## Shapes
 
-Soft, consistent rounding on four steps: 8px small, 12px controls (buttons, fields, banners, radio cards, nav links), 16px cards (cards, listing rows and tiles, worked sums, centred modals), 24px feature surfaces (bottom-sheet top corners). Pills (full radius) for badges, chips, icon buttons and the margin rule's rounded ends.
+Soft, consistent rounding on four steps: 8px small (`rounded-small`: checkboxes, thumbnails), 12px controls (buttons, fields, banners, radio cards, nav links), 16px cards (cards, listing rows and tiles, worked sums, centred modals), 24px feature surfaces (bottom-sheet top corners). Pills (full radius) for badges, chips, icon buttons and the margin rule's rounded ends.
 
 The recurring line forms are the system's geometry: a 2px rounded Teal margin rule set 12px in from the top and bottom of its container, a 3px double Ink rule above totals, and 24px circular step markers on a 2px corridor line.
 
@@ -276,7 +282,7 @@ Confident and plain: one height, one radius, one weight.
 ### Chips
 - **Style:** full-pill, 24px tall, 12px semibold caption text, 8px side padding.
 - **Swap ok / delta:** Mint Mist with Teal (or Ink) text.
-- **Quick Sell:** Warm Gold with Ink text and a timer icon; becomes a neutral Cloud chip with a Border ring once ended.
+- **Quick Sell:** an opaque Gold tint (`bg-highlight-tint`, Gold 32% on white) with a Gold ring, Ink text and a timer icon, so it stays solid over photos; becomes a neutral Cloud chip with a Border ring once ended.
 
 ### Cards / Containers
 - **Corner Style:** 16px.
@@ -318,12 +324,14 @@ A single vertical corridor for transaction steps. A 2px line connects 24px circu
 Quick Sell time left. Compact form is the Gold chip. Detail form adds an Ink label with a warning-tone timer icon, the WAT end time in tabular caption, and a 4px Mint track whose Gold fill length is the real share of time remaining. It never animates or ticks by the second.
 
 ### Motion
-Motion values come from `src/lib/motion/presets.ts`: fast 120ms, standard 200ms, slow 320ms, all on ease-out `cubic-bezier(0.16, 1, 0.3, 1)`. There are springs for sheets, press feedback and sliding indicators; fade-rise (8px) entrances; 16px step slides in the direction of travel; and a 0.98 press scale. The app is wrapped in `MotionConfig reducedMotion="user"`, and a global reduced-motion rule collapses CSS transitions and animations.
+Motion values come from `src/lib/motion/presets.ts`: fast 120ms, standard 200ms, slow 320ms, all on ease-out `cubic-bezier(0.16, 1, 0.3, 1)`. There are springs for sheets and press feedback; fade-rise entrances; 16px step slides in the direction of travel; and a 0.98 press scale.
+
+First-load motion is CSS, so it stays smooth while a page loads and keeps Framer Motion out of the entry chunk: the bottom-nav bar slides with a transform transition, the offline banner drops in (`animate-drop`), the route progress bar grows after a 150ms wait (`animate-route-progress`), and the worked sum writes in line by line (`animate-rise`, 40ms apart). A listing's cover photo morphs from card to detail with a View Transition (240ms). Framer Motion is reserved for interactive motion (springs, drag, path drawing) and is scoped with `MotionProvider` (`MotionConfig reducedMotion="user"` + `LazyMotion`). A global reduced-motion rule collapses CSS transitions, animations and view transitions.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** use the Tailwind theme names (`text-ink`, `text-muted`, `bg-action`, `bg-highlight`, `bg-mint`, `rounded-control`, `rounded-card`, `rounded-feature`, `shadow-card`, `shadow-overlay`, `text-display` through `text-price`, `tablet:`/`desktop:`/`wide:`, `max-w-content`); never raw hex in components.
+- **Do** use the Tailwind theme names (`text-ink`, `text-muted`, `bg-action`, `bg-highlight`, `bg-mint`, `rounded-control`, `rounded-card`, `rounded-feature`, `shadow-card`, `shadow-overlay`, `text-display` through `text-price` and `text-price-sm`, `rounded-small`, `bg-highlight-tint`, `tablet:`/`desktop:`/`wide:`, `max-w-content`); never raw hex in components.
 - **Do** run the 2px Teal margin rule through worked sums, listing facts and timelines; it is the system's structural mark.
 - **Do** put every total under the 3px double Ink rule, and tick a step only when the server confirms it.
 - **Do** set every ₦ amount in tabular figures.

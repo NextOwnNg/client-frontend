@@ -15,6 +15,8 @@
   --color-action-foreground: var(--nx-paper);
   --color-highlight: var(--nx-gold);
   --color-highlight-foreground: var(--nx-ink);
+  /* Opaque Gold tint for the Quick Sell chip: stays solid over photos */
+  --color-highlight-tint: color-mix(in oklab, var(--nx-gold) 32%, white);
   --color-cloud: var(--nx-cloud);
   --color-paper: var(--nx-paper);
   --color-mint: var(--nx-mint);
@@ -49,8 +51,12 @@
   --text-price: 1.5rem; /* 24 / 30 */
   --text-price--line-height: 1.875rem;
   --text-price--font-weight: 700;
+  --text-price-sm: 1.125rem; /* 18 / 24: prices in rows and tiles */
+  --text-price-sm--line-height: 1.5rem;
+  --text-price-sm--font-weight: 700;
 
   /* Radius (Brand §5) */
+  --radius-small: var(--nx-radius-sm);
   --radius-control: var(--nx-radius-control);
   --radius-card: var(--nx-radius-card);
   --radius-feature: var(--nx-radius-feature);

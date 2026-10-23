@@ -9,6 +9,10 @@ type ImageWithFadeProps = {
   aspect?: string
   sizes?: string
   priority?: boolean
+  /** Shared-element name: the same photo on the card and the detail page morphs between them. */
+  transitionName?: string
+  /** "contain" shows the whole photo (listing evidence); "cover" fills the frame (cards). */
+  fit?: 'cover' | 'contain'
   className?: string
 }
 
@@ -16,11 +20,11 @@ type ImageWithFadeProps = {
  * Real item photos: a Mint frame holds the layout, the photo fades in over 200ms once decoded,
  * and a failed image never collapses the card or blocks its actions.
  */
-export function ImageWithFade({ src, alt, aspect = '4/3', sizes, priority, className }: ImageWithFadeProps) {
+export function ImageWithFade({ src, alt, aspect = '4/3', sizes, priority, transitionName, fit = 'cover', className }: ImageWithFadeProps) {
   const [state, setState] = useState<'loading' | 'loaded' | 'error'>('loading')
 
   return (
-    <span className={cx('relative block overflow-hidden bg-mint', className)} style={{ aspectRatio: aspect }}>
+    <span className={cx('relative block overflow-hidden bg-mint', className)} style={{ aspectRatio: aspect, viewTransitionName: transitionName }}>
       {state === 'error' ? (
         <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted">
           <ImageOff aria-hidden className="size-6" />
@@ -37,7 +41,8 @@ export function ImageWithFade({ src, alt, aspect = '4/3', sizes, priority, class
           onLoad={() => setState('loaded')}
           onError={() => setState('error')}
           className={cx(
-            'absolute inset-0 size-full object-cover transition-opacity duration-200 ease-out',
+            'absolute inset-0 size-full transition-opacity duration-200 ease-out',
+            fit === 'cover' ? 'object-cover' : 'object-contain',
             state === 'loaded' ? 'opacity-100' : 'opacity-0',
           )}
         />

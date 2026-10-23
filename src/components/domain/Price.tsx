@@ -7,7 +7,7 @@ export function Price({ kobo, size = 'md', className }: { kobo: number | null; s
     return <span className={cx('font-semibold text-ink', size === 'lg' ? 'text-h3' : 'text-body', className)}>Open to swap</span>
   }
   return (
-    <span className={cx('tabular font-bold text-ink', size === 'lg' ? 'text-price' : 'text-[1.125rem] leading-6', className)}>
+    <span className={cx('tabular font-bold text-ink', size === 'lg' ? 'text-price' : 'text-price-sm', className)}>
       {formatNaira(kobo)}
     </span>
   )

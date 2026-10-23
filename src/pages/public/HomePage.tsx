@@ -1,24 +1,50 @@
 import { Seo } from '@/components/seo/Seo'
-import { ButtonLink } from '@/components/ui/Button'
+import { useAreaSheet } from '@/components/layout/use-area-sheet'
+import { useRuntimeConfig } from '@/features/config/api'
+import { CategoryShortcuts, ExampleSum, HeroActions, HomeSearch, HowItWorks, TradeRoutes } from '@/features/home/components/HomeSections'
+import { RecentListings } from '@/features/listings/components/RecentListings'
 import { copy } from '@/lib/copy/copy'
+import { siteOrigin } from '@/lib/seo/origin'
+import { useUiStore } from '@/stores/ui'
 
-/** Placeholder home until Phase 1 builds the real one (UX-01). */
+/** UX-01 Home: the promise, a search, the ways to trade, one worked example, and what's listed nearby. */
 export function HomePage() {
+  const { data: config } = useRuntimeConfig()
+  const areaId = useUiStore((s) => s.areaId)
+  const setAreaId = useUiStore((s) => s.setAreaId)
+  const areaSheet = useAreaSheet()
+
   return (
     <>
-      <Seo description={copy.supportingLine} />
-      <section className="flex max-w-2xl flex-col gap-4 py-8 desktop:py-16">
-        <h1 className="text-h1 text-ink desktop:text-display">{copy.hero}</h1>
-        <p className="text-body text-muted">{copy.supportingLine}</p>
-        <div className="flex flex-col gap-3 tablet:flex-row">
-          <ButtonLink to="/explore" variant="primary">
-            Explore items
-          </ButtonLink>
-          <ButtonLink to="/listings/new" variant="secondary">
-            List an item
-          </ButtonLink>
-        </div>
-      </section>
+      <Seo description={copy.supportingLine} canonical={`${siteOrigin()}/`} />
+
+      <div className="flex flex-col gap-10 desktop:gap-14">
+        <section className="grid gap-6 desktop:grid-cols-[minmax(0,1fr)_26rem] desktop:items-center desktop:gap-16 desktop:py-6">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-h2 text-ink tablet:text-h1 desktop:text-display">{copy.hero}</h1>
+              <p className="max-w-xl text-body text-muted">{copy.supportingLine}</p>
+            </div>
+            <HomeSearch />
+            <TradeRoutes />
+            <HeroActions />
+          </div>
+          <ExampleSum />
+        </section>
+
+        <RecentListings
+          areaId={areaId}
+          config={config}
+          onChooseArea={areaSheet.open}
+          onPreloadArea={areaSheet.preload}
+          onAllAreas={() => setAreaId(null)}
+        />
+
+        {config && config.categories.length > 0 && <CategoryShortcuts categories={config.categories} />}
+
+        <HowItWorks />
+      </div>
+      {areaSheet.sheet}
     </>
   )
 }

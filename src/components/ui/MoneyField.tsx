@@ -4,6 +4,7 @@ import { formatNairaInput, nairaParseMessages, parseNairaInput } from '@/lib/mon
 
 type MoneyFieldProps = {
   label: string
+  visibleLabel?: string
   /** Amount in kobo, or null when empty or invalid. */
   value: number | null
   onChange: (kobo: number | null) => void
@@ -11,10 +12,11 @@ type MoneyFieldProps = {
   /** An error from the form (e.g. "Enter more than ₦0"); parse errors are handled here. */
   error?: string | null
   placeholder?: string
+  disabled?: boolean
 }
 
 /** Whole-naira amount input. Emits integer kobo; never rounds what the person typed (PRD §7.1). */
-export function MoneyField({ label, value, onChange, hint, error, placeholder = '0' }: MoneyFieldProps) {
+export function MoneyField({ label, visibleLabel, value, onChange, hint, error, placeholder = '0', disabled }: MoneyFieldProps) {
   const [text, setText] = useState(() => (value === null ? '' : formatNairaInput(value)))
   const [parseError, setParseError] = useState<string | null>(null)
 
@@ -44,12 +46,14 @@ export function MoneyField({ label, value, onChange, hint, error, placeholder = 
   return (
     <TextField
       label={label}
+      visibleLabel={visibleLabel}
       hint={hint}
       error={parseError ?? error}
       prefix="₦"
       inputMode="numeric"
       autoComplete="off"
       placeholder={placeholder}
+      disabled={disabled}
       value={text}
       onChange={(e) => handleChange(e.target.value)}
       onBlur={handleBlur}

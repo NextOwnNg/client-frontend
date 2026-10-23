@@ -1,4 +1,4 @@
-import { Button } from '@heroui/react'
+import { PlainButton } from '@/components/ui/Button'
 import { CloudOff, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
@@ -44,9 +44,9 @@ export function ErrorState({
       <h2 className="text-h3 text-ink">{title}</h2>
       <p className="max-w-sm text-body text-muted">{body}</p>
       {onRetry && (
-        <Button variant="secondary" onPress={onRetry} className="mt-2">
+        <PlainButton variant="secondary" onClick={onRetry} className="mt-2">
           Try again
-        </Button>
+        </PlainButton>
       )}
     </div>
   )

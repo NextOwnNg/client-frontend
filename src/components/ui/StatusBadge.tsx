@@ -9,7 +9,7 @@ const tones: Record<StatusTone, string> = {
   success: 'bg-success/10 text-success',
   warning: 'bg-warning/10 text-warning',
   danger: 'bg-danger/10 text-danger',
-  highlight: 'bg-highlight text-highlight-foreground',
+  highlight: 'bg-highlight-tint text-ink ring-1 ring-highlight',
 }
 
 /** Status is always text + icon; colour only reinforces it (Brand §2.1). */

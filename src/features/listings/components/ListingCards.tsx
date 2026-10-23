@@ -1,11 +1,14 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { Deadline } from '@/components/domain/Deadline'
 import { Price } from '@/components/domain/Price'
 import { AreaLabel } from '@/components/domain/TrustModule'
 import { ImageWithFade } from '@/components/ui/ImageWithFade'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { usePrefetchListing } from '@/features/listings/api'
 import { conditionLabel, isAvailable, listingStatus } from '@/lib/copy/status'
 import { cx } from '@/lib/cx'
+import { coverTransitionName } from '@/lib/view-transition'
 import type { ListingSummary } from '@/types/api'
 
 /** Swap-ok tag when a cash listing also takes swaps; swap-only listings already say "Open to swap". */
@@ -17,28 +20,45 @@ function ModeTag({ listing }: { listing: ListingSummary }) {
 }
 
 /**
+ * Link to a listing: starts loading its detail on hover or touch (PRD §12) and morphs the cover photo
+ * into the detail gallery with a view transition.
+ */
+function CardLink({ listing, className, children }: { listing: ListingSummary; className: string; children: ReactNode }) {
+  const prefetch = usePrefetchListing()
+  const warm = () => void prefetch(listing.slug)
+
+  return (
+    <Link to={`/listings/${listing.slug}`} viewTransition onPointerEnter={warm} onTouchStart={warm} onFocus={warm} className={className}>
+      {children}
+    </Link>
+  )
+}
+
+/**
  * The Explore row from the chosen sketch: photo, the Teal margin rule, then the facts on a 24px rhythm.
  * Unavailable listings stay visible but read as unavailable at a glance.
  */
-export function ListingRow({ listing }: { listing: ListingSummary }) {
+export function ListingRow({ listing, priority }: { listing: ListingSummary; priority?: boolean }) {
   const available = isAvailable(listing.status)
   const status = listingStatus(listing.status)
 
   return (
-    <Link
-      to={`/listings/${listing.slug}`}
+    <CardLink
+      listing={listing}
       className="group flex h-30 w-full min-w-0 overflow-hidden rounded-card border border-border bg-surface transition-[transform,border-color] duration-120 ease-out active:scale-[0.98] pointer-fine:hover:border-action/40"
     >
       <ImageWithFade
         src={listing.cover.url}
         alt={listing.cover.alt}
         sizes="112px"
-        className={cx('h-full w-24 shrink-0 min-[380px]:w-28', !available && 'opacity-60 grayscale-[40%]')}
+        priority={priority}
+        transitionName={coverTransitionName(listing.slug)}
+        className={cx('h-full w-24 shrink-0 min-[380px]:w-28', !available && 'opacity-60 grayscale-40')}
         aspect="auto"
       />
       <div className="relative flex min-w-0 flex-1 flex-col py-3 pr-3 pl-4">
         <span aria-hidden className="absolute top-3 bottom-3 left-0 w-0.5 rounded-full bg-action" />
-        <h3 className="truncate text-body font-semibold text-ink">{listing.title}</h3>
+        <h3 className={cx('truncate text-body font-semibold', available ? 'text-ink' : 'text-muted')}>{listing.title}</h3>
         <p className="truncate text-compact leading-6 text-muted">
           {conditionLabel(listing.condition)}
           {listing.defectSummary && ` · ${listing.defectSummary}`}
@@ -49,26 +69,28 @@ export function ListingRow({ listing }: { listing: ListingSummary }) {
         </div>
         <AreaLabel name={listing.areaName} className="sr-only" />
       </div>
-    </Link>
+    </CardLink>
   )
 }
 
 /** Grid card for wider screens: same facts, photo on top. */
-export function ListingTile({ listing }: { listing: ListingSummary }) {
+export function ListingTile({ listing, priority }: { listing: ListingSummary; priority?: boolean }) {
   const available = isAvailable(listing.status)
   const status = listingStatus(listing.status)
 
   return (
-    <Link
-      to={`/listings/${listing.slug}`}
+    <CardLink
+      listing={listing}
       className="group flex min-w-0 flex-col overflow-hidden rounded-card border border-border bg-surface transition-[transform,border-color,box-shadow] duration-120 ease-out active:scale-[0.98] pointer-fine:hover:border-action/40 pointer-fine:hover:shadow-card"
     >
       <span className="relative">
         <ImageWithFade
           src={listing.cover.url}
           alt={listing.cover.alt}
-          sizes="(min-width: 1024px) 280px, 50vw"
-          className={cx(!available && 'opacity-60 grayscale-[40%]')}
+          sizes="(min-width: 1440px) 300px, (min-width: 1024px) 280px, 50vw"
+          priority={priority}
+          transitionName={coverTransitionName(listing.slug)}
+          className={cx(!available && 'opacity-60 grayscale-40')}
         />
         {!available && (
           <StatusBadge tone={status.tone} icon={status.icon} className="absolute top-2 left-2 shadow-card">
@@ -81,7 +103,7 @@ export function ListingTile({ listing }: { listing: ListingSummary }) {
       </span>
       <div className="relative flex flex-col py-3 pr-3 pl-4">
         <span aria-hidden className="absolute top-3 bottom-3 left-0 w-0.5 rounded-full bg-action" />
-        <h3 className="truncate text-body font-semibold text-ink">{listing.title}</h3>
+        <h3 className={cx('truncate text-body font-semibold', available ? 'text-ink' : 'text-muted')}>{listing.title}</h3>
         <p className="truncate text-compact leading-6 text-muted">
           {conditionLabel(listing.condition)} · {listing.areaName}
         </p>
@@ -90,6 +112,6 @@ export function ListingTile({ listing }: { listing: ListingSummary }) {
           {available && <ModeTag listing={listing} />}
         </div>
       </div>
-    </Link>
+    </CardLink>
   )
 }

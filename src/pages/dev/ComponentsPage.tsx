@@ -1,7 +1,7 @@
 import { Button, toast } from '@heroui/react'
 import { Inbox } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { ListingRow, ListingTile } from '@/components/domain/ListingRow'
+import { ListingRow, ListingTile } from '@/features/listings/components/ListingCards'
 import { Deadline } from '@/components/domain/Deadline'
 import { OfferSum } from '@/components/domain/OfferSum'
 import { payerSentence } from '@/components/domain/payer-sentence'
@@ -20,11 +20,52 @@ import { ListingRowSkeleton, ListingTileSkeleton } from '@/components/ui/Skeleto
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { TextField } from '@/components/ui/TextField'
+import { ActiveChips, ChipRow, FiltersButton, ModeToggles } from '@/features/listings/components/FilterChips'
+import { FilterPanel } from '@/features/listings/components/FilterPanel'
+import { Gallery } from '@/features/listings/components/Gallery'
+import { ConditionAndDefects, ListingHeader, SellerCard } from '@/features/listings/components/ListingDetail'
+import { defaultFilters, type ListingFilters } from '@/features/listings/filters'
+import { runtimeConfig } from '@/mocks/fixtures/config'
 import { listingStatus } from '@/lib/copy/status'
 import { listings } from '@/mocks/fixtures/listings'
 import type { ListingStatus, ListingSummary } from '@/types/api'
 
-/** Dev-only gallery (route /dev/components): every Phase 0 component in its states, with fictional data. */
+/** Dev-only gallery (route /dev/components): every component in its states, with fictional data. */
+
+function DiscoverSamples() {
+  const [filters, setFilters] = useState<ListingFilters>({ ...defaultFilters, q: 'mac', modes: ['SWAP'], conditions: ['GOOD'], priceMin: 50_000 })
+  const macbook = listings.find((l) => l.slug === 'macbook-air-m1-2020-gold')!
+  const ipad = listings.find((l) => l.slug === 'ipad-9th-gen-64gb')!
+  const xbox = listings.find((l) => l.slug === 'xbox-series-x')!
+
+  return (
+    <>
+      <Section title="Filters" note="Mode toggles widen each other; chips remove one filter each. The panel is the phone sheet's body and the desktop rail.">
+        <ChipRow label="Trade type">
+          <FiltersButton filters={filters} onPress={() => {}} />
+          <ModeToggles filters={filters} onChange={setFilters} />
+        </ChipRow>
+        <ActiveChips filters={filters} config={runtimeConfig} onChange={setFilters} />
+        <div className="max-w-sm rounded-card border border-border bg-surface p-4">
+          <FilterPanel filters={filters} onChange={setFilters} config={runtimeConfig} />
+        </div>
+      </Section>
+
+      <Section title="Listing detail parts" note="Gallery, header (with a real Quick Sell deadline), seller facts, and defects above the offer button.">
+        <div className="grid gap-6 desktop:grid-cols-2">
+          <Gallery images={macbook.images} slug="dev-gallery" />
+          <div className="flex flex-col gap-5">
+            <ListingHeader listing={macbook} />
+            <SellerCard listing={macbook} />
+            <ConditionAndDefects listing={macbook} />
+            <ConditionAndDefects listing={ipad} />
+          </div>
+        </div>
+        <ListingHeader listing={xbox} />
+      </Section>
+    </>
+  )
+}
 
 function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
@@ -147,6 +188,8 @@ export function ComponentsPage() {
           <ListingTileSkeleton />
         </div>
       </Section>
+
+      <DiscoverSamples />
 
       <Section title="Status" note="Text and icon always; colour only reinforces.">
         <div className="flex flex-wrap gap-2">
