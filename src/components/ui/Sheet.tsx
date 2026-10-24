@@ -41,13 +41,14 @@ export function Sheet({ open, onOpenChange, title, children, footer }: SheetProp
     <Drawer isOpen={open} onOpenChange={onOpenChange}>
       <Drawer.Backdrop>
         <Drawer.Content placement="bottom">
-          <Drawer.Dialog className="max-h-[88dvh] rounded-t-feature pb-[env(safe-area-inset-bottom)]">
+          <Drawer.Dialog className="max-h-[88dvh] rounded-t-feature pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <Drawer.Handle />
             <Drawer.Header>
               <Drawer.Heading className="text-h3 text-ink">{title}</Drawer.Heading>
             </Drawer.Header>
             <Drawer.Body>{children}</Drawer.Body>
-            {footer && <Drawer.Footer className="border-t border-border">{footer}</Drawer.Footer>}
+            {/* Pinned actions: a clear gap under the divider, and room above the phone's home indicator */}
+            {footer && <Drawer.Footer className="border-t border-border pt-4">{footer}</Drawer.Footer>}
           </Drawer.Dialog>
         </Drawer.Content>
       </Drawer.Backdrop>

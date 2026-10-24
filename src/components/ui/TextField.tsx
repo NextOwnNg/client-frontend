@@ -4,6 +4,7 @@ import { cx } from '@/lib/cx'
 
 type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   label: string
+  visibleLabel?: string
   hint?: ReactNode
   error?: string | null
   hideLabel?: boolean
@@ -11,9 +12,18 @@ type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> & {
   prefix?: string
 }
 
-export function TextField({ label, hint, error, hideLabel, prefix, className, ...inputProps }: TextFieldProps) {
+export function TextField({
+  label,
+  visibleLabel,
+  hint,
+  error,
+  hideLabel,
+  prefix,
+  className,
+  ...inputProps
+}: TextFieldProps) {
   return (
-    <Field label={label} hint={hint} error={error} hideLabel={hideLabel}>
+    <Field label={label} visibleLabel={visibleLabel} hint={hint} error={error} hideLabel={hideLabel}>
       {({ inputId, describedBy, invalid }) => (
         <div className="relative">
           {prefix && (

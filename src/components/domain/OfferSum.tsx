@@ -1,7 +1,6 @@
-import { motion } from 'framer-motion'
+import type { CSSProperties } from 'react'
 import { cx } from '@/lib/cx'
 import { formatNaira } from '@/lib/money/money'
-import { durations, easeOut } from '@/lib/motion/presets'
 
 type GiveLine = { kind: 'item' | 'cash'; title: string; kobo?: number }
 
@@ -24,15 +23,18 @@ type OfferSumProps = {
  * The signature move: a trade written out like an exercise-book sum. Items and cash in the working,
  * the result under a double rule, and the payer sentence as the answer (direction contract).
  */
-export function OfferSum({ give, receive, sentence, delta, heading = 'The trade, worked out', animateIn = false, className }: OfferSumProps) {
-  const line = (index: number) =>
-    animateIn
-      ? {
-          initial: { opacity: 0, y: 6 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: durations.standard, ease: easeOut, delay: index * 0.04 },
-        }
-      : {}
+export function OfferSum({
+  give,
+  receive,
+  sentence,
+  delta,
+  heading = 'The trade, worked out',
+  animateIn = false,
+  className,
+}: OfferSumProps) {
+  // Lines write in one after another, 40ms apart (CSS, so it stays smooth on a busy first load)
+  const line = (index: number): { className?: string; style?: CSSProperties } =>
+    animateIn ? { className: 'animate-rise', style: { animationDelay: `${index * 40}ms` } } : {}
 
   return (
     <section
@@ -40,24 +42,36 @@ export function OfferSum({ give, receive, sentence, delta, heading = 'The trade,
       className={cx('relative rounded-card border border-border bg-surface py-3 pr-4 pl-7', className)}
     >
       <span aria-hidden className="absolute top-3 bottom-3 left-4 w-0.5 rounded-full bg-action" />
-      <h3 className="text-caption font-semibold text-muted">{heading}</h3>
+      {/* A caption, not a heading: the sum sits inside whatever section introduces it, at any outline level */}
+      <p className="text-caption font-semibold text-muted">{heading}</p>
 
       <dl className="tabular mt-1">
         {give.map((item, i) => (
-          <motion.div key={`${item.kind}-${item.title}`} {...line(i)} className="flex items-baseline gap-2 leading-6">
+          <div
+            key={`${item.kind}-${item.title}`}
+            style={line(i).style}
+            className={cx('flex items-baseline gap-2 leading-6', line(i).className)}
+          >
             <span aria-hidden className="w-3 shrink-0 text-muted">
               {i > 0 ? '+' : ''}
             </span>
             <dt className="min-w-0 flex-1 text-body text-ink">{item.title}</dt>
-            <dd className={item.kind === 'cash' ? 'shrink-0 text-body font-semibold text-ink' : 'shrink-0 text-caption text-muted'}>
+            <dd
+              className={
+                item.kind === 'cash' ? 'shrink-0 text-body font-semibold text-ink' : 'shrink-0 text-caption text-muted'
+              }
+            >
               {item.kind === 'cash' && item.kobo !== undefined ? formatNaira(item.kobo) : 'item'}
             </dd>
-          </motion.div>
+          </div>
         ))}
 
-        <motion.div
-          {...line(give.length)}
-          className="mt-1 flex items-baseline gap-2 border-t-[3px] border-double border-ink pt-1 leading-6"
+        <div
+          style={line(give.length).style}
+          className={cx(
+            'mt-1 flex items-baseline gap-2 border-t-[3px] border-double border-ink pt-1 leading-6',
+            line(give.length).className,
+          )}
         >
           <span aria-hidden className="w-3 shrink-0 text-muted">
             =
@@ -67,26 +81,30 @@ export function OfferSum({ give, receive, sentence, delta, heading = 'The trade,
             {receive.title}
             {receive.kobo !== undefined && receive.kobo > 0 && <> + {formatNaira(receive.kobo)}</>}
           </dd>
-        </motion.div>
+        </div>
       </dl>
 
-      <motion.p {...line(give.length + 1)} className="mt-1 text-compact font-semibold text-action">
+      <p
+        style={line(give.length + 1).style}
+        className={cx('mt-1 text-compact font-semibold text-action', line(give.length + 1).className)}
+      >
         {sentence}
-      </motion.p>
+      </p>
 
       {delta && (
-        <motion.p
-          initial={animateIn ? { opacity: 0, scale: 0.96 } : false}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: durations.standard, ease: easeOut, delay: animateIn ? (give.length + 2) * 0.04 : 0 }}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-caption text-ink"
+        <p
+          style={animateIn ? { animationDelay: `${(give.length + 2) * 40}ms` } : undefined}
+          className={cx(
+            'mt-2 inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-caption text-ink',
+            animateIn && 'animate-pop',
+          )}
         >
           <span className="tabular font-bold text-action">
             {delta.kobo >= 0 ? '+' : '−'}
             {formatNaira(Math.abs(delta.kobo))}
           </span>
           <span>{delta.label}</span>
-        </motion.p>
+        </p>
       )}
     </section>
   )

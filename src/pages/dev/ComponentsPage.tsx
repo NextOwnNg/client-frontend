@@ -1,7 +1,7 @@
 import { Button, toast } from '@heroui/react'
 import { Inbox } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
-import { ListingRow, ListingTile } from '@/components/domain/ListingRow'
+import { ListingRow, ListingTile } from '@/features/listings/components/ListingCards'
 import { Deadline } from '@/components/domain/Deadline'
 import { OfferSum } from '@/components/domain/OfferSum'
 import { payerSentence } from '@/components/domain/payer-sentence'
@@ -20,11 +20,64 @@ import { ListingRowSkeleton, ListingTileSkeleton } from '@/components/ui/Skeleto
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { TextField } from '@/components/ui/TextField'
+import { ActiveChips, ChipRow, FiltersButton, ModeToggles } from '@/features/listings/components/FilterChips'
+import { FilterPanel } from '@/features/listings/components/FilterPanel'
+import { Gallery } from '@/features/listings/components/Gallery'
+import { ConditionAndDefects, ListingHeader, SellerCard } from '@/features/listings/components/ListingDetail'
+import { defaultFilters, type ListingFilters } from '@/features/listings/filters'
+import { runtimeConfig } from '@/mocks/fixtures/config'
 import { listingStatus } from '@/lib/copy/status'
 import { listings } from '@/mocks/fixtures/listings'
 import type { ListingStatus, ListingSummary } from '@/types/api'
 
-/** Dev-only gallery (route /dev/components): every Phase 0 component in its states, with fictional data. */
+/** Dev-only gallery (route /dev/components): every component in its states, with fictional data. */
+
+function DiscoverSamples() {
+  const [filters, setFilters] = useState<ListingFilters>({
+    ...defaultFilters,
+    q: 'mac',
+    modes: ['SWAP'],
+    conditions: ['GOOD'],
+    priceMin: 50_000,
+  })
+  const macbook = listings.find((l) => l.slug === 'macbook-air-m1-2020-gold')!
+  const ipad = listings.find((l) => l.slug === 'ipad-9th-gen-64gb')!
+  const xbox = listings.find((l) => l.slug === 'xbox-series-x')!
+
+  return (
+    <>
+      <Section
+        title="Filters"
+        note="Mode toggles widen each other; chips remove one filter each. The panel is the phone sheet's body and the desktop rail."
+      >
+        <ChipRow label="Trade type">
+          <FiltersButton filters={filters} onPress={() => {}} />
+          <ModeToggles filters={filters} onChange={setFilters} />
+        </ChipRow>
+        <ActiveChips filters={filters} config={runtimeConfig} onChange={setFilters} />
+        <div className="max-w-sm rounded-card border border-border bg-surface p-4">
+          <FilterPanel filters={filters} onChange={setFilters} config={runtimeConfig} />
+        </div>
+      </Section>
+
+      <Section
+        title="Listing detail parts"
+        note="Gallery, header (with a real Quick Sell deadline), seller facts, and defects above the offer button."
+      >
+        <div className="grid gap-6 desktop:grid-cols-2">
+          <Gallery images={macbook.images} slug="dev-gallery" />
+          <div className="flex flex-col gap-5">
+            <ListingHeader listing={macbook} />
+            <SellerCard listing={macbook} />
+            <ConditionAndDefects listing={macbook} />
+            <ConditionAndDefects listing={ipad} />
+          </div>
+        </div>
+        <ListingHeader listing={xbox} />
+      </Section>
+    </>
+  )
+}
 
 function Section({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
@@ -59,10 +112,22 @@ const variants: { label: string; listing: ListingSummary }[] = [
       askingKobo: 10_000_000_000,
     },
   },
-  { label: 'Photo failed to load', listing: { ...sample, id: 'v-p', cover: { ...sample.cover, url: '/mock/items/missing.jpg' } } },
+  {
+    label: 'Photo failed to load',
+    listing: { ...sample, id: 'v-p', cover: { ...sample.cover, url: '/mock/items/missing.jpg' } },
+  },
 ]
 
-const statuses: ListingStatus[] = ['ACTIVE', 'PENDING_REVIEW', 'RESERVED', 'EXPIRED', 'COMPLETED', 'CLOSED', 'REMOVED', 'DRAFT']
+const statuses: ListingStatus[] = [
+  'ACTIVE',
+  'PENDING_REVIEW',
+  'RESERVED',
+  'EXPIRED',
+  'COMPLETED',
+  'CLOSED',
+  'REMOVED',
+  'DRAFT',
+]
 
 export function ComponentsPage() {
   const [mode, setMode] = useState<'CASH' | 'SWAP' | 'MIXED'>('CASH')
@@ -77,14 +142,18 @@ export function ComponentsPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-h1 text-ink">Component gallery</h1>
         <p className="max-w-2xl text-body text-muted">
-          Phase 0 building blocks with fictional sample data. Use the Sample data button to slow the network or fail a request.
+          Phase 0 building blocks with fictional sample data. Use the Sample data button to slow the network or fail a
+          request.
         </p>
         <ButtonLink to="/dev/tokens" variant="tertiary" className="self-start">
           Design tokens
         </ButtonLink>
       </div>
 
-      <Section title="The worked sum" note="The signature: every trade written out as a sum, with the payer sentence as its answer.">
+      <Section
+        title="The worked sum"
+        note="The signature: every trade written out as a sum, with the payer sentence as its answer."
+      >
         <div className="grid gap-4 desktop:grid-cols-2">
           <OfferSum
             key={sumKey}
@@ -124,7 +193,10 @@ export function ComponentsPage() {
         </Button>
       </Section>
 
-      <Section title="Listing rows" note="Explore on phones. Unavailable listings stay visible but can't be mistaken for available ones.">
+      <Section
+        title="Listing rows"
+        note="Explore on phones. Unavailable listings stay visible but can't be mistaken for available ones."
+      >
         <div className="grid grid-cols-1 gap-x-4 gap-y-6 tablet:grid-cols-2">
           {variants.map(({ label, listing }) => (
             <div key={listing.id} className="flex min-w-0 flex-col gap-2">
@@ -147,6 +219,8 @@ export function ComponentsPage() {
           <ListingTileSkeleton />
         </div>
       </Section>
+
+      <DiscoverSamples />
 
       <Section title="Status" note="Text and icon always; colour only reinforces.">
         <div className="flex flex-wrap gap-2">
@@ -189,9 +263,18 @@ export function ComponentsPage() {
 
       <Section title="Fields">
         <div className="grid max-w-3xl gap-6 tablet:grid-cols-2">
-          <TextField label="Title" placeholder="e.g. iPhone 12 Pro · 128GB" hint="Say what it is, plus model and storage." />
+          <TextField
+            label="Title"
+            placeholder="e.g. iPhone 12 Pro · 128GB"
+            hint="Say what it is, plus model and storage."
+          />
           <TextField label="Title" defaultValue="iP" error="Add a little more detail, at least 8 characters." />
-          <MoneyField label="Your offer" value={money} onChange={setMoney} hint="Try 12.5 or ₦1,200,000 and leave the field." />
+          <MoneyField
+            label="Your offer"
+            value={money}
+            onChange={setMoney}
+            hint="Try 12.5 or ₦1,200,000 and leave the field."
+          />
           <PhoneField value="" onChange={() => {}} />
           <TextField label="Disabled" defaultValue="Can't change after acceptance" disabled />
         </div>
@@ -204,7 +287,13 @@ export function ComponentsPage() {
             options={[
               { value: 'CASH', title: 'Cash offer', description: 'You pay the seller directly.' },
               { value: 'SWAP', title: 'Swap an item', description: 'One of your items for theirs.' },
-              { value: 'MIXED', title: 'Swap + cash', description: 'Your item plus cash, either way.', disabled: true, disabledReason: 'The seller only accepts cash.' },
+              {
+                value: 'MIXED',
+                title: 'Swap + cash',
+                description: 'Your item plus cash, either way.',
+                disabled: true,
+                disabledReason: 'The seller only accepts cash.',
+              },
             ]}
           />
         </div>
@@ -228,7 +317,10 @@ export function ComponentsPage() {
         </div>
       </Section>
 
-      <Section title="Progress" note="One corridor from terms to both confirmations; ticks draw only when a step is truly done.">
+      <Section
+        title="Progress"
+        note="One corridor from terms to both confirmations; ticks draw only when a step is truly done."
+      >
         <div className="grid gap-8 tablet:grid-cols-2">
           <ProgressLine
             label="Handover progress"
@@ -259,7 +351,15 @@ export function ComponentsPage() {
           <Banner tone="success" title="Your confirmation is recorded.">
             Waiting for the other person to confirm.
           </Banner>
-          <Banner tone="warning" title="The offer has changed." action={<Button variant="secondary" size="sm">Review latest version</Button>}>
+          <Banner
+            tone="warning"
+            title="The offer has changed."
+            action={
+              <Button variant="secondary" size="sm">
+                Review latest version
+              </Button>
+            }
+          >
             Review the latest version before deciding.
           </Banner>
           <Banner tone="danger" title="This item is no longer available.">
@@ -282,7 +382,11 @@ export function ComponentsPage() {
             icon={Inbox}
             title="No offers yet"
             body="When someone makes an offer on your listing, it shows up here."
-            action={<ButtonLink to="/explore" variant="secondary">Explore items</ButtonLink>}
+            action={
+              <ButtonLink to="/explore" variant="secondary">
+                Explore items
+              </ButtonLink>
+            }
           />
           <ErrorState onRetry={() => toast('Retrying…')} />
         </div>

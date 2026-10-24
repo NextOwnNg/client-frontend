@@ -9,7 +9,13 @@ export const categories: Category[] = [
     id: 'phones',
     name: 'Phones',
     fields: [
-      { id: 'storage', label: 'Storage', type: 'select', options: ['64GB', '128GB', '256GB', '512GB'], allowUnknown: true },
+      {
+        id: 'storage',
+        label: 'Storage',
+        type: 'select',
+        options: ['64GB', '128GB', '256GB', '512GB'],
+        allowUnknown: true,
+      },
       { id: 'battery', label: 'Battery health', type: 'percent', allowUnknown: true },
       { id: 'accessories', label: 'Included accessories', type: 'text' },
     ],
@@ -18,7 +24,13 @@ export const categories: Category[] = [
     id: 'laptops',
     name: 'Laptops & tablets',
     fields: [
-      { id: 'storage', label: 'Storage', type: 'select', options: ['128GB', '256GB', '512GB', '1TB'], allowUnknown: true },
+      {
+        id: 'storage',
+        label: 'Storage',
+        type: 'select',
+        options: ['128GB', '256GB', '512GB', '1TB'],
+        allowUnknown: true,
+      },
       { id: 'ram', label: 'Memory (RAM)', type: 'select', options: ['4GB', '8GB', '16GB', '32GB'], allowUnknown: true },
       { id: 'battery', label: 'Battery health', type: 'percent', allowUnknown: true },
     ],

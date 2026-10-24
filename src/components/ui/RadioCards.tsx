@@ -22,7 +22,14 @@ type RadioCardsProps<T extends string> = {
 }
 
 /** Single-choice cards with real radio semantics (arrow keys move and select). */
-export function RadioCards<T extends string>({ label, options, value, onChange, hideLabel, columns = 1 }: RadioCardsProps<T>) {
+export function RadioCards<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  hideLabel,
+  columns = 1,
+}: RadioCardsProps<T>) {
   return (
     <RadioGroup value={value} onChange={(v) => onChange(v as T)} className="flex flex-col gap-2">
       <Label className={hideLabel ? 'sr-only' : 'text-compact font-medium text-ink'}>{label}</Label>
@@ -45,10 +52,20 @@ export function RadioCards<T extends string>({ label, options, value, onChange, 
           >
             {({ isSelected, isDisabled }) => (
               <>
-                {option.icon && <span className={cx('mt-0.5 shrink-0', isDisabled ? 'text-muted' : 'text-action')}>{option.icon}</span>}
+                {option.icon && (
+                  <span className={cx('mt-0.5 shrink-0', isDisabled ? 'text-muted' : 'text-action')}>
+                    {option.icon}
+                  </span>
+                )}
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className={cx('text-body font-semibold', isDisabled ? 'text-muted' : 'text-ink')}>{option.title}</span>
-                  {option.description && <Text slot="description" className="text-compact text-muted">{option.description}</Text>}
+                  <span className={cx('text-body font-semibold', isDisabled ? 'text-muted' : 'text-ink')}>
+                    {option.title}
+                  </span>
+                  {option.description && (
+                    <Text slot="description" className="text-compact text-muted">
+                      {option.description}
+                    </Text>
+                  )}
                   {isDisabled && option.disabledReason && (
                     <span className="mt-1 text-compact text-muted">{option.disabledReason}</span>
                   )}

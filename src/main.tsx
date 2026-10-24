@@ -13,7 +13,7 @@ async function startMockApi() {
 const root = document.getElementById('root')
 if (!root) throw new Error('Root element #root not found')
 
-startMockApi().then(() => {
+void startMockApi().then(() => {
   createRoot(root).render(
     <StrictMode>
       <App />

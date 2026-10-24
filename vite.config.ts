@@ -12,6 +12,22 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          // Every public page needs these on first load: one chunk compresses better than many small ones,
+          // and it caches across deploys that only change app code (PRD §12 budget: 170 KB gz).
+          groups: [
+            {
+              name: 'vendor',
+              test: /node_modules[\\/](react|react-dom|scheduler|react-router|@tanstack|axios|react-helmet-async|react-fast-compare|invariant|shallowequal|zustand)[\\/]/,
+            },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],

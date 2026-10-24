@@ -5,6 +5,8 @@ type FieldIds = { inputId: string; describedBy: string | undefined; invalid: boo
 
 type FieldProps = {
   label: string
+  /** Shorter on-screen label when a group heading gives the context (e.g. "Minimum" under "Price"); `label` stays the accessible name. */
+  visibleLabel?: string
   hint?: ReactNode
   error?: string | null
   /** Visually hide the label when the surrounding UI already names the field. */
@@ -13,7 +15,7 @@ type FieldProps = {
 }
 
 /** Label above, hint below, error replacing nothing: both stay programmatically linked to the input. */
-export function Field({ label, hint, error, hideLabel, children }: FieldProps) {
+export function Field({ label, visibleLabel, hint, error, hideLabel, children }: FieldProps) {
   const inputId = useId()
   const hintId = `${inputId}-hint`
   const errorId = `${inputId}-error`
@@ -22,7 +24,14 @@ export function Field({ label, hint, error, hideLabel, children }: FieldProps) {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={inputId} className={hideLabel ? 'sr-only' : 'text-compact font-medium text-ink'}>
-        {label}
+        {visibleLabel ? (
+          <>
+            <span aria-hidden>{visibleLabel}</span>
+            <span className="sr-only">{label}</span>
+          </>
+        ) : (
+          label
+        )}
       </label>
       {children({ inputId, describedBy, invalid: Boolean(error) })}
       {error && (

@@ -1,14 +1,7 @@
 /** API resource shapes (PRD §6, NX-PRD-001 §6). Money is integer kobo; times are ISO UTC strings. */
 
 export type ListingStatus =
-  | 'DRAFT'
-  | 'PENDING_REVIEW'
-  | 'ACTIVE'
-  | 'RESERVED'
-  | 'EXPIRED'
-  | 'COMPLETED'
-  | 'CLOSED'
-  | 'REMOVED'
+  'DRAFT' | 'PENDING_REVIEW' | 'ACTIVE' | 'RESERVED' | 'EXPIRED' | 'COMPLETED' | 'CLOSED' | 'REMOVED'
 
 export type TradeMode = 'CASH' | 'SWAP'
 
@@ -59,6 +52,23 @@ export type ListingSummary = {
   /** True for fictional mock data. */
   sample?: boolean
 }
+
+/** Full public listing (PRD FE-LDT-01). Removed listings come back stripped: no photos, text or seller. */
+export type ListingDetail = ListingSummary & {
+  images: ListingImage[]
+  description: string
+  /** Disclosed defects, one per line; shown above the offer CTA. */
+  defects: string[]
+  repairs?: string
+  accessories?: string
+  /** What the owner would like in a swap. */
+  desiredSwap?: string
+  categoryFields: { label: string; value: string }[]
+  seller: PublicSeller
+}
+
+export type ListingSuggestion =
+  { kind: 'query'; label: string } | { kind: 'category'; label: string; categoryId: string }
 
 export type Paginated<T> = { items: T[]; nextCursor: string | null; total?: number }
 

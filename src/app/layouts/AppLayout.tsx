@@ -1,9 +1,10 @@
-import { Toast } from '@heroui/react'
 import { lazy, Suspense } from 'react'
 import { Outlet } from 'react-router'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { Header } from '@/components/layout/Header'
 import { Footer, OfflineBanner, RouteProgress } from '@/components/layout/ShellParts'
+
+const ToastRegion = lazy(() => import('@/components/layout/ToastRegion').then((m) => ({ default: m.ToastRegion })))
 
 const DevToolbar = import.meta.env.DEV
   ? lazy(() => import('@/components/layout/DevToolbar').then((m) => ({ default: m.DevToolbar })))
@@ -31,7 +32,9 @@ export function AppLayout() {
         <Footer />
       </div>
       <BottomNav />
-      <Toast.Provider placement="top" />
+      <Suspense fallback={null}>
+        <ToastRegion />
+      </Suspense>
       {DevToolbar && (
         <Suspense fallback={null}>
           <DevToolbar />

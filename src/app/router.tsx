@@ -20,9 +20,12 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
 
 /** Screens from later phases render a placeholder so the shell's navigation can be reviewed now. */
 const upcoming: { path: string; title: string; phase: string }[] = [
-  { path: 'explore', title: 'Explore', phase: 'Phase 1 (Discover)' },
   { path: 'feed', title: 'Feed', phase: 'Phase 6 (Community)' },
   { path: 'listings/new', title: 'List an item', phase: 'Phase 3 (Sell)' },
+  { path: 'me/listings', title: 'My listings', phase: 'Phase 3 (Sell)' },
+  { path: 'login', title: 'Sign in', phase: 'Phase 2 (Join)' },
+  { path: 'offers/new', title: 'Make an offer', phase: 'Phase 4 (Offer)' },
+  { path: 'report/:type/:id', title: 'Report', phase: 'Phase 7 (Trust and finish)' },
   { path: 'offers', title: 'Offers', phase: 'Phase 4 (Offer)' },
   { path: 'me', title: 'Profile', phase: 'Phase 2 (Join)' },
   { path: 'messages', title: 'Messages', phase: 'Phase 6 (Community)' },
@@ -42,6 +45,15 @@ export const routes: RouteObject[] = [
         Component: AppLayout,
         children: [
           { index: true, Component: HomePage },
+          // Public routes after Home load as their own chunks, keeping the entry chunk inside budget (PRD §12)
+          {
+            path: 'explore',
+            lazy: async () => ({ Component: (await import('@/pages/public/ExplorePage')).ExplorePage }),
+          },
+          {
+            path: 'listings/:slug',
+            lazy: async () => ({ Component: (await import('@/pages/public/ListingDetailPage')).ListingDetailPage }),
+          },
           ...upcoming.map(({ path, title, phase }) => ({
             path,
             element: <ComingSoonPage title={title} phase={phase} />,

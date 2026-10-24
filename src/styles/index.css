@@ -1,13 +1,13 @@
 /* Inter variable font with optical-size axis (Inter Display at large sizes); self-hosted */
-@import "@fontsource-variable/inter/opsz.css";
+@import '@fontsource-variable/inter/opsz.css';
 
 /* Tailwind CSS v4 + HeroUI v3 styles */
-@import "@heroui/styles";
+@import '@heroui/styles';
 
 /* NextOwn brand tokens, Tailwind theme and HeroUI overrides */
-@import "./tokens.css";
-@import "./theme.css";
-@import "./heroui-overrides.css";
+@import './tokens.css';
+@import './theme.css';
+@import './heroui-overrides.css';
 
 @layer base {
   html {
@@ -25,6 +25,13 @@
   h3 {
     font-family: var(--font-display);
     text-wrap: balance;
+  }
+
+  /* No single word stranded on a paragraph's last line */
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
   }
 
   /* Amounts, IDs and times compare precisely with tabular figures (Brand §3.1) */
@@ -67,5 +74,78 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+
+    /* Card-to-detail photo morph becomes an instant page change */
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
   }
+}
+
+/* Route changes: the shared cover photo morphs; the rest of the page cross-fades quickly (Brand motion: 200ms ease-out). */
+::view-transition-group(*) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 160ms;
+}
+
+/*
+ * CSS motion for first-load UI (shell, worked sum). It runs off the main thread and keeps Framer Motion
+ * out of the entry chunk; Framer is used where motion is interactive (springs, drag, path drawing).
+ * Timings follow src/lib/motion/presets.ts. The reduced-motion rule above collapses them.
+ */
+@keyframes nx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes nx-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes nx-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes nx-progress {
+  from {
+    opacity: 1;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(0.85);
+  }
+}
+
+@utility animate-rise {
+  animation: nx-rise 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-drop {
+  animation: nx-drop 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-pop {
+  animation: nx-pop 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-route-progress {
+  opacity: 0;
+  /* Waits 150ms so fast loads don't flash */
+  animation: nx-progress 1200ms cubic-bezier(0.16, 1, 0.3, 1) 150ms forwards;
 }

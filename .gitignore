@@ -34,6 +34,7 @@ test-results
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
@@ -42,8 +43,13 @@ test-results
 
 # Agent tooling scratch (design decisions in .impeccable stay tracked)
 .superpowers/
+docs/superpowers/
 .impeccable/hook.cache.json
 .impeccable/hook.pending.json
 .impeccable/config.local.json
 .impeccable/questions/
 .impeccable/review/
+
+# Lint and format caches
+.eslintcache
+.prettiercache

@@ -24,3 +24,7 @@ Downloaded 22 October 2026 at 960 px, then resized to at most 800 px and recompr
 | `blender.jpg` | [File:A table-top mixer-grinder or mixie.jpg](https://commons.wikimedia.org/wiki/File:A_table-top_mixer-grinder_or_mixie.jpg) | Vimkay | CC BY-SA 4.0 |
 
 CC BY and CC BY-SA licenses require attribution; this file is that attribution while the photos are in use.
+
+## Detail crops
+
+`*-detail-1.jpg` and `*-detail-2.jpg` are crops of the photo with the same base name (same source, licence and attribution), used to give the sample gallery more than one image.
