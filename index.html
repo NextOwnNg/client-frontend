@@ -8,7 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <!-- use-credentials: browsers fetch the manifest without cookies, which Vercel Deployment Protection
+         redirects to its login (CORS error on preview deployments) -->
+    <link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials" />
 
     <!-- Default head tags. React Helmet replaces these per route in the browser;
          the listing share-preview function injects listing tags for scrapers (PRD §4.3). -->

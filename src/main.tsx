@@ -1,11 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from '@/app/App'
+import { useMockApi } from '@/lib/env'
 import '@/styles/index.css'
 
-/** In development the mock API (fictional sample data) answers every request until the backend exists. */
+/**
+ * The mock API (fictional sample data) answers every request until the backend exists. It runs wherever
+ * VITE_USE_MOCK_API=true: locally, and on preview deployments that turn it on.
+ */
 async function startMockApi() {
-  if (!import.meta.env.DEV || import.meta.env.VITE_USE_MOCK_API !== 'true') return
+  if (!useMockApi) return
   const { worker } = await import('@/mocks/browser')
   await worker.start({ onUnhandledFrame: 'bypass', quiet: true })
 }

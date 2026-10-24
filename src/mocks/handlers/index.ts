@@ -1,10 +1,11 @@
 import { delay, http, HttpResponse, type RequestHandler } from 'msw'
 import { categories, runtimeConfig } from '@/mocks/fixtures/config'
 import { listings } from '@/mocks/fixtures/listings'
+import { apiBaseUrl } from '@/lib/env'
 import { useDevSettings } from '@/mocks/dev-settings'
 import type { ItemCondition, ListingDetail, ListingSuggestion, ListingSummary, Paginated } from '@/types/api'
 
-const API = import.meta.env.VITE_API_BASE_URL
+const API = apiBaseUrl
 const PAGE_SIZE = 12
 
 /** Simulated network: latency and a one-shot failure from the dev toolbar (no-ops in tests). */
