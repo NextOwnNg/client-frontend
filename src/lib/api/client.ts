@@ -1,13 +1,14 @@
 import axios from 'axios'
 import { toApiError } from '@/lib/api/api-error'
 import { recordServerDate } from '@/lib/time/server-clock'
+import { apiBaseUrl } from '@/lib/env'
 
 /**
  * The one Axios instance for the NextOwn API (PRD §4.4).
  * Components never call it directly: they use TanStack Query hooks in features/<domain>/api.
  */
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: apiBaseUrl,
   withCredentials: true, // HttpOnly session cookie; no tokens in JS
   timeout: 15_000,
   headers: { Accept: 'application/json' },

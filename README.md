@@ -17,6 +17,18 @@ npm install
 npm run dev                  # http://localhost:5173
 ```
 
+### Deploying to Vercel
+
+`vercel.json` sends every app route (`/explore`, `/listings/…`) to `index.html` so deep links and refreshes work, and leaves `/api/*` alone. Until the backend exists, set these in **Vercel → Project → Settings → Environment Variables** (Preview, and Production if wanted), then redeploy:
+
+| Variable | Value | Why |
+| :---- | :---- | :---- |
+| `VITE_USE_MOCK_API` | `true` | Serves the fictional sample data in the browser (the "Sample data" button shows it's fictional) |
+| `VITE_API_BASE_URL` | `/api` | Where the mock API answers; switch to the real API URL later and set `VITE_USE_MOCK_API` to `false` |
+| `VITE_SITE_ORIGIN` | the deployment's URL | Canonical and share-preview links |
+
+`VITE_` variables are baked in at build time, so changing one needs a redeploy.
+
 | Script | What it does |
 | :---- | :---- |
 | `npm run dev` | Start the dev server |

@@ -3,12 +3,15 @@ import { Outlet } from 'react-router'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { Header } from '@/components/layout/Header'
 import { Footer, OfflineBanner, RouteProgress } from '@/components/layout/ShellParts'
+import { useMockApi } from '@/lib/env'
 
 const ToastRegion = lazy(() => import('@/components/layout/ToastRegion').then((m) => ({ default: m.ToastRegion })))
 
-const DevToolbar = import.meta.env.DEV
-  ? lazy(() => import('@/components/layout/DevToolbar').then((m) => ({ default: m.DevToolbar })))
-  : null
+// Shown wherever sample data is served, so reviewers of a preview deployment can see it's fictional
+const DevToolbar =
+  import.meta.env.DEV || useMockApi
+    ? lazy(() => import('@/components/layout/DevToolbar').then((m) => ({ default: m.DevToolbar })))
+    : null
 
 /** The member app shell: sticky header, content, footer, and the bottom nav under 1024px. */
 export function AppLayout() {
