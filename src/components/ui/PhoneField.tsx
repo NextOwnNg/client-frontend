@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { TextField } from '@/components/ui/TextField'
 import { normalisePhone } from '@/lib/phone/phone'
 
@@ -7,16 +7,23 @@ type PhoneFieldProps = {
   value: string
   onChange: (e164: string | null) => void
   error?: string | null
+  /** Replaces the default privacy hint; `null` hides it when the page explains it more fully. */
+  hint?: ReactNode
 }
 
 /** Nigerian mobile number with a fixed +234 prefix (PRD FE-AUT-01). */
-export function PhoneField({ value, onChange, error }: PhoneFieldProps) {
+export function PhoneField({
+  value,
+  onChange,
+  error,
+  hint = "We'll text you a 6-digit code. Your number is never shown on your profile.",
+}: PhoneFieldProps) {
   const [text, setText] = useState(value)
 
   return (
     <TextField
       label="Phone number"
-      hint="We'll text you a 6-digit code. Your number is never shown on your profile."
+      hint={hint}
       error={error}
       prefix="+234"
       type="tel"

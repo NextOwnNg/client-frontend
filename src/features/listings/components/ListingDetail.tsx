@@ -1,6 +1,7 @@
-import { ArrowLeftRight, Banknote, Bookmark, Flag, LifeBuoy, LoaderCircle, Settings2 } from 'lucide-react'
-import { lazy, Suspense, useState, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { ArrowLeftRight, Banknote, Bookmark, ChevronRight, Flag, LifeBuoy, LoaderCircle, Settings2 } from 'lucide-react'
+import { lazy, Suspense, useEffect, useEffectEvent, useRef, useState, type ReactNode } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Avatar } from '@/components/domain/Avatar'
 import { Deadline } from '@/components/domain/Deadline'
 import { Price } from '@/components/domain/Price'
 import { AreaLabel, TrustModule } from '@/components/domain/TrustModule'
@@ -71,16 +72,19 @@ export function SellerCard({ listing }: { listing: ListingDetail }) {
         Listed by
       </h2>
       <div className="flex items-center gap-3">
-        <span
-          aria-hidden
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-mint text-body font-bold text-action"
-        >
-          {seller.displayName.charAt(0)}
-        </span>
+        <Avatar name={seller.displayName} />
         <div className="flex min-w-0 flex-col">
           <p className="truncate text-body font-semibold text-ink">{seller.displayName}</p>
           <AreaLabel name={seller.areaName} />
         </div>
+        <Link
+          to={`/users/${seller.id}`}
+          aria-label={`See ${seller.displayName}’s profile`}
+          className="ml-auto inline-flex min-h-11 shrink-0 items-center gap-1 text-compact font-semibold text-action underline-offset-4 hover:underline"
+        >
+          Profile
+          <ChevronRight aria-hidden className="size-4" />
+        </Link>
       </div>
       <TrustModule phoneConfirmed={seller.phoneConfirmed} reviewCount={seller.reviewCount} rating={seller.rating} />
     </section>
@@ -213,7 +217,9 @@ type OfferActionsProps = {
  */
 export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
   const userId = useSessionStore((s) => s.userId)
+  const restricted = useSessionStore((s) => s.restricted)
   const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
   const [checking, setChecking] = useState(false)
   const [intent, setIntent] = useState<Intent | null>(null)
   const [promptOpen, setPromptOpen] = useState(false)
@@ -232,6 +238,19 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
     // Saved items arrive with Phase 6; say so rather than pretend
     else void import('@heroui/react').then(({ toast }) => toast("Saved items aren't available yet in this preview."))
   }
+
+  // Back from signing in with `?intent=save` (QA-01): finish the save once, then tidy the URL
+  const resumed = useRef(false)
+  const resumeSave = useEffectEvent(() => {
+    resumed.current = true
+    const rest = new URLSearchParams(params)
+    rest.delete('intent')
+    setParams(rest, { replace: true, preventScrollReset: true })
+    void act('save')
+  })
+  useEffect(() => {
+    if (!resumed.current && userId && params.get('intent') === 'save') resumeSave()
+  }, [userId, params])
 
   const save = (
     <PlainButton
@@ -256,6 +275,18 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
           <Settings2 aria-hidden className="size-5" />
           Manage listing
         </ButtonLink>
+      </>
+    )
+  } else if (restricted && available) {
+    actions = (
+      <>
+        <p className={cx('text-compact text-ink', bar && 'min-w-0 flex-1')}>
+          Your account can’t make offers right now.{' '}
+          <Link to="/support?topic=appeal" className="font-semibold text-action underline-offset-4 hover:underline">
+            Why?
+          </Link>
+        </p>
+        {save}
       </>
     )
   } else if (!available) {

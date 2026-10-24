@@ -67,6 +67,32 @@ export type ListingDetail = ListingSummary & {
   seller: PublicSeller
 }
 
+/** A person's public profile (PRD FE-PRF-01): never a phone number or an exact location. */
+export type PublicProfile = PublicSeller & { memberSince: string }
+
+/** The signed-in member (`GET /me`). Only the last four digits of their own phone come back. */
+export type Me = {
+  id: string
+  /** Null until onboarding sets it. */
+  displayName: string | null
+  areaId: string | null
+  interests: string[]
+  phoneLast4: string
+  onboarded: boolean
+  restricted: boolean
+  restriction?: { reason: string }
+  marketingOptIn: boolean
+  reviewCount: number
+  rating?: number
+  memberSince: string
+  deletionRequestedAt: string | null
+}
+
+/** `PATCH /me`. `acceptTerms` records the terms and 18+ acknowledgment that completes onboarding (ACC-04). */
+export type MeUpdate = Partial<Pick<Me, 'displayName' | 'areaId' | 'interests' | 'marketingOptIn'>> & {
+  acceptTerms?: { version: string; adult: boolean }
+}
+
 export type ListingSuggestion =
   { kind: 'query'; label: string } | { kind: 'category'; label: string; categoryId: string }
 

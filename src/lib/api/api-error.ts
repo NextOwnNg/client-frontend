@@ -11,6 +11,8 @@ export type ApiErrorCode =
   | 'STALE_OFFER_VERSION'
   | 'OFFER_EXPIRED'
   | 'RATE_LIMITED'
+  | 'OTP_INVALID'
+  | 'OTP_EXPIRED'
   | 'SERVER_ERROR'
   | 'UNKNOWN'
 

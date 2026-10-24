@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll } from 'vitest'
+import { mockAuth } from '@/mocks/db/auth'
+import { useDraftStore } from '@/stores/drafts'
+import { useSessionStore } from '@/stores/session'
 import { server } from '@/test/msw/server'
 
 // jsdom has no layout engine; React Router's ScrollRestoration calls this
@@ -19,9 +22,21 @@ window.matchMedia = (query: string) =>
     dispatchEvent: () => false,
   }) as MediaQueryList
 
+// jsdom has no ResizeObserver; HeroUI's toast region measures toasts with it
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 afterEach(() => {
   server.resetHandlers()
+  mockAuth.reset()
+  // Client stores outlive a render; every test starts signed out with no drafts
+  useSessionStore.setState({ status: 'unknown', userId: null, onboarded: false, restricted: false, expired: false })
+  useDraftStore.setState({ drafts: {} })
+  sessionStorage.clear()
   cleanup()
 })
 afterAll(() => server.close())

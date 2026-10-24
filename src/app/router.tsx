@@ -1,4 +1,5 @@
 import { createBrowserRouter, type RouteObject } from 'react-router'
+import { RedirectIfAuthed, RequireAuth } from '@/app/guards'
 import { AppLayout } from '@/app/layouts/AppLayout'
 import { RootLayout } from '@/app/layouts/RootLayout'
 import { ComingSoonPage } from '@/pages/ComingSoonPage'
@@ -19,23 +20,35 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
   : []
 
 /** Screens from later phases render a placeholder so the shell's navigation can be reviewed now. */
-const upcoming: { path: string; title: string; phase: string }[] = [
+type Upcoming = { path: string; title: string; phase: string }
+
+const upcomingPublic: Upcoming[] = [
   { path: 'feed', title: 'Feed', phase: 'Phase 6 (Community)' },
-  { path: 'listings/new', title: 'List an item', phase: 'Phase 3 (Sell)' },
-  { path: 'me/listings', title: 'My listings', phase: 'Phase 3 (Sell)' },
-  { path: 'login', title: 'Sign in', phase: 'Phase 2 (Join)' },
-  { path: 'offers/new', title: 'Make an offer', phase: 'Phase 4 (Offer)' },
-  { path: 'report/:type/:id', title: 'Report', phase: 'Phase 7 (Trust and finish)' },
-  { path: 'offers', title: 'Offers', phase: 'Phase 4 (Offer)' },
-  { path: 'me', title: 'Profile', phase: 'Phase 2 (Join)' },
-  { path: 'messages', title: 'Messages', phase: 'Phase 6 (Community)' },
-  { path: 'notifications', title: 'Notifications', phase: 'Phase 6 (Community)' },
   { path: 'how-it-works', title: 'How it works', phase: 'Phase 7 (Trust and finish)' },
   { path: 'support', title: 'Safety and help', phase: 'Phase 7 (Trust and finish)' },
   { path: 'community-rules', title: 'Community rules', phase: 'Phase 7 (Trust and finish)' },
   { path: 'terms', title: 'Terms', phase: 'Phase 7 (Trust and finish)' },
   { path: 'privacy', title: 'Privacy', phase: 'Phase 7 (Trust and finish)' },
 ]
+
+/** Member-only placeholders sit behind sign-in already, so the redirects can be reviewed now (PRD §6.3). */
+const upcomingMember: Upcoming[] = [
+  { path: 'listings/new', title: 'List an item', phase: 'Phase 3 (Sell)' },
+  { path: 'me/listings', title: 'My listings', phase: 'Phase 3 (Sell)' },
+  { path: 'offers/new', title: 'Make an offer', phase: 'Phase 4 (Offer)' },
+  { path: 'offers', title: 'Offers', phase: 'Phase 4 (Offer)' },
+  { path: 'transactions', title: 'Transactions', phase: 'Phase 5 (Exchange)' },
+  { path: 'me/reviews', title: 'Reviews', phase: 'Phase 5 (Exchange)' },
+  { path: 'messages', title: 'Messages', phase: 'Phase 6 (Community)' },
+  { path: 'notifications', title: 'Notifications', phase: 'Phase 6 (Community)' },
+  { path: 'saved', title: 'Saved', phase: 'Phase 6 (Community)' },
+  { path: 'report/:type/:id', title: 'Report', phase: 'Phase 7 (Trust and finish)' },
+]
+
+const placeholder = ({ path, title, phase }: Upcoming): RouteObject => ({
+  path,
+  element: <ComingSoonPage title={title} phase={phase} />,
+})
 
 export const routes: RouteObject[] = [
   {
@@ -54,11 +67,45 @@ export const routes: RouteObject[] = [
             path: 'listings/:slug',
             lazy: async () => ({ Component: (await import('@/pages/public/ListingDetailPage')).ListingDetailPage }),
           },
-          ...upcoming.map(({ path, title, phase }) => ({
-            path,
-            element: <ComingSoonPage title={title} phase={phase} />,
-          })),
+          {
+            path: 'users/:id',
+            lazy: async () => ({ Component: (await import('@/pages/public/ProfilePage')).ProfilePage }),
+          },
+          ...upcomingPublic.map(placeholder),
+          {
+            Component: RequireAuth,
+            children: [
+              { path: 'me', lazy: async () => ({ Component: (await import('@/pages/member/MePage')).MePage }) },
+              {
+                path: 'settings',
+                lazy: async () => ({ Component: (await import('@/pages/member/SettingsPage')).SettingsPage }),
+              },
+              ...upcomingMember.map(placeholder),
+            ],
+          },
           ...devRoutes,
+        ],
+      },
+      {
+        // Sign-in and first-time setup: a focused layout, loaded only when someone signs in
+        lazy: async () => ({ Component: (await import('@/app/layouts/AuthLayout')).AuthLayout }),
+        children: [
+          {
+            Component: RedirectIfAuthed,
+            children: [
+              { path: 'login', lazy: async () => ({ Component: (await import('@/pages/auth/LoginPage')).LoginPage }) },
+            ],
+          },
+          { path: 'verify', lazy: async () => ({ Component: (await import('@/pages/auth/VerifyPage')).VerifyPage }) },
+          {
+            element: <RequireAuth allowNew />,
+            children: [
+              {
+                path: 'onboarding',
+                lazy: async () => ({ Component: (await import('@/pages/auth/OnboardingPage')).OnboardingPage }),
+              },
+            ],
+          },
         ],
       },
       { path: '*', Component: NotFoundPage },

@@ -3,7 +3,13 @@ import { Outlet } from 'react-router'
 import { BottomNav } from '@/components/layout/BottomNav'
 import { Header } from '@/components/layout/Header'
 import { Footer, OfflineBanner, RouteProgress } from '@/components/layout/ShellParts'
+import { useSessionStore } from '@/stores/session'
 import { useMockApi } from '@/lib/env'
+
+// Only restricted members ever see it, so it stays out of everyone else's first load
+const RestrictedBanner = lazy(() =>
+  import('@/features/account/RestrictedBanner').then((m) => ({ default: m.RestrictedBanner })),
+)
 
 const ToastRegion = lazy(() => import('@/components/layout/ToastRegion').then((m) => ({ default: m.ToastRegion })))
 
@@ -15,6 +21,8 @@ const DevToolbar =
 
 /** The member app shell: sticky header, content, footer, and the bottom nav under 1024px. */
 export function AppLayout() {
+  const restricted = useSessionStore((s) => s.restricted)
+
   return (
     <div className="flex min-h-dvh flex-col">
       <a
@@ -28,6 +36,11 @@ export function AppLayout() {
       <OfflineBanner />
 
       <main id="main" className="mx-auto w-full max-w-content flex-1 px-4 pt-4 pb-8 tablet:px-6 desktop:pt-8">
+        {restricted && (
+          <Suspense fallback={null}>
+            <RestrictedBanner className="mb-4 desktop:mb-6" />
+          </Suspense>
+        )}
         <Outlet />
       </main>
 
