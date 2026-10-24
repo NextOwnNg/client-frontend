@@ -8,8 +8,10 @@ export type ModeFilter = 'CASH' | 'SWAP' | 'QUICK_SELL'
 /** Explore and Home search state (PRD FE-EXP-01). Prices are whole naira; the API takes naira too. */
 export type ListingFilters = {
   q?: string
-  category?: string
-  area?: string
+  /** At most one category id (picked one at a time); empty means every category. */
+  categories: string[]
+  /** At most one area id (picked one at a time); empty means the whole pilot city. */
+  areas: string[]
   modes: ModeFilter[]
   priceMin?: number
   priceMax?: number
@@ -19,7 +21,7 @@ export type ListingFilters = {
 
 export type FilterIssue = 'min_gt_max'
 
-export const defaultFilters: ListingFilters = { modes: [], conditions: [], sort: 'recent' }
+export const defaultFilters: ListingFilters = { categories: [], areas: [], modes: [], conditions: [], sort: 'recent' }
 
 export const modeLabels: Record<ModeFilter, string> = {
   CASH: 'For sale',
@@ -69,15 +71,27 @@ export function parseFilters(
   config?: RuntimeConfig,
 ): { filters: ListingFilters; issues: FilterIssue[] } {
   const q = params.get('q')?.trim() || undefined
-  let category = params.get('category') || undefined
-  let area = params.get('area') || undefined
-  if (config && category && !config.categories.some((c) => c.id === category)) category = undefined
-  if (config && area && !config.areas.some((a) => a.id === area)) area = undefined
+  // Comma lists, de-duplicated; once config has loaded, ids it doesn't know are dropped
+  const ids = (value: string | null) => [
+    ...new Set(
+      (value ?? '')
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean),
+    ),
+  ]
+  // One category and one area at a time: a link listing several keeps the first valid one
+  const categories = ids(params.get('category'))
+    .filter((id) => !config || config.categories.some((c) => c.id === id))
+    .slice(0, 1)
+  const areas = ids(params.get('area'))
+    .filter((id) => !config || config.areas.some((a) => a.id === id))
+    .slice(0, 1)
 
   const filters: ListingFilters = {
     q,
-    category,
-    area,
+    categories,
+    areas,
     modes: fromSlugs(params.get('mode'), modeSlugs),
     priceMin: nairaParam(params.get('min')),
     priceMax: nairaParam(params.get('max')),
@@ -91,8 +105,8 @@ export function parseFilters(
 export function serializeFilters(filters: ListingFilters): URLSearchParams {
   const params = new URLSearchParams()
   if (filters.q) params.set('q', filters.q)
-  if (filters.category) params.set('category', filters.category)
-  if (filters.area) params.set('area', filters.area)
+  if (filters.categories.length) params.set('category', filters.categories.join(','))
+  if (filters.areas.length) params.set('area', filters.areas.join(','))
   if (filters.modes.length) params.set('mode', filters.modes.map((m) => modeSlugs[m]).join(','))
   if (filters.priceMin !== undefined) params.set('min', String(filters.priceMin))
   if (filters.priceMax !== undefined) params.set('max', String(filters.priceMax))
@@ -104,8 +118,8 @@ export function serializeFilters(filters: ListingFilters): URLSearchParams {
 export function toApiParams(filters: ListingFilters): Record<string, string | number> {
   const params: Record<string, string | number> = {}
   if (filters.q) params.q = filters.q
-  if (filters.category) params.category = filters.category
-  if (filters.area) params.area = filters.area
+  if (filters.categories.length) params.category = filters.categories.join(',')
+  if (filters.areas.length) params.area = filters.areas.join(',')
   if (filters.modes.length) params.mode = filters.modes.join(',')
   if (filters.conditions.length) params.condition = filters.conditions.join(',')
   if (!priceDisabled(filters) && !validatePrice(filters.priceMin, filters.priceMax)) {
@@ -131,13 +145,19 @@ function priceLabel(min?: number, max?: number): string | null {
 export function activeChips(filters: ListingFilters, config?: RuntimeConfig): FilterChip[] {
   const chips: FilterChip[] = []
   if (filters.q) chips.push({ key: 'q', label: `“${filters.q}”`, remove: () => ({ ...filters, q: undefined }) })
-  if (filters.category) {
-    const name = config?.categories.find((c) => c.id === filters.category)?.name ?? filters.category
-    chips.push({ key: 'category', label: name, remove: () => ({ ...filters, category: undefined }) })
+  for (const id of filters.categories) {
+    chips.push({
+      key: `category-${id}`,
+      label: config?.categories.find((c) => c.id === id)?.name ?? id,
+      remove: () => ({ ...filters, categories: filters.categories.filter((c) => c !== id) }),
+    })
   }
-  if (filters.area) {
-    const name = config?.areas.find((a) => a.id === filters.area)?.name ?? filters.area
-    chips.push({ key: 'area', label: name, remove: () => ({ ...filters, area: undefined }) })
+  for (const id of filters.areas) {
+    chips.push({
+      key: `area-${id}`,
+      label: config?.areas.find((a) => a.id === id)?.name ?? id,
+      remove: () => ({ ...filters, areas: filters.areas.filter((a) => a !== id) }),
+    })
   }
   for (const mode of filters.modes) {
     chips.push({
@@ -162,8 +182,8 @@ export function activeChips(filters: ListingFilters, config?: RuntimeConfig): Fi
 /** Number shown on the "Filters" button: everything set in the panel, but not the search text. */
 export function countPanelFilters(filters: ListingFilters): number {
   return (
-    (filters.category ? 1 : 0) +
-    (filters.area ? 1 : 0) +
+    filters.categories.length +
+    filters.areas.length +
     filters.modes.length +
     (filters.priceMin !== undefined || filters.priceMax !== undefined ? 1 : 0) +
     filters.conditions.length
@@ -173,8 +193,8 @@ export function countPanelFilters(filters: ListingFilters): number {
 /** Explore's canonical keeps only category and area (PRD §4.2), so filter permutations aren't indexed. */
 export function canonicalSearch(filters: ListingFilters): string {
   const params = new URLSearchParams()
-  if (filters.category) params.set('category', filters.category)
-  if (filters.area) params.set('area', filters.area)
+  if (filters.categories.length) params.set('category', filters.categories.join(','))
+  if (filters.areas.length) params.set('area', filters.areas.join(','))
   const query = params.toString()
   return query ? `?${query}` : ''
 }

@@ -1,12 +1,15 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
+import { useUiStore } from '@/stores/ui'
 import { server } from '@/test/msw/server'
 import { renderWithProviders } from '@/test/utils'
 
 const API = import.meta.env.VITE_API_BASE_URL
+
+afterEach(() => useUiStore.getState().setAreaIds([]))
 
 const renderExplore = (path = '/explore') => renderWithProviders(routes, { initialPath: path })
 const results = () => screen.getByRole('list', { name: 'Results' })
@@ -83,15 +86,21 @@ describe('Explore', () => {
     await waitFor(() => expect(resultTitles()).not.toContain('Tecno Camon CX'))
   })
 
-  it('filters by category from the rail', async () => {
+  it('filters by one category at a time from the rail, and All clears it', async () => {
     const user = userEvent.setup()
     const { router } = renderExplore()
-    const rail = await screen.findByRole('navigation', { name: 'Categories' })
+    const rail = await screen.findByRole('group', { name: 'Categories' })
 
-    await user.click(await within(rail).findByRole('link', { name: 'Gaming' }))
-
+    await user.click(await within(rail).findByRole('button', { name: 'Gaming' }))
     await waitFor(() => expect(router.state.location.search).toBe('?category=gaming'))
-    expect(within(rail).getByRole('link', { name: 'Gaming' })).toHaveAttribute('aria-current', 'page')
+    await user.click(within(rail).getByRole('button', { name: 'Phones' }))
+
+    await waitFor(() => expect(router.state.location.search).toBe('?category=phones'))
+    expect(within(rail).getByRole('button', { name: 'Phones' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(rail).getByRole('button', { name: 'Gaming' })).toHaveAttribute('aria-pressed', 'false')
+
+    await user.click(within(rail).getByRole('button', { name: 'All' }))
+    await waitFor(() => expect(router.state.location.search).toBe(''))
   })
 
   it('shows active filters as chips that remove one filter each', async () => {
@@ -149,6 +158,51 @@ describe('Explore', () => {
 })
 
 describe('Explore filter sheet', () => {
+  it('uses checkboxes for areas that pick one at a time', async () => {
+    const user = userEvent.setup()
+    const { router } = renderExplore()
+    await screen.findByText('14 items · newest first')
+
+    await user.click(screen.getByRole('button', { name: /^Filters/ }))
+    const sheet = await screen.findByRole('dialog', { name: 'Filters' })
+    expect(within(sheet).queryAllByRole('radio')).toHaveLength(0)
+    const areas = within(sheet).getByRole('group', { name: 'Area' })
+    const north = within(areas).getByRole('checkbox', { name: '[Pilot Area] North' })
+    const east = within(areas).getByRole('checkbox', { name: '[Pilot Area] East' })
+
+    await user.click(north)
+    await user.click(east)
+    expect(east).toBeChecked()
+    expect(north).not.toBeChecked()
+    await user.click(await within(sheet).findByRole('button', { name: /Show \d+ results/ }))
+
+    await waitFor(() => expect(router.state.location.search).toBe('?area=east'))
+    expect(useUiStore.getState().areaIds).toEqual(['east'])
+  })
+
+  it('uses checkboxes for categories that pick one at a time, and untick to clear', async () => {
+    const user = userEvent.setup()
+    const { router } = renderExplore()
+    await screen.findByText('14 items · newest first')
+
+    await user.click(screen.getByRole('button', { name: /^Filters/ }))
+    const sheet = await screen.findByRole('dialog', { name: 'Filters' })
+    const categories = within(sheet).getByRole('group', { name: 'Category' })
+    const phones = within(categories).getByRole('checkbox', { name: 'Phones' })
+    const gaming = within(categories).getByRole('checkbox', { name: 'Gaming' })
+
+    await user.click(phones)
+    await user.click(gaming)
+    expect(gaming).toBeChecked()
+    expect(phones).not.toBeChecked()
+    await user.click(gaming)
+    expect(gaming).not.toBeChecked()
+    await user.click(phones)
+    await user.click(await within(sheet).findByRole('button', { name: /Show \d+ results/ }))
+
+    await waitFor(() => expect(router.state.location.search).toBe('?category=phones'))
+  })
+
   it('previews the result count and applies on "Show N results"', async () => {
     const user = userEvent.setup()
     const { router } = renderExplore()

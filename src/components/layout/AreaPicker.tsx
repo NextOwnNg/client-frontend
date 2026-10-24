@@ -7,10 +7,9 @@ import { useUiStore } from '@/stores/ui'
 export function AreaPicker() {
   const areaSheet = useAreaSheet()
   const { data: config } = useRuntimeConfig()
-  const areaId = useUiStore((s) => s.areaId)
+  const areaIds = useUiStore((s) => s.areaIds)
 
-  const selected = config?.areas.find((a) => a.id === areaId)
-  const label = selected?.name ?? 'All areas'
+  const label = config?.areas.find((a) => a.id === areaIds[0])?.name ?? 'All areas'
 
   return (
     <>

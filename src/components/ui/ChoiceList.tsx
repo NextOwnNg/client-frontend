@@ -8,20 +8,31 @@ const row =
   'group flex min-h-11 cursor-pointer items-center gap-3 rounded-control px-1 text-body text-ink outline-none data-focus-visible:ring-2 data-focus-visible:ring-focus data-disabled:cursor-not-allowed data-disabled:text-muted'
 const legend = 'mb-1 text-compact font-semibold text-ink'
 
-/** Compact multi-select list for filter panels: 44px rows, real checkbox semantics. */
+/**
+ * Compact checkbox list for filter panels: 44px rows, real checkbox semantics.
+ * `single`: ticking one unticks the others, and ticking it again clears the choice.
+ */
 export function CheckList<T extends string>({
   label,
   options,
   value,
   onChange,
+  single = false,
 }: {
   label: string
   options: Option<T>[]
   value: T[]
   onChange: (value: T[]) => void
+  single?: boolean
 }) {
+  function handleChange(next: string[]) {
+    const ticked = next.find((v) => !value.includes(v as T))
+    // In single mode keep only the box just ticked; an untick leaves the (now empty or shorter) list as is
+    onChange((single && ticked !== undefined ? [ticked] : next) as T[])
+  }
+
   return (
-    <CheckboxGroup value={value} onChange={(v) => onChange(v as T[])} className="flex flex-col">
+    <CheckboxGroup value={value} onChange={handleChange} className="flex flex-col">
       <Label className={legend}>{label}</Label>
       {options.map((o) => (
         <Checkbox key={o.value} value={o.value} className={row}>

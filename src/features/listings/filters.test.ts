@@ -18,8 +18,8 @@ describe('listing filters in the URL', () => {
   it('round-trips every filter through the query string', () => {
     const filters = {
       q: 'iphone',
-      category: 'phones',
-      area: 'central',
+      categories: ['phones'],
+      areas: ['central'],
       modes: ['CASH', 'QUICK_SELL'] as const,
       priceMin: 100_000,
       priceMax: 400_000,
@@ -28,6 +28,7 @@ describe('listing filters in the URL', () => {
     }
     const query = serializeFilters({
       ...filters,
+      categories: [...filters.categories],
       modes: [...filters.modes],
       conditions: [...filters.conditions],
     }).toString()
@@ -58,10 +59,20 @@ describe('listing filters in the URL', () => {
     expect(filters.q).toBeUndefined()
   })
 
+  it('keeps one category and one area, the first valid one, from a link that lists several', () => {
+    expect(parse('category=gaming,phones&area=north,east').filters).toMatchObject({
+      categories: ['gaming'],
+      areas: ['north'],
+    })
+  })
+
   it('drops an unknown category or area once the pilot config is known', () => {
-    expect(parse('category=boats&area=mars').filters).toMatchObject({ category: undefined, area: undefined })
+    expect(parse('category=boats,gaming,gaming&area=mars,east').filters).toMatchObject({
+      categories: ['gaming'],
+      areas: ['east'],
+    })
     // Before config loads, values are kept so a shared link isn't lost
-    expect(parseFilters(new URLSearchParams('category=boats')).filters.category).toBe('boats')
+    expect(parseFilters(new URLSearchParams('category=boats')).filters.categories).toEqual(['boats'])
   })
 
   it('rounds prices to whole naira', () => {
@@ -113,7 +124,8 @@ describe('active filter chips', () => {
     ])
     const withoutSwap = chips.find((c) => c.label === 'Open to swap')!.remove()
     expect(withoutSwap.modes).toEqual([])
-    expect(withoutSwap.category).toBe('laptops')
+    expect(withoutSwap.categories).toEqual(['laptops'])
+    expect(chips.find((c) => c.label === 'Laptops & tablets')!.remove().categories).toEqual([])
   })
 
   it('describes an open-ended price range', () => {

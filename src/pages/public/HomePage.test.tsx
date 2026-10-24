@@ -9,7 +9,7 @@ import { renderWithProviders } from '@/test/utils'
 
 const API = import.meta.env.VITE_API_BASE_URL
 
-afterEach(() => useUiStore.getState().setAreaId(null))
+afterEach(() => useUiStore.getState().setAreaIds([]))
 
 describe('Home', () => {
   it('leads with the promise, a search and the two main actions', async () => {
@@ -73,7 +73,7 @@ describe('Home', () => {
   })
 
   it('shows recent listings from the selected area', async () => {
-    useUiStore.getState().setAreaId('north')
+    useUiStore.getState().setAreaIds(['north'])
     renderWithProviders(routes)
 
     expect(await screen.findByRole('heading', { name: 'Recently listed in [Pilot Area] North' })).toBeInTheDocument()
@@ -85,14 +85,14 @@ describe('Home', () => {
 
   it('offers next steps when the area has nothing listed yet', async () => {
     const user = userEvent.setup()
-    useUiStore.getState().setAreaId('east')
+    useUiStore.getState().setAreaIds(['east'])
     server.use(http.get(`${API}/listings`, () => HttpResponse.json({ items: [], nextCursor: null, total: 0 })))
     renderWithProviders(routes)
 
     expect(await screen.findByRole('heading', { name: 'Nothing listed in [Pilot Area] East yet' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'See all areas' }))
 
-    expect(useUiStore.getState().areaId).toBeNull()
+    expect(useUiStore.getState().areaIds).toEqual([])
   })
 
   it('shows skeletons while recent listings load, then a retry if they fail', async () => {

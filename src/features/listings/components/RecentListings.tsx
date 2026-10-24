@@ -12,20 +12,20 @@ import type { RuntimeConfig } from '@/types/api'
 const SHOWN = 6
 
 type RecentListingsProps = {
-  areaId: string | null
+  areaIds: string[]
   config?: RuntimeConfig
   onChooseArea: () => void
   onPreloadArea: () => void
   onAllAreas: () => void
 }
 
-/** Home's "recently listed near you" (FE-HOM-01/03). The area is the one the visitor chose, never detected. */
-export function RecentListings({ areaId, config, onChooseArea, onPreloadArea, onAllAreas }: RecentListingsProps) {
+/** Home's "recently listed near you" (FE-HOM-01/03). The areas are the ones the visitor chose, never detected. */
+export function RecentListings({ areaIds, config, onChooseArea, onPreloadArea, onAllAreas }: RecentListingsProps) {
   const tiles = useMediaQuery(breakpoints.tablet)
-  const filters = { ...defaultFilters, area: areaId ?? undefined }
+  const filters = { ...defaultFilters, areas: areaIds }
   const { data, isPending, isError, refetch } = useListings(filters)
-  const areaName = config?.areas.find((a) => a.id === areaId)?.name
-  const place = areaName ?? config?.cityName ?? 'the pilot city'
+  const city = config?.cityName ?? 'the pilot city'
+  const place = config?.areas.find((a) => a.id === areaIds[0])?.name ?? city
   const items = data?.pages[0]?.items.slice(0, SHOWN) ?? []
   const query = serializeFilters(filters).toString()
   const grid = 'grid grid-cols-1 gap-3 tablet:grid-cols-2 tablet:gap-4 desktop:grid-cols-3'
@@ -47,7 +47,7 @@ export function RecentListings({ areaId, config, onChooseArea, onPreloadArea, on
         )}
       </div>
 
-      {!areaId && (
+      {areaIds.length === 0 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-mint px-4 py-3">
           <p className="flex items-center gap-2 text-compact text-ink">
             <MapPin aria-hidden className="size-4 shrink-0 text-action" />
@@ -80,7 +80,7 @@ export function RecentListings({ areaId, config, onChooseArea, onPreloadArea, on
           body="The pilot is just starting here. Look across the whole city, or be the first to list something."
           action={
             <div className="flex flex-wrap justify-center gap-3">
-              {areaId && (
+              {areaIds.length > 0 && (
                 <PlainButton variant="secondary" onClick={onAllAreas}>
                   See all areas
                 </PlainButton>

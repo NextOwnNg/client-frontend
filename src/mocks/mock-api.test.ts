@@ -21,6 +21,20 @@ describe('mock API', () => {
     expect(data.items.every((l) => l.sample)).toBe(true)
   })
 
+  it('filters listings by several categories at once', async () => {
+    const { data } = await apiClient.get<Paginated<ListingSummary>>('/listings', {
+      params: { category: 'phones,gaming' },
+    })
+
+    expect(new Set(data.items.map((l) => l.categoryId))).toEqual(new Set(['phones', 'gaming']))
+  })
+
+  it('filters listings by several areas at once', async () => {
+    const { data } = await apiClient.get<Paginated<ListingSummary>>('/listings', { params: { area: 'north,east' } })
+
+    expect(new Set(data.items.map((l) => l.areaName))).toEqual(new Set(['[Pilot Area] North', '[Pilot Area] East']))
+  })
+
   it('filters listings by trade mode and urgency', async () => {
     const swaps = await apiClient.get<Paginated<ListingSummary>>('/listings', { params: { mode: 'SWAP' } })
     const urgent = await apiClient.get<Paginated<ListingSummary>>('/listings', { params: { urgent: 'true' } })

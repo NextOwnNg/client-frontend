@@ -4,49 +4,52 @@ import { useRuntimeConfig } from '@/features/config/api'
 import { parseFilters, serializeFilters, type ListingFilters } from '@/features/listings/filters'
 import { useUiStore } from '@/stores/ui'
 
+const sameIds = (a: string[], b: string[]) => a.join(',') === b.join(',')
+
 /**
  * Explore's filters, read from and written to the URL (PRD §7.7), so Back from a listing and shared links
- * keep them. The browsing area is the header's area: a link's `area` seeds it once, and after that the
- * header (or the filter panel) owns it and the URL follows.
+ * keep them. The browsing areas are the header's areas: a link's `area` seeds them once, and after that the
+ * header (or the filter panel) owns them and the URL follows.
  */
 export function useUrlFilters() {
   const [params, setParams] = useSearchParams()
   const { data: config } = useRuntimeConfig()
-  const areaId = useUiStore((s) => s.areaId)
-  const setAreaId = useUiStore((s) => s.setAreaId)
+  const areaIds = useUiStore((s) => s.areaIds)
+  const setAreaIds = useUiStore((s) => s.setAreaIds)
 
   const parsed = useMemo(() => parseFilters(params, config), [params, config])
-  const urlArea = parsed.filters.area
+  const urlAreas = parsed.filters.areas
+  const urlHasAreas = params.has('area')
 
-  // A shared link's area wins once, on arrival
+  // A shared link's areas win once, on arrival
   const seeded = useRef(false)
   useEffect(() => {
     if (seeded.current || !config) return
     seeded.current = true
-    if (urlArea && urlArea !== areaId) setAreaId(urlArea)
-  }, [config, urlArea, areaId, setAreaId])
+    if (urlHasAreas && !sameIds(urlAreas, areaIds)) setAreaIds(urlAreas)
+  }, [config, urlHasAreas, urlAreas, areaIds, setAreaIds])
 
-  // After that the header's area drives the URL
+  // After that the header's areas drive the URL
   useEffect(() => {
-    if (!seeded.current || urlArea === (areaId ?? undefined)) return
+    if (!seeded.current || sameIds(urlAreas, areaIds)) return
     const next = new URLSearchParams(params)
-    if (areaId) next.set('area', areaId)
+    if (areaIds.length) next.set('area', areaIds.join(','))
     else next.delete('area')
     setParams(next, { replace: true, preventScrollReset: true })
-  }, [areaId, urlArea, params, setParams])
+  }, [areaIds, urlAreas, params, setParams])
 
-  // The URL catches up with the header's area within a render, so the URL's value is the one to query
+  // The URL catches up with the header's areas within a render, so the URL's value is the one to query
   const filters: ListingFilters = useMemo(
-    () => ({ ...parsed.filters, area: urlArea ?? areaId ?? undefined }),
-    [parsed.filters, areaId, urlArea],
+    () => ({ ...parsed.filters, areas: urlHasAreas ? urlAreas : areaIds }),
+    [parsed.filters, urlHasAreas, urlAreas, areaIds],
   )
 
   const setFilters = useCallback(
     (next: ListingFilters) => {
-      if ((next.area ?? null) !== areaId) setAreaId(next.area ?? null)
+      if (!sameIds(next.areas, areaIds)) setAreaIds(next.areas)
       setParams(serializeFilters(next), { preventScrollReset: true })
     },
-    [areaId, setAreaId, setParams],
+    [areaIds, setAreaIds, setParams],
   )
 
   return { filters, issues: parsed.issues, setFilters, config }

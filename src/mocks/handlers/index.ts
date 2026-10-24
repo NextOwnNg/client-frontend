@@ -85,8 +85,8 @@ export const handlers: RequestHandler[] = [
 
     const params = new URL(request.url).searchParams
     const q = params.get('q')?.trim().toLowerCase()
-    const category = params.get('category')
-    const area = params.get('area')
+    const categoryIds = list(params.get('category'))
+    const areaNames = list(params.get('area')).map((id) => runtimeConfig.areas.find((a) => a.id === id)?.name)
     const modes = list(params.get('mode'))
     const conditions = list(params.get('condition')) as ItemCondition[]
     const urgent = params.get('urgent') === 'true'
@@ -98,8 +98,8 @@ export const handlers: RequestHandler[] = [
       // Public results only show listings that can take offers (PRD DSC-02).
       .filter((l) => l.status === 'ACTIVE')
       .filter((l) => !q || l.title.toLowerCase().includes(q))
-      .filter((l) => !category || l.categoryId === category)
-      .filter((l) => !area || runtimeConfig.areas.find((a) => a.id === area)?.name === l.areaName)
+      .filter((l) => categoryIds.length === 0 || categoryIds.includes(l.categoryId))
+      .filter((l) => areaNames.length === 0 || areaNames.includes(l.areaName))
       // Modes widen each other: "For sale" or "Open to swap" or "Quick Sell"
       .filter(
         (l) =>

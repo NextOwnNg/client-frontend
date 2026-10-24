@@ -17,8 +17,8 @@ import { useUiStore } from '@/stores/ui'
 /** UX-01 Home: the promise, a search, the ways to trade, one worked example, and what's listed nearby. */
 export function HomePage() {
   const { data: config } = useRuntimeConfig()
-  const areaId = useUiStore((s) => s.areaId)
-  const setAreaId = useUiStore((s) => s.setAreaId)
+  const areaIds = useUiStore((s) => s.areaIds)
+  const setAreaIds = useUiStore((s) => s.setAreaIds)
   const areaSheet = useAreaSheet()
 
   return (
@@ -40,11 +40,11 @@ export function HomePage() {
         </section>
 
         <RecentListings
-          areaId={areaId}
+          areaIds={areaIds}
           config={config}
           onChooseArea={areaSheet.open}
           onPreloadArea={areaSheet.preload}
-          onAllAreas={() => setAreaId(null)}
+          onAllAreas={() => setAreaIds([])}
         />
 
         {config && config.categories.length > 0 && <CategoryShortcuts categories={config.categories} />}

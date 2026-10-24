@@ -1,11 +1,9 @@
 import { Check, SlidersHorizontal, Timer, X } from 'lucide-react'
-import { Link } from 'react-router'
 import {
   activeChips,
   countPanelFilters,
   defaultFilters,
   modeLabels,
-  serializeFilters,
   type ListingFilters,
   type ModeFilter,
 } from '@/features/listings/filters'
@@ -22,18 +20,17 @@ const chipOn = 'border-action bg-mint text-action pointer-fine:hover:border-acti
 /** A horizontal row that scrolls on phones and bleeds to the screen edge, so it reads as "more this way". */
 export function ChipRow({
   label,
-  as = 'div',
   className,
   children,
 }: {
+  /** Names the row as a group of related toggles for assistive tech. */
   label?: string
-  as?: 'div' | 'nav'
   className?: string
   children: React.ReactNode
 }) {
-  const Tag = as
   return (
-    <Tag
+    <div
+      role={label ? 'group' : undefined}
       aria-label={label}
       className={cx(
         '-mx-4 -my-1 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 py-1.5 tablet:-mx-6 tablet:px-6 [&::-webkit-scrollbar]:hidden',
@@ -41,7 +38,7 @@ export function ChipRow({
       )}
     >
       {children}
-    </Tag>
+    </div>
   )
 }
 
@@ -113,28 +110,48 @@ export function FiltersButton({
   )
 }
 
-/** Category shortcuts as links, so each category view is a real, shareable URL. */
-export function CategoryRail({ filters, config }: { filters: ListingFilters; config?: RuntimeConfig }) {
-  const href = (category?: string) => {
-    const query = serializeFilters({ ...filters, category }).toString()
-    return query ? `/explore?${query}` : '/explore'
-  }
-  const items = [{ id: undefined, name: 'All' }, ...(config?.categories ?? [])]
+const categoryOn = 'border-ink bg-ink text-paper pointer-fine:hover:bg-ink/90'
+
+/**
+ * Category toggles, one at a time. "All" clears the choice and is on when none is picked.
+ * The URL still carries the choice, so a filtered view stays shareable.
+ */
+export function CategoryRail({
+  filters,
+  config,
+  onChange,
+}: {
+  filters: ListingFilters
+  config?: RuntimeConfig
+  onChange: (next: ListingFilters) => void
+}) {
+  const none = filters.categories.length === 0
+  // One category at a time: tapping another switches to it, tapping the current one goes back to All
+  const toggle = (id: string) => onChange({ ...filters, categories: filters.categories.includes(id) ? [] : [id] })
 
   return (
-    <ChipRow as="nav" label="Categories">
-      {items.map((c) => {
-        const on = filters.category === c.id
+    <ChipRow label="Categories">
+      <button
+        type="button"
+        aria-pressed={none}
+        onClick={() => onChange({ ...filters, categories: [] })}
+        className={cx(chipBase, none ? categoryOn : chipOff)}
+      >
+        All
+      </button>
+      {(config?.categories ?? []).map((c) => {
+        const on = filters.categories.includes(c.id)
         return (
-          <Link
-            key={c.id ?? 'all'}
-            to={href(c.id)}
-            preventScrollReset
-            aria-current={on ? 'page' : undefined}
-            className={cx(chipBase, on ? 'border-ink bg-ink text-paper pointer-fine:hover:bg-ink/90' : chipOff)}
+          <button
+            key={c.id}
+            type="button"
+            aria-pressed={on}
+            onClick={() => toggle(c.id)}
+            className={cx(chipBase, on ? categoryOn : chipOff)}
           >
+            {on && <Check aria-hidden className="size-4" strokeWidth={2.5} />}
             {c.name}
-          </Link>
+          </button>
         )
       })}
     </ChipRow>
@@ -156,7 +173,7 @@ export function ActiveChips({
 }) {
   const chips = activeChips(filters, config)
   if (chips.length === 0) return null
-  const desktopOnly = (key: string) => key === 'category' || key.startsWith('mode-')
+  const desktopOnly = (key: string) => key.startsWith('category-') || key.startsWith('mode-')
   const phoneCount = chips.filter((c) => !desktopOnly(c.key)).length
 
   return (

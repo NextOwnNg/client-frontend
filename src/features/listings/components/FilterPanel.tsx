@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@heroui/react'
-import { CheckList, RadioList } from '@/components/ui/ChoiceList'
+import { CheckList } from '@/components/ui/ChoiceList'
 import { MoneyField } from '@/components/ui/MoneyField'
 import { Sheet } from '@/components/ui/Sheet'
 import { useListings } from '@/features/listings/api'
@@ -86,23 +86,20 @@ export function FilterPanel({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <RadioList
+      {/* Areas and categories work the same way: tick one, or none for all */}
+      <CheckList
         label="Area"
-        value={filters.area ?? 'all'}
-        onChange={(v) => onChange({ ...filters, area: v === 'all' ? undefined : v })}
-        options={[
-          { value: 'all', label: `All of ${config?.cityName ?? 'the pilot city'}` },
-          ...(config?.areas ?? []).map((a) => ({ value: a.id, label: a.name })),
-        ]}
+        options={(config?.areas ?? []).map((a) => ({ value: a.id, label: a.name }))}
+        value={filters.areas}
+        onChange={(areas) => onChange({ ...filters, areas })}
+        single
       />
-      <RadioList
+      <CheckList
         label="Category"
-        value={filters.category ?? 'all'}
-        onChange={(v) => onChange({ ...filters, category: v === 'all' ? undefined : v })}
-        options={[
-          { value: 'all', label: 'All categories' },
-          ...(config?.categories ?? []).map((c) => ({ value: c.id, label: c.name })),
-        ]}
+        options={(config?.categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
+        value={filters.categories}
+        onChange={(categories) => onChange({ ...filters, categories })}
+        single
       />
       <CheckList
         label="Trade type"

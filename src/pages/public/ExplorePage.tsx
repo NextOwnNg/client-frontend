@@ -27,7 +27,9 @@ export function ExplorePage() {
   const [sheetMounted, setSheetMounted] = useState(false)
   const desktop = useMediaQuery(breakpoints.desktop)
   const clear = useCallback(() => setFilters({ ...defaultFilters }), [setFilters])
-  const categoryName = config?.categories.find((c) => c.id === filters.category)?.name
+  // A single category gets its own page title; several read as a general Explore page
+  const categoryName =
+    filters.categories.length === 1 ? config?.categories.find((c) => c.id === filters.categories[0])?.name : undefined
 
   return (
     <>
@@ -50,13 +52,13 @@ export function ExplorePage() {
             key={filters.q ?? ''}
             defaultValue={filters.q}
             onSearch={(q) => setFilters({ ...filters, q: q || undefined })}
-            onCategory={(category) => setFilters({ ...filters, q: undefined, category })}
+            onCategory={(category) => setFilters({ ...filters, q: undefined, categories: [category] })}
             className="desktop:max-w-xl"
           />
 
           {!desktop && (
             <div className="flex flex-col gap-2">
-              <CategoryRail filters={filters} config={config} />
+              <CategoryRail filters={filters} config={config} onChange={setFilters} />
               <ChipRow label="Trade type">
                 <FiltersButton
                   filters={filters}
