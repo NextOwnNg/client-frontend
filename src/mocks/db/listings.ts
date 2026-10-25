@@ -2,7 +2,7 @@ import { detailToInput, emptyListingInput, inputToDetail } from '@/features/sell
 import { authDb, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { listings as fixtures } from '@/mocks/fixtures/listings'
-import type { ListingDetail, ListingInput, ListingStatus, OwnListing, PublicSeller } from '@/types/api'
+import type { ListingDetail, ListingInput, ListingStatus, ListingSummary, OwnListing, PublicSeller } from '@/types/api'
 
 /**
  * Every listing the mock API knows: the fictional fixtures plus anything members create in the wizard.
@@ -199,8 +199,27 @@ export const listingsDb = {
     return `${slugify(title)}-${id.slice(-4)}`
   },
 
+  /** Changes only the state, e.g. when an accepted offer reserves the item. */
+  setStatus(id: string, status: ListingStatus) {
+    const record = store.get(id)
+    if (record) listingsDb.update(id, toOwnInput(record), { status })
+  },
+
   goesLive: () => goLive,
 }
+
+/** What cards and lists get: the detail without its long-form fields. */
+export const toSummary = ({
+  images: _images,
+  description: _description,
+  defects: _defects,
+  repairs: _repairs,
+  accessories: _accessories,
+  desiredSwap: _desiredSwap,
+  categoryFields: _categoryFields,
+  seller: _seller,
+  ...summary
+}: ListingDetail): ListingSummary => summary
 
 /** Controls for the dev toolbar and tests. */
 export const mockListings = {

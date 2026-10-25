@@ -13,6 +13,7 @@ import { PhotoUploader } from '@/features/selling/components/PhotoUploader'
 import { quickSellLabel, UNKNOWN, type FieldErrors } from '@/features/selling/listing-input'
 import { useNow } from '@/hooks/useNow'
 import { copy } from '@/lib/copy/copy'
+import { conditionHelp } from '@/lib/copy/labels'
 import { conditionLabel } from '@/lib/copy/status'
 import { cx } from '@/lib/cx'
 import { formatWAT } from '@/lib/time/time'
@@ -168,13 +169,6 @@ function CategoryFields({
 }
 
 /* ---------- Step 2: condition (UX-11) ---------- */
-
-const conditionHelp: Record<ItemCondition, string> = {
-  LIKE_NEW: 'No visible wear, and everything works.',
-  GOOD: 'Light signs of use. Everything works.',
-  FAIR: 'Clear wear or small faults, but it still works.',
-  FOR_PARTS: 'Doesn’t fully work. For repair or parts.',
-}
 
 export function ConditionStep({ input, change, errors }: StepProps) {
   return (

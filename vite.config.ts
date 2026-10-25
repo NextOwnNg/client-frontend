@@ -23,6 +23,12 @@ export default defineConfig({
               name: 'vendor',
               test: /node_modules[\\/](react|react-dom|scheduler|react-router|@tanstack|axios|react-helmet-async|react-fast-compare|invariant|shallowequal|zustand)[\\/]/,
             },
+            {
+              // The listing page's small icons, shared with member screens: one chunk instead of a file each
+              name: 'detail-icons',
+              test: /lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](flag|life-buoy|package-x|bookmark|chevron-left|chevron-right)\.mjs$/,
+              includeDependenciesRecursively: false,
+            },
           ],
         },
       },

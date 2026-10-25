@@ -2,9 +2,10 @@ import { http, HttpResponse, type RequestHandler } from 'msw'
 import { categories, runtimeConfig } from '@/mocks/fixtures/config'
 import { apiBaseUrl } from '@/lib/env'
 import { authDb } from '@/mocks/db/auth'
-import { listingsDb } from '@/mocks/db/listings'
+import { listingsDb, toSummary } from '@/mocks/db/listings'
 import { authHandlers } from '@/mocks/handlers/auth'
 import { network } from '@/mocks/handlers/network'
+import { offersHandlers } from '@/mocks/handlers/offers'
 import { sellingHandlers } from '@/mocks/handlers/selling'
 import type {
   ItemCondition,
@@ -17,18 +18,6 @@ import type {
 
 const API = apiBaseUrl
 const PAGE_SIZE = 12
-
-const toSummary = ({
-  images: _images,
-  description: _description,
-  defects: _defects,
-  repairs: _repairs,
-  accessories: _accessories,
-  desiredSwap: _desiredSwap,
-  categoryFields: _categoryFields,
-  seller: _seller,
-  ...summary
-}: ListingDetail): ListingSummary => summary
 
 /** Removed listings keep only what the page needs to say so (PRD FE-SEO-03: nothing indexable). */
 function toPublicDetail(listing: ListingDetail): ListingDetail {
@@ -60,6 +49,7 @@ const notFound = (message: string) => HttpResponse.json({ code: 'NOT_FOUND', mes
 export const handlers: RequestHandler[] = [
   ...authHandlers,
   ...sellingHandlers,
+  ...offersHandlers,
 
   http.get(`${API}/config`, async () => (await network()) ?? HttpResponse.json(runtimeConfig)),
 

@@ -33,8 +33,6 @@ const upcomingPublic: Upcoming[] = [
 
 /** Member-only placeholders sit behind sign-in already, so the redirects can be reviewed now (PRD §6.3). */
 const upcomingMember: Upcoming[] = [
-  { path: 'offers/new', title: 'Make an offer', phase: 'Phase 4 (Offer)' },
-  { path: 'offers', title: 'Offers', phase: 'Phase 4 (Offer)' },
   { path: 'transactions', title: 'Transactions', phase: 'Phase 5 (Exchange)' },
   { path: 'me/reviews', title: 'Reviews', phase: 'Phase 5 (Exchange)' },
   { path: 'messages', title: 'Messages', phase: 'Phase 6 (Community)' },
@@ -89,6 +87,24 @@ export const routes: RouteObject[] = [
               {
                 path: 'settings',
                 lazy: async () => ({ Component: (await import('@/pages/member/SettingsPage')).SettingsPage }),
+              },
+              {
+                path: 'offers',
+                lazy: async () => ({ Component: (await import('@/pages/member/OffersPage')).OffersLayout }),
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => ({ Component: (await import('@/pages/member/OffersPage')).OffersIndex }),
+                  },
+                  {
+                    path: ':id',
+                    lazy: async () => ({ Component: (await import('@/pages/member/OfferThreadPage')).OfferThreadPage }),
+                  },
+                ],
+              },
+              {
+                path: 'offers/new',
+                lazy: async () => ({ Component: (await import('@/pages/member/OfferComposerPage')).OfferComposerPage }),
               },
               ...upcomingMember.map(placeholder),
             ],

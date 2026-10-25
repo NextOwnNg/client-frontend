@@ -147,3 +147,82 @@ export type RuntimeConfig = {
   reservationDays: number
   photoLimits: { min: number; max: number }
 }
+
+/** How an offer is made up (PRD §7.1). Listings accept CASH and/or SWAP; Swap + cash balances a swap. */
+export type OfferMode = 'CASH' | 'SWAP' | 'SWAP_PLUS_CASH'
+
+export type OfferStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN' | 'EXPIRED' | 'CLOSED_UNAVAILABLE'
+
+/**
+ * Something the offerer can put into a swap: one of their own listings, or an offer-only item that only the
+ * person they offer it to can see (LST-07).
+ */
+export type SwapItem = {
+  id: string
+  title: string
+  condition: ItemCondition
+  defects: string[]
+  repairs?: string
+  photos: MediaRef[]
+  source: 'listing' | 'offer-only'
+  /** Public listing page, for items that are listed. */
+  listingSlug?: string
+  /** False once the item is reserved for another deal, or no longer listed. */
+  available: boolean
+  unavailableReason?: string
+}
+
+/** What a person creates in "Add an item" while making a swap offer. */
+export type OfferItemInput = {
+  title: string
+  condition: ItemCondition | null
+  defects: string[]
+  noDefects: boolean
+  repairs: string
+  photos: MediaRef[]
+  ownershipConfirmed: boolean
+}
+
+/** The terms of one offer version, as sent to the API (PRD §7.1 payload table). */
+export type OfferTerms = {
+  mode: OfferMode
+  offeredItemId: string | null
+  cashKobo: number
+  cashDirection: CashDirection
+  note: string
+}
+
+/** One immutable version of an offer: the first offer or a counter. */
+export type OfferVersion = OfferTerms & {
+  id: string
+  number: number
+  authorId: string
+  offeredItem: SwapItem | null
+  createdAt: string
+}
+
+/** A negotiation between the person offering and the listing's owner, as seen by one of them. */
+export type Offer = {
+  id: string
+  /** The listing as it is now (live status and price), not as it was when the offer was made. */
+  listing: ListingSummary
+  offerer: PublicSeller
+  owner: PublicSeller
+  viewerRole: 'offerer' | 'owner'
+  status: OfferStatus
+  /** Oldest first; the last one is current. */
+  versions: OfferVersion[]
+  /** Whose decision is next; null once the offer is closed. */
+  turnUserId: string | null
+  expiresAt: string
+  createdAt: string
+  updatedAt: string
+  /** Why it closed, in words, e.g. "The owner accepted another offer." */
+  closedReason?: string
+  /** Set once accepted (Phase 5 builds the transaction screen). */
+  transactionId?: string
+  /** Changed since the viewer last opened it. */
+  unread: boolean
+}
+
+export type NewOffer = OfferTerms & { listingId: string }

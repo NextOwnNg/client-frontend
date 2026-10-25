@@ -1,10 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { FlaskConical, X } from 'lucide-react'
 import { useState } from 'react'
+import { useMatch } from 'react-router'
 import { meKey, useMe } from '@/features/account/api'
 import { formatPhoneDisplay } from '@/lib/phone/phone'
 import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID, SAMPLE_MEMBER_PHONE } from '@/mocks/db/auth'
 import { listingsDb, mockListings } from '@/mocks/db/listings'
+import { mockOffers } from '@/mocks/db/offers'
 import { useDevSettings } from '@/mocks/dev-settings'
 
 const tool = 'flex-1 rounded-control bg-white/10 px-2 py-2 font-medium hover:bg-white/20'
@@ -20,6 +22,8 @@ export function DevToolbar() {
   const { data: me } = useMe()
   const [note, setNote] = useState<string | null>(null)
   const [liveListings, setLiveListings] = useState(() => listingsDb.goesLive())
+  // On an offer's page, the offer controls act on that offer; elsewhere on the newest one that fits
+  const offerId = useMatch('/offers/:id')?.params.id
 
   const refreshSession = () => queryClient.invalidateQueries({ queryKey: meKey })
   const act = (message: string, change: () => void) => {
@@ -31,6 +35,14 @@ export function DevToolbar() {
   const listingsAct = (message: string, change: () => void) => {
     change()
     setNote(message)
+    void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
+    void queryClient.invalidateQueries({ queryKey: ['listings'] })
+  }
+
+  const offersAct = (message: string, change: () => boolean) => {
+    setNote(change() ? message : 'No open offer fits. Open one where the other person can act.')
+    void queryClient.invalidateQueries({ queryKey: ['offers'] })
+    void queryClient.invalidateQueries({ queryKey: ['my-items'] })
     void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
     void queryClient.invalidateQueries({ queryKey: ['listings'] })
   }
@@ -52,7 +64,7 @@ export function DevToolbar() {
     <div
       role="region"
       aria-label="Developer tools"
-      className="fixed bottom-[calc(152px+env(safe-area-inset-bottom))] left-3 z-50 w-80 max-w-[calc(100vw-1.5rem)] rounded-card bg-ink p-4 text-compact text-paper shadow-overlay desktop:bottom-4"
+      className="fixed bottom-[calc(152px+env(safe-area-inset-bottom))] left-3 z-50 max-h-[70dvh] w-80 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-card bg-ink p-4 text-compact text-paper shadow-overlay desktop:bottom-4"
     >
       <div className="mb-3 flex items-center justify-between">
         <p className="font-semibold">Mock API · fictional sample data</p>
@@ -181,6 +193,53 @@ export function DevToolbar() {
               Expire a listing
             </button>
           </div>
+        </div>
+      )}
+      {me && (
+        <div className="mt-4 border-t border-white/15 pt-3">
+          <p className="font-semibold">Offers {offerId ? '· this offer' : '· newest open offer'}</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => offersAct('The other person countered.', () => mockOffers.otherPartyCounters(offerId))}
+              className={tool}
+            >
+              They counter
+            </button>
+            <button
+              type="button"
+              onClick={() => offersAct('The other person accepted.', () => mockOffers.otherPartyAccepts(offerId))}
+              className={tool}
+            >
+              They accept
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                offersAct('The owner accepted someone else’s offer.', () => mockOffers.closeByOtherAcceptance(offerId))
+              }
+              className={tool}
+            >
+              Owner picks another
+            </button>
+            <button
+              type="button"
+              onClick={() => offersAct('The offer expired.', () => mockOffers.expire(offerId))}
+              className={tool}
+            >
+              Expire offer
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              mockOffers.saveThenFailNext()
+              setNote('The next offer action saves, then its answer is lost.')
+            }}
+            className={`${tool} mt-2 w-full`}
+          >
+            Next offer action: save, then lose the answer
+          </button>
         </div>
       )}
       <p role="status" className="mt-2 text-caption text-white/70 empty:hidden">

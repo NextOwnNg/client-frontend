@@ -1,11 +1,12 @@
 import { Button, toast } from '@heroui/react'
 import { CircleCheck, CloudOff, LoaderCircle, SearchX, X } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { ButtonLink } from '@/components/ui/Button'
 import { ErrorSummary, type SummaryItem } from '@/components/ui/ErrorSummary'
+import { StepFooter, StepMeter } from '@/components/ui/StepFlow'
 import { focusField } from '@/components/ui/focus-field'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { useMe } from '@/features/account/api'
@@ -280,7 +281,7 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
         />
       </div>
 
-      <StepMeter step={step} stepHref={stepHref} />
+      <StepMeter label="Listing steps" steps={wizardSteps} current={step} href={stepHref} />
       <h1 className="text-h2 text-ink tablet:text-h1">{published ? 'Edit listing' : 'List an item'}</h1>
 
       {listing?.status === 'RESERVED' && (
@@ -343,7 +344,7 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
           />
         )}
 
-        <WizardFooter>
+        <StepFooter>
           {stepIndex > 0 && (
             <Button variant="tertiary" onPress={() => goTo(wizardSteps[stepIndex - 1]!.id)} className="shrink-0">
               Back
@@ -356,50 +357,9 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
               Continue
             </Button>
           )}
-        </WizardFooter>
+        </StepFooter>
       </form>
     </div>
-  )
-}
-
-/** Sticky at the bottom on phones (above the tab bar), in the page flow from 1024px. */
-function WizardFooter({ children }: { children: ReactNode }) {
-  return (
-    <div className="fixed inset-x-0 bottom-[calc(64px+env(safe-area-inset-bottom))] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-sm desktop:static desktop:mt-8 desktop:border-t desktop:bg-transparent desktop:px-0 desktop:pt-6 desktop:backdrop-blur-none">
-      <div className="mx-auto flex max-w-2xl items-center gap-3 desktop:mx-0 desktop:max-w-none">{children}</div>
-    </div>
-  )
-}
-
-function StepMeter({ step, stepHref }: { step: WizardStep; stepHref: (step: WizardStep) => string }) {
-  const index = wizardSteps.findIndex((s) => s.id === step)
-  return (
-    <nav aria-label="Listing steps" className="flex flex-col gap-2">
-      <p className="text-caption font-semibold text-muted">
-        <span>Step {index + 1} of 4</span>
-        <span className="tablet:hidden"> · {wizardSteps[index]!.label}</span>
-      </p>
-      <ol className="grid grid-cols-4 gap-1.5">
-        {wizardSteps.map((s, i) => (
-          <li key={s.id} className="flex flex-col gap-1.5">
-            <span
-              aria-hidden
-              className={cx('h-1 rounded-full transition-colors duration-200', i <= index ? 'bg-action' : 'bg-border')}
-            />
-            <Link
-              to={stepHref(s.id)}
-              aria-current={s.id === step ? 'step' : undefined}
-              className={cx(
-                'hidden min-h-11 items-start text-compact underline-offset-4 hover:underline tablet:flex',
-                s.id === step ? 'font-semibold text-ink' : 'text-muted',
-              )}
-            >
-              {s.label}
-            </Link>
-          </li>
-        ))}
-      </ol>
-    </nav>
   )
 }
 
