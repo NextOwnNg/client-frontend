@@ -6,14 +6,8 @@ import { BackButton } from '@/components/ui/BackButton'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { listingQueryOptions, useListing } from '@/features/listings/api'
-import { Gallery } from '@/features/listings/components/Gallery'
-import {
-  ConditionAndDefects,
-  ListingBody,
-  ListingHeader,
-  OfferActions,
-  SellerCard,
-} from '@/features/listings/components/ListingDetail'
+import { OfferActions } from '@/features/listings/components/ListingDetail'
+import { ListingView } from '@/features/listings/components/ListingView'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
 import { isApiError } from '@/lib/api/api-error'
 import { buildListingMeta } from '@/lib/seo/listing-meta'
@@ -97,36 +91,14 @@ function ListingDetailContent() {
     queryClient.fetchQuery({ ...listingQueryOptions(queryClient, slug), staleTime: 0 }).catch(() => undefined)
 
   return (
-    <article className="pb-28 desktop:grid desktop:grid-cols-[minmax(0,1fr)_24rem] desktop:items-start desktop:gap-x-10 desktop:pb-0">
+    <>
       <Seo tags={meta.tags} />
-
-      <div className="desktop:col-start-1 desktop:row-start-1">
-        <Gallery images={full ? listing.images : [listing.cover]} slug={listing.slug} />
-      </div>
-
-      <div className="mt-5 flex flex-col gap-5 desktop:sticky desktop:top-24 desktop:col-start-2 desktop:row-span-2 desktop:row-start-1 desktop:mt-0">
-        <ListingHeader listing={listing} />
-        {full ? (
-          <>
-            <SellerCard listing={listing} />
-            <ConditionAndDefects listing={listing} />
-            {desktop && <OfferActions listing={listing} recheck={recheck} layout="panel" />}
-          </>
-        ) : (
-          <div aria-hidden className="flex flex-col gap-3">
-            <div className="h-28 animate-pulse rounded-card bg-cloud" />
-            <div className="h-20 animate-pulse rounded-card bg-cloud" />
-          </div>
-        )}
-      </div>
-
-      {full && (
-        <div className="mt-8 desktop:col-start-1 desktop:row-start-2">
-          <ListingBody listing={listing} />
-        </div>
-      )}
-
-      {full && !desktop && <OfferActions listing={listing} recheck={recheck} layout="bar" />}
-    </article>
+      <ListingView
+        listing={listing}
+        full={full}
+        panel={desktop && <OfferActions listing={listing} recheck={recheck} layout="panel" />}
+        bar={!desktop && <OfferActions listing={listing} recheck={recheck} layout="bar" />}
+      />
+    </>
   )
 }

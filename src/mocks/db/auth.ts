@@ -1,3 +1,4 @@
+import { runtimeConfig } from '@/mocks/fixtures/config'
 import { sellers } from '@/mocks/fixtures/listings'
 import { SAMPLE_CODE } from '@/mocks/sample-code'
 import type { Me, PublicProfile } from '@/types/api'
@@ -161,10 +162,19 @@ export const authDb = {
   },
 
   publicProfile(id: string): PublicProfile | null {
-    const seller = sellers.find((s) => s.id === id)
     const account = accounts.get(id)
-    if (!seller || !account) return null
-    return { ...seller, displayName: account.displayName ?? seller.displayName, memberSince: account.memberSince }
+    if (!account?.onboarded) return null
+    const seller = sellers.find((s) => s.id === id)
+    return {
+      id,
+      displayName: account.displayName ?? seller?.displayName ?? 'Member',
+      phoneConfirmed: true,
+      reviewCount: account.reviewCount,
+      rating: account.rating,
+      areaName:
+        runtimeConfig.areas.find((a) => a.id === account.areaId)?.name ?? seller?.areaName ?? runtimeConfig.cityName,
+      memberSince: account.memberSince,
+    }
   },
 }
 

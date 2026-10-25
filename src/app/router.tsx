@@ -33,8 +33,6 @@ const upcomingPublic: Upcoming[] = [
 
 /** Member-only placeholders sit behind sign-in already, so the redirects can be reviewed now (PRD §6.3). */
 const upcomingMember: Upcoming[] = [
-  { path: 'listings/new', title: 'List an item', phase: 'Phase 3 (Sell)' },
-  { path: 'me/listings', title: 'My listings', phase: 'Phase 3 (Sell)' },
   { path: 'offers/new', title: 'Make an offer', phase: 'Phase 4 (Offer)' },
   { path: 'offers', title: 'Offers', phase: 'Phase 4 (Offer)' },
   { path: 'transactions', title: 'Transactions', phase: 'Phase 5 (Exchange)' },
@@ -76,6 +74,18 @@ export const routes: RouteObject[] = [
             Component: RequireAuth,
             children: [
               { path: 'me', lazy: async () => ({ Component: (await import('@/pages/member/MePage')).MePage }) },
+              {
+                path: 'me/listings',
+                lazy: async () => ({ Component: (await import('@/pages/member/MyListingsPage')).MyListingsPage }),
+              },
+              {
+                path: 'listings/new',
+                lazy: async () => ({ Component: (await import('@/pages/member/ListingWizardPage')).ListingWizardPage }),
+              },
+              {
+                path: 'listings/:id/edit',
+                lazy: async () => ({ Component: (await import('@/pages/member/ListingWizardPage')).ListingWizardPage }),
+              },
               {
                 path: 'settings',
                 lazy: async () => ({ Component: (await import('@/pages/member/SettingsPage')).SettingsPage }),

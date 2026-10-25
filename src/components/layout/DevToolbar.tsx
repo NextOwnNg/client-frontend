@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { meKey, useMe } from '@/features/account/api'
 import { formatPhoneDisplay } from '@/lib/phone/phone'
 import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID, SAMPLE_MEMBER_PHONE } from '@/mocks/db/auth'
+import { listingsDb, mockListings } from '@/mocks/db/listings'
 import { useDevSettings } from '@/mocks/dev-settings'
 
 const tool = 'flex-1 rounded-control bg-white/10 px-2 py-2 font-medium hover:bg-white/20'
@@ -18,12 +19,20 @@ export function DevToolbar() {
   const { latencyMs, setLatency, failNext, setFailNext } = useDevSettings()
   const { data: me } = useMe()
   const [note, setNote] = useState<string | null>(null)
+  const [liveListings, setLiveListings] = useState(() => listingsDb.goesLive())
 
   const refreshSession = () => queryClient.invalidateQueries({ queryKey: meKey })
   const act = (message: string, change: () => void) => {
     change()
     setNote(message)
     void refreshSession()
+  }
+
+  const listingsAct = (message: string, change: () => void) => {
+    change()
+    setNote(message)
+    void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
+    void queryClient.invalidateQueries({ queryKey: ['listings'] })
   }
 
   if (!open) {
@@ -134,10 +143,49 @@ export function DevToolbar() {
             </button>
           </div>
         )}
-        <p role="status" className="mt-2 text-caption text-white/70 empty:hidden">
-          {note}
-        </p>
       </div>
+
+      {me && (
+        <div className="mt-4 border-t border-white/15 pt-3">
+          <p className="font-semibold">Listings</p>
+          <label className="mt-2 flex items-center justify-between gap-2">
+            New listings go live straight away
+            <input
+              type="checkbox"
+              checked={liveListings}
+              onChange={(e) => {
+                mockListings.publishLive(e.target.checked)
+                setLiveListings(e.target.checked)
+              }}
+              className="size-4 accent-[var(--nx-teal)]"
+            />
+          </label>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() => listingsAct('Listings under review approved.', () => mockListings.approvePending())}
+              className={tool}
+            >
+              Approve reviews
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                listingsAct('Your first active listing has expired.', () => {
+                  const active = listingsDb.ownedBy(me.id).find((l) => l.status === 'ACTIVE')
+                  if (active) mockListings.expire(active.id)
+                })
+              }
+              className={tool}
+            >
+              Expire a listing
+            </button>
+          </div>
+        </div>
+      )}
+      <p role="status" className="mt-2 text-caption text-white/70 empty:hidden">
+        {note}
+      </p>
     </div>
   )
 }

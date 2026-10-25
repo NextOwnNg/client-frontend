@@ -93,6 +93,46 @@ export type MeUpdate = Partial<Pick<Me, 'displayName' | 'areaId' | 'interests' |
   acceptTerms?: { version: string; adult: boolean }
 }
 
+/** An uploaded photo: the image plus the media id the listing refers to. */
+export type MediaRef = ListingImage & { id: string }
+
+/**
+ * What the owner edits in the listing wizard (PRD LST-02/03/04). Drafts may be incomplete; publishing
+ * validates it. `defects` is one disclosed defect per entry; `noDefects` is the explicit "none" answer.
+ */
+export type ListingInput = {
+  title: string
+  categoryId: string | null
+  /** Category field id → value; `"unknown"` records "Not known". */
+  categoryFields: Record<string, string>
+  description: string
+  /** In display order; the first is the cover. */
+  photos: MediaRef[]
+  condition: ItemCondition | null
+  defects: string[]
+  noDefects: boolean
+  repairs: string
+  accessories: string
+  ownershipConfirmed: boolean
+  modes: TradeMode[]
+  askingKobo: number | null
+  desiredSwap: string
+  openToOffers: boolean
+  areaId: string | null
+  quickSell: boolean
+  quickSellHours: number | null
+}
+
+/** One of the member's own listings, in any state (`GET /me/listings`). */
+export type OwnListing = ListingInput & {
+  id: string
+  slug: string
+  status: ListingStatus
+  updatedAt: string
+  publishedAt?: string
+  urgencyEndsAt?: string
+}
+
 export type ListingSuggestion =
   { kind: 'query'; label: string } | { kind: 'category'; label: string; categoryId: string }
 

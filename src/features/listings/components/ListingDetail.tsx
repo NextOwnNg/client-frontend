@@ -20,7 +20,7 @@ import type { ListingDetail } from '@/types/api'
 const sectionHeading = 'text-h3 text-ink'
 
 /** Status, area, title, price, accepted modes and any real Quick Sell deadline. */
-export function ListingHeader({ listing }: { listing: ListingDetail }) {
+export function ListingHeader({ listing, titleAs: Title = 'h1' }: { listing: ListingDetail; titleAs?: 'h1' | 'h2' }) {
   const available = isAvailable(listing.status)
   const status = listingStatus(listing.status)
 
@@ -35,7 +35,7 @@ export function ListingHeader({ listing }: { listing: ListingDetail }) {
         <AreaLabel name={listing.areaName} />
         <span className="text-compact text-muted">Listed {formatWAT(listing.publishedAt, { withTime: false })}</span>
       </div>
-      <h1 className={cx('text-h2 desktop:text-h1', available ? 'text-ink' : 'text-muted')}>{listing.title}</h1>
+      <Title className={cx('text-h2 desktop:text-h1', available ? 'text-ink' : 'text-muted')}>{listing.title}</Title>
       <Price kobo={listing.askingKobo} size="lg" className={cx(!available && 'text-muted')} />
       <ul aria-label="Accepted offers" className="flex flex-wrap gap-2">
         {listing.acceptedModes.includes('CASH') && listing.askingKobo !== null && (
@@ -271,7 +271,12 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
     actions = (
       <>
         <p className={cx('text-compact text-muted', bar && 'sr-only')}>This is your listing.</p>
-        <ButtonLink to="/me/listings" variant="secondary" fullWidth={!bar} className={cx(bar && 'flex-1')}>
+        <ButtonLink
+          to={`/listings/${listing.id}/edit`}
+          variant="secondary"
+          fullWidth={!bar}
+          className={cx(bar && 'flex-1')}
+        >
           <Settings2 aria-hidden className="size-5" />
           Manage listing
         </ButtonLink>
