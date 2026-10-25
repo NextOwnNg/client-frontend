@@ -26,6 +26,13 @@ export function formatWAT(iso: string, { withTime = true }: { withTime?: boolean
   return `${day}, ${timeFormatter.format(date).toLowerCase()} WAT`
 }
 
+const monthFormatter = new Intl.DateTimeFormat('en-GB', { timeZone: TIME_ZONE, month: 'long', year: 'numeric' })
+
+/** `"March 2026"`, for "Member since". */
+export function formatMonthYear(iso: string): string {
+  return monthFormatter.format(new Date(iso))
+}
+
 export type Deadline = { label: string; ended: boolean; fractionLeft: number }
 
 /**

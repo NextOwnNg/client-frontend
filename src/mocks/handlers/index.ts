@@ -1,23 +1,21 @@
-import { delay, http, HttpResponse, type RequestHandler } from 'msw'
+import { http, HttpResponse, type RequestHandler } from 'msw'
 import { categories, runtimeConfig } from '@/mocks/fixtures/config'
 import { listings } from '@/mocks/fixtures/listings'
 import { apiBaseUrl } from '@/lib/env'
-import { useDevSettings } from '@/mocks/dev-settings'
-import type { ItemCondition, ListingDetail, ListingSuggestion, ListingSummary, Paginated } from '@/types/api'
+import { authDb } from '@/mocks/db/auth'
+import { authHandlers } from '@/mocks/handlers/auth'
+import { network } from '@/mocks/handlers/network'
+import type {
+  ItemCondition,
+  ListingDetail,
+  ListingSuggestion,
+  ListingSummary,
+  Paginated,
+  PublicProfile,
+} from '@/types/api'
 
 const API = apiBaseUrl
 const PAGE_SIZE = 12
-
-/** Simulated network: latency and a one-shot failure from the dev toolbar (no-ops in tests). */
-async function network() {
-  const { latencyMs, failNext, setFailNext } = useDevSettings.getState()
-  if (import.meta.env.MODE !== 'test') await delay(latencyMs)
-  if (failNext) {
-    setFailNext(false)
-    return HttpResponse.json({ code: 'SERVER_ERROR', message: 'Simulated failure' }, { status: 503 })
-  }
-  return null
-}
 
 const toSummary = ({
   images: _images,
@@ -56,7 +54,11 @@ const nairaParam = (value: string | null) => {
   return Number.isFinite(n) && n >= 0 ? n * 100 : null
 }
 
+const notFound = (message: string) => HttpResponse.json({ code: 'NOT_FOUND', message }, { status: 404 })
+
 export const handlers: RequestHandler[] = [
+  ...authHandlers,
+
   http.get(`${API}/config`, async () => (await network()) ?? HttpResponse.json(runtimeConfig)),
 
   http.get(`${API}/listings/suggest`, async ({ request }) => {
@@ -126,7 +128,27 @@ export const handlers: RequestHandler[] = [
     if (failure) return failure
 
     const listing = listings.find((l) => l.slug === params.slug || l.id === params.slug)
-    if (!listing) return HttpResponse.json({ code: 'NOT_FOUND', message: 'Listing not found' }, { status: 404 })
+    if (!listing) return notFound('Listing not found')
     return HttpResponse.json(toPublicDetail(listing))
+  }),
+
+  http.get(`${API}/users/:id`, async ({ params }) => {
+    const failure = await network()
+    if (failure) return failure
+
+    const profile = authDb.publicProfile(String(params.id))
+    return profile ? HttpResponse.json<PublicProfile>(profile) : notFound('Person not found')
+  }),
+
+  http.get(`${API}/users/:id/listings`, async ({ params }) => {
+    const failure = await network()
+    if (failure) return failure
+
+    if (!authDb.publicProfile(String(params.id))) return notFound('Person not found')
+    const items = listings
+      .filter((l) => l.seller.id === params.id && l.status === 'ACTIVE')
+      .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
+      .map(toSummary)
+    return HttpResponse.json<Paginated<ListingSummary>>({ items, nextCursor: null, total: items.length })
   }),
 ]

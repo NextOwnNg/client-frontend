@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { afterEach, describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
+import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
 import { listings } from '@/mocks/fixtures/listings'
 import { useSessionStore } from '@/stores/session'
 import { server } from '@/test/msw/server'
@@ -137,7 +138,7 @@ describe('Listing detail', () => {
   })
 
   it('shows Manage instead of Make an offer on your own listing', async () => {
-    useSessionStore.getState().setSession({ userId: 'u-tolu', onboarded: true, restricted: false })
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
     renderDetail('iphone-12-pro-128gb')
 
     expect(await screen.findByRole('link', { name: 'Manage listing' })).toBeInTheDocument()

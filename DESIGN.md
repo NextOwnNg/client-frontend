@@ -223,8 +223,8 @@ A restrained, high-confidence palette: Ink foundation, one Teal action colour, l
 
 ### Hierarchy
 - **Display** (700, 40/48px): the desktop home hero only.
-- **H1** (700, 32/40px): page titles; the mobile hero.
-- **H2** (700, 26/34px): section headings.
+- **H1** (700, 32/40px): page titles from tablet width (768px) up.
+- **H2** (700, 26/34px): section headings, and page titles on phones.
 - **H3** (600, 21/28px): sub-sections and large swap-only price text.
 - **Body** (400, 16/24px): default copy, field text at every breakpoint (prevents iOS zoom), listing titles at 600.
 - **Compact** (400 to 600, 14/21px): secondary facts such as condition and defect lines, desktop nav links, banner detail.
@@ -235,6 +235,8 @@ A restrained, high-confidence palette: Ink foundation, one Teal action colour, l
 
 ### Named Rules
 **The Tabular Money Rule.** Every ₦ amount, ID and time uses tabular figures (`.tabular`), so ₦300,000 and ₦350,000 line up and compare precisely.
+
+**The Responsive Page Title Rule.** Every screen's `h1` steps down on phones: `text-h2 tablet:text-h1` (26px under 768px, 32px from 768px). The home hero adds `desktop:text-display` (40px). Never set a page title as a fixed `text-h1` at every width. Body, compact and caption sizes stay fixed (16/14/12px in rem, so they follow the phone's text-size setting). Check titles at 320 and 390px before handing a screen over.
 
 **The 24px Ruling Rule.** Text sits on a 24px line: body line height, sum lines, fact lines in listing rows (compact text set to a 24px line) and timeline step spacing all step in 24px.
 
@@ -335,6 +337,7 @@ First-load motion is CSS, so it stays smooth while a page loads and keeps Framer
 - **Do** run the 2px Teal margin rule through worked sums, listing facts and timelines; it is the system's structural mark.
 - **Do** put every total under the 3px double Ink rule, and tick a step only when the server confirms it.
 - **Do** set every ₦ amount in tabular figures.
+- **Do** give every page title the responsive classes (`text-h2 tablet:text-h1`), so headings scale down on phones.
 - **Do** keep primary controls and fields at 48px and every target at 44px or more.
 - **Do** pair every status colour with a word and an icon through the status badge.
 - **Do** take durations and easings from the motion presets, and respect reduced motion.

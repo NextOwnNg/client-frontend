@@ -1,9 +1,11 @@
-import { Bell, MessageCircle, Search } from 'lucide-react'
-import { Link, NavLink } from 'react-router'
+import { Bell, MessageCircle, Search, UserRound } from 'lucide-react'
+import { Link, NavLink, useLocation } from 'react-router'
 import { Logo, LogoMark } from '@/components/brand/Logo'
 import { AreaPicker } from '@/components/layout/AreaPicker'
 import { ButtonLink } from '@/components/ui/Button'
+import { loginPath } from '@/lib/auth/next'
 import { cx } from '@/lib/cx'
+import { useSessionStore } from '@/stores/session'
 
 function IconLink({ to, label, icon: Icon }: { to: string; label: string; icon: typeof Bell }) {
   return (
@@ -14,6 +16,35 @@ function IconLink({ to, label, icon: Icon }: { to: string; label: string; icon: 
     >
       <Icon aria-hidden className="size-5.5" strokeWidth={1.75} />
     </Link>
+  )
+}
+
+/** Members get their inboxes and profile; guests get one way in, which brings them back to this page. */
+function SessionLinks() {
+  const status = useSessionStore((s) => s.status)
+  const { pathname, search } = useLocation()
+
+  // Nothing until the session check answers, so the header doesn't flash "Sign in" at a member
+  if (status === 'unknown') return null
+  if (status === 'guest') {
+    return (
+      <Link
+        to={loginPath(pathname + search)}
+        className="ml-1 inline-flex min-h-11 shrink-0 items-center rounded-control px-3 text-compact font-semibold text-action transition-colors duration-120 pointer-fine:hover:bg-mint"
+      >
+        Sign in
+      </Link>
+    )
+  }
+  return (
+    <>
+      <IconLink to="/messages" label="Messages" icon={MessageCircle} />
+      <IconLink to="/notifications" label="Notifications" icon={Bell} />
+      {/* Phones reach the profile from the bottom nav */}
+      <span className="hidden desktop:contents">
+        <IconLink to="/me" label="Your profile" icon={UserRound} />
+      </span>
+    </>
   )
 }
 
@@ -60,8 +91,7 @@ export function Header() {
           >
             <Search aria-hidden className="size-5.5" strokeWidth={1.75} />
           </Link>
-          <IconLink to="/messages" label="Messages" icon={MessageCircle} />
-          <IconLink to="/notifications" label="Notifications" icon={Bell} />
+          <SessionLinks />
           <ButtonLink to="/listings/new" variant="primary" className="ml-2 hidden desktop:inline-flex">
             List an item
           </ButtonLink>

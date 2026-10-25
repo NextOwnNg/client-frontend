@@ -42,9 +42,6 @@ export const sellers: PublicSeller[] = [
   },
 ]
 
-/** The seller the dev toolbar's "member" persona signs in as, so own-listing states can be reviewed. */
-export const MEMBER_PERSONA_ID = 'u-tolu'
-
 const HOUR = 3_600_000
 const ago = (hours: number) => new Date(Date.now() - hours * HOUR).toISOString()
 const fromNow = (hours: number) => new Date(Date.now() + hours * HOUR).toISOString()

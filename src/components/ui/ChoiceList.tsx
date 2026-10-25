@@ -1,12 +1,31 @@
 import { Check } from 'lucide-react'
 import { Checkbox, CheckboxGroup, Label, Radio, RadioGroup } from 'react-aria-components'
+import { choiceRow } from '@/components/ui/control-styles'
 import { cx } from '@/lib/cx'
 
 type Option<T extends string> = { value: T; label: string }
 
-const row =
-  'group flex min-h-11 cursor-pointer items-center gap-3 rounded-control px-1 text-body text-ink outline-none data-focus-visible:ring-2 data-focus-visible:ring-focus data-disabled:cursor-not-allowed data-disabled:text-muted'
+const row = choiceRow
 const legend = 'mb-1 text-compact font-semibold text-ink'
+
+/** The square tick shared by every checkbox. */
+export function CheckMark({ checked, invalid = false }: { checked: boolean; invalid?: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cx(
+        'flex size-5 shrink-0 items-center justify-center rounded-small border transition-colors duration-120',
+        checked
+          ? 'border-action bg-action text-action-foreground'
+          : invalid
+            ? 'border-danger bg-surface'
+            : 'border-border bg-surface',
+      )}
+    >
+      {checked && <Check className="size-3.5" strokeWidth={3} />}
+    </span>
+  )
+}
 
 /**
  * Compact checkbox list for filter panels: 44px rows, real checkbox semantics.
@@ -38,15 +57,7 @@ export function CheckList<T extends string>({
         <Checkbox key={o.value} value={o.value} className={row}>
           {({ isSelected }) => (
             <>
-              <span
-                aria-hidden
-                className={cx(
-                  'flex size-5 shrink-0 items-center justify-center rounded-small border transition-colors duration-120',
-                  isSelected ? 'border-action bg-action text-action-foreground' : 'border-border bg-surface',
-                )}
-              >
-                {isSelected && <Check className="size-3.5" strokeWidth={3} />}
-              </span>
+              <CheckMark checked={isSelected} />
               {o.label}
             </>
           )}
