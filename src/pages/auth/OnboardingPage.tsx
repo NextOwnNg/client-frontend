@@ -112,7 +112,7 @@ export function OnboardingPage() {
     <>
       <Seo title="Set up your profile" noindex />
       <StepMeter step={step} />
-      <h1 className="mt-3 text-h1 text-ink">Set up your profile</h1>
+      <h1 className="mt-3 text-h2 text-ink tablet:text-h1">Set up your profile</h1>
       {confirmed && step === 1 && <Banner tone="success" title={copy.phoneBadgeExplainer} className="mt-4" />}
       <RestrictedBanner className="mt-4" />
 

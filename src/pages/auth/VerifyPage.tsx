@@ -102,7 +102,7 @@ function CodeStep({ phone, initialResendAt, next }: { phone: string; initialRese
   return (
     <>
       <Seo title="Confirm your phone" noindex />
-      <h1 className="text-h1 text-ink">Enter the code</h1>
+      <h1 className="text-h2 text-ink tablet:text-h1">Enter the code</h1>
       <p className="mt-2 text-body text-muted">
         We sent a 6-digit code by text message to{' '}
         <span className="tabular font-semibold whitespace-nowrap text-ink">{formatPhoneDisplay(phone)}</span>

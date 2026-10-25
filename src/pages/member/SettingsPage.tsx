@@ -24,7 +24,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <Seo title="Account settings" noindex />
-      <h1 className="text-h1 text-ink">Account settings</h1>
+      <h1 className="text-h2 text-ink tablet:text-h1">Account settings</h1>
       {!me ? (
         <div aria-busy="true" aria-label="Loading settings" className="h-64 animate-pulse rounded-card bg-cloud" />
       ) : (

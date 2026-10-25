@@ -43,7 +43,7 @@ export function LoginPage() {
   return (
     <>
       <Seo title="Sign in" noindex />
-      <h1 className="text-h1 text-ink">Sign in or create an account</h1>
+      <h1 className="text-h2 text-ink tablet:text-h1">Sign in or create an account</h1>
       <p className="mt-2 text-body text-muted">Enter your phone number and we’ll text you a 6-digit code.</p>
 
       <form noValidate onSubmit={submit} className="mt-6 flex flex-col gap-5">
