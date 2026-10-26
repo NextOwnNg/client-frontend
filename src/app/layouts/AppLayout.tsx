@@ -19,7 +19,6 @@ const DevToolbar =
     ? lazy(() => import('@/components/layout/DevToolbar').then((m) => ({ default: m.DevToolbar })))
     : null
 
-/** The member app shell: sticky header, content, footer, and the bottom nav under 1024px. */
 export function AppLayout() {
   const restricted = useSessionStore((s) => s.restricted)
 
@@ -32,7 +31,6 @@ export function AppLayout() {
         Skip to content
       </a>
       <RouteProgress />
-      {/* `contents` keeps the header sticky; printing a deal record leaves the shell out (FE-TRX-10) */}
       <div className="contents print:hidden">
         <Header />
         <OfflineBanner />
