@@ -2,6 +2,10 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { mockAuth } from '@/mocks/db/auth'
+import { mockListings } from '@/mocks/db/listings'
+import { mockOffers } from '@/mocks/db/offers'
+import { mockTransactions } from '@/mocks/db/transactions'
+import { mediaDb } from '@/mocks/db/media'
 import { useDraftStore } from '@/stores/drafts'
 import { useSessionStore } from '@/stores/session'
 import { server } from '@/test/msw/server'
@@ -29,10 +33,18 @@ globalThis.ResizeObserver ??= class {
   disconnect() {}
 }
 
+// jsdom has no object URLs; photo previews only need a placeholder
+URL.createObjectURL ??= () => 'blob:preview'
+URL.revokeObjectURL ??= () => {}
+
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 afterEach(() => {
   server.resetHandlers()
   mockAuth.reset()
+  mockListings.reset()
+  mockOffers.reset()
+  mockTransactions.reset()
+  mediaDb.reset()
   // Client stores outlive a render; every test starts signed out with no drafts
   useSessionStore.setState({ status: 'unknown', userId: null, onboarded: false, restricted: false, expired: false })
   useDraftStore.setState({ drafts: {} })

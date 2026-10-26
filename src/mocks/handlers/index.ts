@@ -1,10 +1,13 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { categories, runtimeConfig } from '@/mocks/fixtures/config'
-import { listings } from '@/mocks/fixtures/listings'
 import { apiBaseUrl } from '@/lib/env'
 import { authDb } from '@/mocks/db/auth'
+import { listingsDb, toSummary } from '@/mocks/db/listings'
 import { authHandlers } from '@/mocks/handlers/auth'
 import { network } from '@/mocks/handlers/network'
+import { offersHandlers } from '@/mocks/handlers/offers'
+import { transactionsHandlers } from '@/mocks/handlers/transactions'
+import { sellingHandlers } from '@/mocks/handlers/selling'
 import type {
   ItemCondition,
   ListingDetail,
@@ -16,18 +19,6 @@ import type {
 
 const API = apiBaseUrl
 const PAGE_SIZE = 12
-
-const toSummary = ({
-  images: _images,
-  description: _description,
-  defects: _defects,
-  repairs: _repairs,
-  accessories: _accessories,
-  desiredSwap: _desiredSwap,
-  categoryFields: _categoryFields,
-  seller: _seller,
-  ...summary
-}: ListingDetail): ListingSummary => summary
 
 /** Removed listings keep only what the page needs to say so (PRD FE-SEO-03: nothing indexable). */
 function toPublicDetail(listing: ListingDetail): ListingDetail {
@@ -58,6 +49,9 @@ const notFound = (message: string) => HttpResponse.json({ code: 'NOT_FOUND', mes
 
 export const handlers: RequestHandler[] = [
   ...authHandlers,
+  ...sellingHandlers,
+  ...offersHandlers,
+  ...transactionsHandlers,
 
   http.get(`${API}/config`, async () => (await network()) ?? HttpResponse.json(runtimeConfig)),
 
@@ -70,7 +64,10 @@ export const handlers: RequestHandler[] = [
 
     const titles = [
       ...new Set(
-        listings.filter((l) => l.status === 'ACTIVE' && l.title.toLowerCase().includes(q)).map((l) => l.title),
+        listingsDb
+          .details()
+          .filter((l) => l.status === 'ACTIVE' && l.title.toLowerCase().includes(q))
+          .map((l) => l.title),
       ),
     ]
     const suggestions: ListingSuggestion[] = [
@@ -97,7 +94,8 @@ export const handlers: RequestHandler[] = [
     const max = nairaParam(params.get('price_max'))
     const cursor = Number(params.get('cursor') ?? 0)
 
-    const matches = listings
+    const matches = listingsDb
+      .details()
       // Public results only show listings that can take offers (PRD DSC-02).
       .filter((l) => l.status === 'ACTIVE')
       .filter((l) => !q || l.title.toLowerCase().includes(q))
@@ -127,8 +125,11 @@ export const handlers: RequestHandler[] = [
     const failure = await network()
     if (failure) return failure
 
-    const listing = listings.find((l) => l.slug === params.slug || l.id === params.slug)
-    if (!listing) return notFound('Listing not found')
+    const listing = listingsDb.byIdOrSlug(String(params.slug))?.detail
+    // Drafts and listings under review aren't public yet
+    if (!listing || listing.status === 'DRAFT' || listing.status === 'PENDING_REVIEW') {
+      return notFound('Listing not found')
+    }
     return HttpResponse.json(toPublicDetail(listing))
   }),
 
@@ -145,7 +146,8 @@ export const handlers: RequestHandler[] = [
     if (failure) return failure
 
     if (!authDb.publicProfile(String(params.id))) return notFound('Person not found')
-    const items = listings
+    const items = listingsDb
+      .details()
       .filter((l) => l.seller.id === params.id && l.status === 'ACTIVE')
       .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))
       .map(toSummary)

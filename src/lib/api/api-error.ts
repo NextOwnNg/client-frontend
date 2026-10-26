@@ -13,6 +13,9 @@ export type ApiErrorCode =
   | 'RATE_LIMITED'
   | 'OTP_INVALID'
   | 'OTP_EXPIRED'
+  | 'DUPLICATE_ITEM'
+  | 'UNSUPPORTED_FORMAT'
+  | 'FILE_TOO_LARGE'
   | 'SERVER_ERROR'
   | 'UNKNOWN'
 
@@ -20,6 +23,7 @@ type ApiErrorBody = {
   code?: string
   message?: string
   field_errors?: Record<string, string>
+  details?: Record<string, unknown>
 }
 
 /** The single error shape every API failure is normalised into (PRD §4.4). */
@@ -30,6 +34,8 @@ export class ApiError extends Error {
   readonly fieldErrors?: Record<string, string>
   readonly retryAfterSeconds?: number
   readonly requestId?: string
+  /** Extra facts for a specific error, e.g. the existing listing behind a `DUPLICATE_ITEM`. */
+  readonly details?: Record<string, unknown>
 
   constructor(init: {
     kind: ApiErrorKind
@@ -39,6 +45,7 @@ export class ApiError extends Error {
     fieldErrors?: Record<string, string>
     retryAfterSeconds?: number
     requestId?: string
+    details?: Record<string, unknown>
   }) {
     super(init.message)
     this.name = 'ApiError'
@@ -48,6 +55,7 @@ export class ApiError extends Error {
     this.fieldErrors = init.fieldErrors
     this.retryAfterSeconds = init.retryAfterSeconds
     this.requestId = init.requestId
+    this.details = init.details
   }
 
   /** A timed-out or dropped write may have succeeded on the server: read state before retrying (PRD §7.4). */
@@ -88,6 +96,7 @@ export function toApiError(error: unknown): ApiError {
     code: data?.code ?? (status >= 500 ? 'SERVER_ERROR' : 'UNKNOWN'),
     message: data?.message ?? `Request failed with status ${status}`,
     fieldErrors: data?.field_errors,
+    details: data?.details,
     retryAfterSeconds: Number.isFinite(retryAfter) ? retryAfter : undefined,
     requestId,
   })
