@@ -32,8 +32,11 @@ export function AppLayout() {
         Skip to content
       </a>
       <RouteProgress />
-      <Header />
-      <OfflineBanner />
+      {/* `contents` keeps the header sticky; printing a deal record leaves the shell out (FE-TRX-10) */}
+      <div className="contents print:hidden">
+        <Header />
+        <OfflineBanner />
+      </div>
 
       <main id="main" className="mx-auto w-full max-w-content flex-1 px-4 pt-4 pb-8 tablet:px-6 desktop:pt-8">
         {restricted && (
@@ -44,17 +47,21 @@ export function AppLayout() {
         <Outlet />
       </main>
 
-      <div className="pb-[calc(64px+env(safe-area-inset-bottom))] desktop:pb-0">
+      <div className="pb-[calc(64px+env(safe-area-inset-bottom))] desktop:pb-0 print:hidden">
         <Footer />
       </div>
-      <BottomNav />
+      <div className="contents print:hidden">
+        <BottomNav />
+      </div>
       <Suspense fallback={null}>
         <ToastRegion />
       </Suspense>
       {DevToolbar && (
-        <Suspense fallback={null}>
-          <DevToolbar />
-        </Suspense>
+        <div className="contents print:hidden">
+          <Suspense fallback={null}>
+            <DevToolbar />
+          </Suspense>
+        </div>
       )}
     </div>
   )

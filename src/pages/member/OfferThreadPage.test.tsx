@@ -83,11 +83,9 @@ describe('Offer thread: decisions (FE-OFF-08, FE-OFF-09)', () => {
     ).toBeInTheDocument()
     await userEvent.click(within(sheet).getByRole('button', { name: 'Accept offer' }))
 
-    expect(await screen.findByText(copy.offerAccepted)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'View the agreement' })).toHaveAttribute(
-      'href',
-      '/transactions/t-o-macbook-for-iphone',
-    )
+    expect(await screen.findByRole('heading', { level: 1, name: 'Offer accepted' })).toBeInTheDocument()
+    expect(screen.getByText(copy.offerAccepted)).toBeInTheDocument()
+    expect(screen.getByText('Transaction t-o-macbook-for-iphone')).toBeInTheDocument()
     expect((await latestOf('o-macbook-for-iphone')).status).toBe('ACCEPTED')
   })
 

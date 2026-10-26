@@ -27,7 +27,7 @@ describe('Offers inbox (FE-OFF-06, UX-19)', () => {
     await waitFor(() => expect(tab(/^Received/)).toHaveTextContent('2'))
     expect(tab(/^Sent/)).toHaveTextContent('2')
     expect(tab(/^Awaiting handover/)).toHaveTextContent('1')
-    expect(tab(/^Closed/)).toHaveTextContent('1')
+    expect(tab(/^Closed/)).toHaveTextContent('2')
     expect(await cards()).toHaveLength(2)
   })
 

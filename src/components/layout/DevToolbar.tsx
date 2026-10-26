@@ -7,6 +7,7 @@ import { formatPhoneDisplay } from '@/lib/phone/phone'
 import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID, SAMPLE_MEMBER_PHONE } from '@/mocks/db/auth'
 import { listingsDb, mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
+import { mockTransactions } from '@/mocks/db/transactions'
 import { useDevSettings } from '@/mocks/dev-settings'
 
 const tool = 'flex-1 rounded-control bg-white/10 px-2 py-2 font-medium hover:bg-white/20'
@@ -24,6 +25,7 @@ export function DevToolbar() {
   const [liveListings, setLiveListings] = useState(() => listingsDb.goesLive())
   // On an offer's page, the offer controls act on that offer; elsewhere on the newest one that fits
   const offerId = useMatch('/offers/:id')?.params.id
+  const dealId = useMatch('/transactions/:id')?.params.id
 
   const refreshSession = () => queryClient.invalidateQueries({ queryKey: meKey })
   const act = (message: string, change: () => void) => {
@@ -43,6 +45,14 @@ export function DevToolbar() {
     setNote(change() ? message : 'No open offer fits. Open one where the other person can act.')
     void queryClient.invalidateQueries({ queryKey: ['offers'] })
     void queryClient.invalidateQueries({ queryKey: ['my-items'] })
+    void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
+    void queryClient.invalidateQueries({ queryKey: ['listings'] })
+  }
+
+  const dealAct = (message: string, change: () => boolean) => {
+    setNote(change() ? message : 'No open deal fits. Open one that’s awaiting handover.')
+    void queryClient.invalidateQueries({ queryKey: ['transactions'] })
+    void queryClient.invalidateQueries({ queryKey: ['offers'] })
     void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
     void queryClient.invalidateQueries({ queryKey: ['listings'] })
   }
@@ -239,6 +249,67 @@ export function DevToolbar() {
             className={`${tool} mt-2 w-full`}
           >
             Next offer action: save, then lose the answer
+          </button>
+        </div>
+      )}
+      {me && (
+        <div className="mt-4 border-t border-white/15 pt-3">
+          <p className="font-semibold">Exchange {dealId ? '· this deal' : '· newest open deal'}</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                dealAct('They suggested a meeting.', () => mockTransactions.otherPartyProposesMeeting(dealId))
+              }
+              className={tool}
+            >
+              They suggest a meeting
+            </button>
+            <button
+              type="button"
+              onClick={() => dealAct('They confirmed their side.', () => mockTransactions.otherPartyConfirms(dealId))}
+              className={tool}
+            >
+              They confirm
+            </button>
+            <button
+              type="button"
+              onClick={() => dealAct('They asked to cancel.', () => mockTransactions.otherPartyRequestsCancel(dealId))}
+              className={tool}
+            >
+              They ask to cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => dealAct('They reported a problem.', () => mockTransactions.otherPartyDisputes(dealId))}
+              className={tool}
+            >
+              They report a problem
+            </button>
+            <button
+              type="button"
+              onClick={() => dealAct('The reservation has 20 hours left.', () => mockTransactions.nearlyEnd(dealId))}
+              className={tool}
+            >
+              Reservation nearly over
+            </button>
+            <button
+              type="button"
+              onClick={() => dealAct('The reservation ended.', () => mockTransactions.endReservation(dealId))}
+              className={tool}
+            >
+              End reservation
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              mockTransactions.saveThenFailNext()
+              setNote('The next deal action saves, then its answer is lost.')
+            }}
+            className={`${tool} mt-2 w-full`}
+          >
+            Next deal action: save, then lose the answer
           </button>
         </div>
       )}

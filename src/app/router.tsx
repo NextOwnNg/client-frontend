@@ -33,8 +33,6 @@ const upcomingPublic: Upcoming[] = [
 
 /** Member-only placeholders sit behind sign-in already, so the redirects can be reviewed now (PRD §6.3). */
 const upcomingMember: Upcoming[] = [
-  { path: 'transactions', title: 'Transactions', phase: 'Phase 5 (Exchange)' },
-  { path: 'me/reviews', title: 'Reviews', phase: 'Phase 5 (Exchange)' },
   { path: 'messages', title: 'Messages', phase: 'Phase 6 (Community)' },
   { path: 'notifications', title: 'Notifications', phase: 'Phase 6 (Community)' },
   { path: 'saved', title: 'Saved', phase: 'Phase 6 (Community)' },
@@ -101,6 +99,22 @@ export const routes: RouteObject[] = [
                     lazy: async () => ({ Component: (await import('@/pages/member/OfferThreadPage')).OfferThreadPage }),
                   },
                 ],
+              },
+              {
+                path: 'transactions',
+                lazy: async () => ({ Component: (await import('@/pages/member/TransactionsPage')).TransactionsPage }),
+              },
+              {
+                path: 'transactions/:id/review',
+                lazy: async () => ({ Component: (await import('@/pages/member/ReviewPage')).ReviewPage }),
+              },
+              {
+                path: 'me/reviews',
+                lazy: async () => ({ Component: (await import('@/pages/member/MyReviewsPage')).MyReviewsPage }),
+              },
+              {
+                path: 'transactions/:id',
+                lazy: async () => ({ Component: (await import('@/pages/member/TransactionPage')).TransactionPage }),
               },
               {
                 path: 'offers/new',

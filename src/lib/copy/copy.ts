@@ -17,5 +17,11 @@ export const copy = {
   supportLimit: 'We can review reports and account activity. We cannot reverse a transfer made outside NextOwn.',
   commentsNote: 'To make an offer, use Make an offer. Agreements made in comments are not tracked.',
   chatNote: 'Accept or counter through an offer card so the agreed terms are recorded.',
+  handoverNotice:
+    'Inspect the items before exchanging. Payment is arranged directly between you and the other person. NextOwn does not hold or independently verify payment in this pilot.',
   offline: "You're offline. You can keep browsing what's loaded. Offers and confirmations need a connection.",
 } as const
+
+/** PRD §10.1 dispute copy, with the case reference filled in. */
+export const disputeRecorded = (caseRef: string) =>
+  `We have recorded your report. Your case reference is ${caseRef}. Support will review the information.`

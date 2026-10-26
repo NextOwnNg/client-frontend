@@ -128,6 +128,16 @@ export function seedOffers(): { offers: StoredOffer[]; items: StoredItem[] } {
           ['u-tolu', 30, cash(570_000)],
         ),
       }),
+      // Accepted long ago and completed: the iPad deal both people confirmed
+      offer({
+        id: 'o-ipad-completed',
+        listingId: 'l17',
+        offererId: 'u-tolu',
+        ownerId: 'u-ibrahim',
+        status: 'ACCEPTED',
+        transactionId: 't-o-ipad-completed',
+        versions: versions(['u-tolu', 290, cash(85_000, 'Can pick up at the bus park.')]),
+      }),
       // Closed: declined
       offer({
         id: 'o-tecno-declined',

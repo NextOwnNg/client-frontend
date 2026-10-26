@@ -2,7 +2,8 @@ import { authDb } from '@/mocks/db/auth'
 import { listingsDb, toSummary } from '@/mocks/db/listings'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { seedOffers } from '@/mocks/fixtures/offers'
-import type { ListingDetail, Offer, OfferItemInput, OfferStatus, OfferTerms, PublicSeller, SwapItem } from '@/types/api'
+import { transactionsDb } from '@/mocks/db/transactions'
+import type { ListingDetail, Offer, OfferItemInput, OfferStatus, OfferTerms, SnapshotItem, SwapItem } from '@/types/api'
 
 /**
  * The mock API's negotiations and offer-only items. FICTIONAL. Offers keep their versions as they were sent;
@@ -84,13 +85,7 @@ function load() {
 }
 load()
 
-function seller(id: string): PublicSeller {
-  const profile = authDb.publicProfile(id)
-  if (!profile)
-    return { id, displayName: 'Member', phoneConfirmed: true, reviewCount: 0, areaName: runtimeConfig.cityName }
-  const { memberSince: _memberSince, ...rest } = profile
-  return rest
-}
+const seller = (id: string) => authDb.seller(id)
 
 function listingItem(detail: ListingDetail): SwapItem {
   const reason =
@@ -178,6 +173,7 @@ function view(offer: StoredOffer, viewerId: string): Offer {
     updatedAt: offer.updatedAt,
     closedReason: offer.closedReason,
     transactionId: offer.transactionId,
+    transactionStatus: offer.transactionId ? transactionsDb.statusOf(offer.transactionId) : undefined,
     unread: offer.unreadFor.includes(viewerId),
   }
 }
@@ -190,8 +186,19 @@ function addVersion(offer: StoredOffer, authorId: string, terms: OfferTerms) {
   offer.unreadFor = [authorId === offer.offererId ? offer.ownerId : offer.offererId]
 }
 
+const snapshotOf = (item: SwapItem | ListingDetail): SnapshotItem => ({
+  title: item.title,
+  condition: item.condition,
+  defects: item.defects,
+  repairs: item.repairs,
+  photos: 'images' in item ? item.images : item.photos.map(({ id: _id, ...photo }) => photo),
+  listingSlug: 'images' in item ? item.slug : item.listingSlug,
+})
+
 function accept(offer: StoredOffer) {
   const terms = currentVersion(offer)
+  const listing = listingsDb.byIdOrSlug(offer.listingId)!.detail
+  const offered = terms.offeredItemId ? findItem(terms.offeredItemId)?.item : undefined
   offer.status = 'ACCEPTED'
   offer.transactionId = `t-${offer.id}`
   offer.updatedAt = new Date().toISOString()
@@ -205,6 +212,25 @@ function accept(offer: StoredOffer) {
     if (own) own.reserved = true
     else listingsDb.setStatus(terms.offeredItemId, 'RESERVED')
   }
+
+  // The agreement is copied as it stands now, so later listing edits can't change it (QA-08)
+  transactionsDb.create({
+    id: offer.transactionId,
+    offerId: offer.id,
+    offererId: offer.offererId,
+    ownerId: offer.ownerId,
+    listingId: offer.listingId,
+    offeredItemId: terms.offeredItemId,
+    agreement: {
+      mode: terms.mode,
+      listingItem: snapshotOf(listing),
+      offeredItem: offered ? snapshotOf(offered) : null,
+      cashKobo: terms.cashKobo,
+      cashDirection: terms.cashDirection,
+      versionNumber: terms.number,
+      acceptedAt: offer.updatedAt,
+    },
+  })
 
   // Both items are spoken for now: every other open negotiation involving either one closes (ruling R4-5)
   for (const other of offers.values()) {
@@ -296,6 +322,15 @@ export const offersDb = {
   },
 
   item: findItem,
+
+  /** Reserve or release an offer-only item (deals hold it, cancellations free it). */
+  setItemReserved(id: string, reserved: boolean) {
+    const item = items.get(id)
+    if (!item) return false
+    item.reserved = reserved
+    save()
+    return true
+  },
 
   createItem(ownerId: string, input: OfferItemInput): SwapItem {
     const item: StoredItem = {

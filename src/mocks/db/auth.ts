@@ -1,7 +1,7 @@
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { sellers } from '@/mocks/fixtures/listings'
 import { SAMPLE_CODE } from '@/mocks/sample-code'
-import type { Me, PublicProfile } from '@/types/api'
+import type { Me, PublicProfile, PublicSeller } from '@/types/api'
 
 /**
  * The mock API's accounts, codes and session: a stand-in for the server and its HttpOnly cookie.
@@ -175,6 +175,26 @@ export const authDb = {
         runtimeConfig.areas.find((a) => a.id === account.areaId)?.name ?? seller?.areaName ?? runtimeConfig.cityName,
       memberSince: account.memberSince,
     }
+  },
+
+  /** The public card shown in offers and deals; a placeholder if the account is gone. */
+  seller(id: string): PublicSeller {
+    const profile = authDb.publicProfile(id)
+    if (!profile) {
+      return { id, displayName: 'Member', phoneConfirmed: true, reviewCount: 0, areaName: runtimeConfig.cityName }
+    }
+    const { memberSince: _memberSince, ...seller } = profile
+    return seller
+  },
+
+  /** A new review moves the person's count and average, as the server would. */
+  addReview(subjectId: string, rating: number) {
+    const account = accounts.get(subjectId)
+    if (!account) return
+    const count = account.reviewCount
+    account.rating = Math.round((((account.rating ?? rating) * count + rating) / (count + 1)) * 10) / 10
+    account.reviewCount = count + 1
+    if (subjectId === sessionUserId) save()
   },
 }
 

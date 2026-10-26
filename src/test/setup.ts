@@ -4,6 +4,7 @@ import { afterAll, afterEach, beforeAll } from 'vitest'
 import { mockAuth } from '@/mocks/db/auth'
 import { mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
+import { mockTransactions } from '@/mocks/db/transactions'
 import { mediaDb } from '@/mocks/db/media'
 import { useDraftStore } from '@/stores/drafts'
 import { useSessionStore } from '@/stores/session'
@@ -42,6 +43,7 @@ afterEach(() => {
   mockAuth.reset()
   mockListings.reset()
   mockOffers.reset()
+  mockTransactions.reset()
   mediaDb.reset()
   // Client stores outlive a render; every test starts signed out with no drafts
   useSessionStore.setState({ status: 'unknown', userId: null, onboarded: false, restricted: false, expired: false })

@@ -6,6 +6,7 @@ import { listingsDb, toSummary } from '@/mocks/db/listings'
 import { authHandlers } from '@/mocks/handlers/auth'
 import { network } from '@/mocks/handlers/network'
 import { offersHandlers } from '@/mocks/handlers/offers'
+import { transactionsHandlers } from '@/mocks/handlers/transactions'
 import { sellingHandlers } from '@/mocks/handlers/selling'
 import type {
   ItemCondition,
@@ -50,6 +51,7 @@ export const handlers: RequestHandler[] = [
   ...authHandlers,
   ...sellingHandlers,
   ...offersHandlers,
+  ...transactionsHandlers,
 
   http.get(`${API}/config`, async () => (await network()) ?? HttpResponse.json(runtimeConfig)),
 

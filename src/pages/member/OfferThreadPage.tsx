@@ -2,7 +2,7 @@ import { Button, toast } from '@heroui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Clock, Flag, LifeBuoy, LoaderCircle, SearchX } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { OfferSum } from '@/components/domain/OfferSum'
 import { MotionProvider } from '@/components/motion/MotionProvider'
 import { Seo } from '@/components/seo/Seo'
@@ -101,6 +101,7 @@ function Thread({
 }) {
   const now = useServerNow()
   const online = useOnline()
+  const navigate = useNavigate()
   const { decide, pending, checking } = useDecision(offer, viewerId)
   const [sheet, setSheet] = useState<'accept' | 'counter' | 'decline' | 'withdraw' | null>(null)
   const [acceptVersion, setAcceptVersion] = useState<OfferVersion | null>(null)
@@ -141,7 +142,12 @@ function Thread({
 
   async function accept() {
     if (!acceptVersion) return
-    settle(await decide({ action: 'accept', expectedVersionId: acceptVersion.id }))
+    const result = await decide({ action: 'accept', expectedVersionId: acceptVersion.id })
+    // An accepted offer becomes a deal: carry on there (FE-OFF-08, ruling R5-5)
+    settle(result, () => {
+      if (result.kind === 'done' && result.offer.transactionId)
+        void navigate(`/transactions/${result.offer.transactionId}`)
+    })
   }
 
   async function end(action: 'decline' | 'withdraw') {

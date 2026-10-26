@@ -178,9 +178,12 @@ export function diffVersions(before: OfferTerms, after: OfferTerms, viewer: View
 export type OfferTab = 'received' | 'sent' | 'handover' | 'closed'
 
 /** Inbox tab (FE-OFF-06): open offers by who made them, accepted ones until handover, then everything else. */
-export function offerTab(offer: Pick<Offer, 'status' | 'viewerRole'>): OfferTab {
+export function offerTab(offer: Pick<Offer, 'status' | 'viewerRole' | 'transactionStatus'>): OfferTab {
   if (offer.status === 'PENDING') return offer.viewerRole === 'owner' ? 'received' : 'sent'
-  return offer.status === 'ACCEPTED' ? 'handover' : 'closed'
+  if (offer.status !== 'ACCEPTED') return 'closed'
+  // Accepted offers stay here while the deal is open, then move to Closed
+  const open = !offer.transactionStatus || ['AWAITING_HANDOVER', 'DISPUTED'].includes(offer.transactionStatus)
+  return open ? 'handover' : 'closed'
 }
 
 /** The parts a sentence needs, from one version of an offer. */

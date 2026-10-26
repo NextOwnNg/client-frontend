@@ -219,10 +219,84 @@ export type Offer = {
   updatedAt: string
   /** Why it closed, in words, e.g. "The owner accepted another offer." */
   closedReason?: string
-  /** Set once accepted (Phase 5 builds the transaction screen). */
+  /** Set once accepted. */
   transactionId?: string
+  /** Where the deal stands once accepted. */
+  transactionStatus?: TransactionStatus
   /** Changed since the viewer last opened it. */
   unread: boolean
 }
 
 export type NewOffer = OfferTerms & { listingId: string }
+
+export type TransactionStatus = 'AWAITING_HANDOVER' | 'COMPLETED' | 'DISPUTED' | 'CANCELLED' | 'EXPIRED'
+
+/** One item exactly as it was agreed: copied at acceptance, never read from the live listing (QA-08). */
+export type SnapshotItem = {
+  title: string
+  condition: ItemCondition
+  defects: string[]
+  repairs?: string
+  photos: ListingImage[]
+  listingSlug?: string
+}
+
+/** The frozen terms of an accepted offer (FE-TRX-01). */
+export type AgreementSnapshot = {
+  mode: OfferMode
+  listingItem: SnapshotItem
+  offeredItem: SnapshotItem | null
+  cashKobo: number
+  cashDirection: CashDirection
+  versionNumber: number
+  acceptedAt: string
+}
+
+/** Private to the two people (FE-TRX-03). `agreedBy` holds who has said yes to this exact proposal. */
+export type Meeting = { place: string; time: string; note: string; proposedBy: string; agreedBy: string[] }
+
+/** The statements a person ticks when confirming their side (FE-TRX-05). */
+export type ConfirmCheck = 'received' | 'gave' | 'cash'
+
+export type CancelReason = 'CHANGED_MIND' | 'CANT_MEET' | 'ITEM_PROBLEM' | 'OTHER'
+
+export type DisputeCategory = 'CONDITION' | 'NO_SHOW' | 'PAYMENT' | 'UNSAFE' | 'OTHER'
+
+export type Review = {
+  rating: number
+  note?: string
+  authorId: string
+  subjectId: string
+  createdAt: string
+}
+
+export type Transaction = {
+  id: string
+  offerId: string
+  status: TransactionStatus
+  viewerRole: 'offerer' | 'owner'
+  offerer: PublicSeller
+  owner: PublicSeller
+  agreement: AgreementSnapshot
+  meeting: Meeting | null
+  /** When each person confirmed their side, or null. */
+  confirmations: { offerer: string | null; owner: string | null }
+  reservationExpiresAt: string
+  cancellation?: { requestedBy: string; reason: CancelReason; note?: string; requestedAt: string }
+  dispute?: { caseRef: string; openedBy: string; openedAt: string; category: DisputeCategory }
+  /** Why it ended, in words, for cancelled and expired deals. */
+  endedReason?: string
+  completedAt?: string
+  endedAt?: string
+  /** Reviews unlock only on COMPLETED; `mine` once the reader has left one. */
+  review: { eligible: boolean; mine?: Review; theirs?: Review }
+  createdAt: string
+  updatedAt: string
+}
+
+export type ReviewWithContext = Review & {
+  authorName: string
+  subjectName: string
+  itemTitle: string
+  transactionId: string
+}
