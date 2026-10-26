@@ -204,3 +204,47 @@ describe('Listing detail', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'iPhone 12 Pro · 128GB' })).toBeInTheDocument()
   })
 })
+
+describe('Saving a listing (FE-SAV-01)', () => {
+  const saveButtons = () => screen.findAllByRole('button', { name: /^Saved?$/ })
+
+  it('saves at once, and the item appears in Saved', async () => {
+    const user = userEvent.setup()
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    const { router } = renderDetail('macbook-air-m1-2020-gold')
+    await offerButton()
+
+    await user.click((await saveButtons())[0]!)
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: 'Saved' })[0]).toHaveAttribute('aria-pressed', 'true'),
+    )
+
+    await router.navigate('/saved')
+    expect(await screen.findByRole('link', { name: /MacBook Air M1, 2020/ })).toBeInTheDocument()
+  })
+
+  it('puts the toggle back and says so when saving fails', async () => {
+    const user = userEvent.setup()
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    server.use(http.put(`${API}/saved/listing/:id`, () => HttpResponse.json({ code: 'SERVER_ERROR' }, { status: 503 })))
+    renderDetail('macbook-air-m1-2020-gold')
+    await offerButton()
+
+    await user.click((await saveButtons())[0]!)
+
+    expect(await screen.findByText('We couldn’t save that. Try again.')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Save' })[0]).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('finishes a guest’s save after sign-in, and never unsaves (QA-01)', async () => {
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    // Already saved before: coming back with the intent must leave it saved
+    renderWithProviders(routes, { initialPath: '/listings/nintendo-switch-docked?intent=save' })
+
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: 'Saved' })[0]).toHaveAttribute('aria-pressed', 'true'),
+    )
+    await new Promise((r) => setTimeout(r, 50))
+    expect(screen.getAllByRole('button', { name: 'Saved' })[0]).toHaveAttribute('aria-pressed', 'true')
+  })
+})

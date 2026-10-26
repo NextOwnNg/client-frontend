@@ -54,3 +54,13 @@ export function relativeDeadline(endsAt: string, now: number, startedAt?: string
 
   return { label, ended: false, fractionLeft }
 }
+
+/** `"5 min ago"`, `"3h ago"`, `"Yesterday"`, then the day: for posts, messages and alerts. */
+export function timeAgo(iso: string, now: number): string {
+  const elapsed = now - Date.parse(iso)
+  if (elapsed < MINUTE) return 'Just now'
+  if (elapsed < HOUR) return `${Math.floor(elapsed / MINUTE)} min ago`
+  if (elapsed < 24 * HOUR) return `${Math.floor(elapsed / HOUR)}h ago`
+  if (elapsed < 48 * HOUR) return 'Yesterday'
+  return formatWAT(iso, { withTime: false })
+}

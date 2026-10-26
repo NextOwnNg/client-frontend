@@ -5,6 +5,8 @@ import { useMatch } from 'react-router'
 import { meKey, useMe } from '@/features/account/api'
 import { formatPhoneDisplay } from '@/lib/phone/phone'
 import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID, SAMPLE_MEMBER_PHONE } from '@/mocks/db/auth'
+import { mockFeed } from '@/mocks/db/feed'
+import { mockMessages } from '@/mocks/db/messages'
 import { listingsDb, mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
 import { mockTransactions } from '@/mocks/db/transactions'
@@ -26,6 +28,7 @@ export function DevToolbar() {
   // On an offer's page, the offer controls act on that offer; elsewhere on the newest one that fits
   const offerId = useMatch('/offers/:id')?.params.id
   const dealId = useMatch('/transactions/:id')?.params.id
+  const conversationId = useMatch('/messages/:id')?.params.id
 
   const refreshSession = () => queryClient.invalidateQueries({ queryKey: meKey })
   const act = (message: string, change: () => void) => {
@@ -55,6 +58,13 @@ export function DevToolbar() {
     void queryClient.invalidateQueries({ queryKey: ['offers'] })
     void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
     void queryClient.invalidateQueries({ queryKey: ['listings'] })
+  }
+
+  const communityAct = (message: string, change: () => boolean) => {
+    setNote(change() ? message : 'Nothing fits. Open a conversation first.')
+    void queryClient.invalidateQueries({ queryKey: ['conversations'] })
+    void queryClient.invalidateQueries({ queryKey: ['notifications'] })
+    void queryClient.invalidateQueries({ queryKey: ['feed'] })
   }
 
   if (!open) {
@@ -310,6 +320,55 @@ export function DevToolbar() {
             className={`${tool} mt-2 w-full`}
           >
             Next deal action: save, then lose the answer
+          </button>
+        </div>
+      )}
+      {me && (
+        <div className="mt-4 border-t border-white/15 pt-3">
+          <p className="font-semibold">Community {conversationId ? '· this conversation' : '· newest conversation'}</p>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => communityAct('They replied.', () => mockMessages.otherPartyReplies(conversationId))}
+              className={tool}
+            >
+              They reply
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                communityAct('Their last message was removed.', () =>
+                  mockMessages.moderateLastFromOther(conversationId),
+                )
+              }
+              className={tool}
+            >
+              Moderate their message
+            </button>
+            <button
+              type="button"
+              onClick={() => communityAct('Block switched.', () => mockMessages.toggleBlockedByOther(conversationId))}
+              className={tool}
+            >
+              They block / unblock you
+            </button>
+            <button
+              type="button"
+              onClick={() => communityAct('A comment was removed.', () => mockFeed.removeNewestComment())}
+              className={tool}
+            >
+              Remove a comment
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              mockFeed.rateLimitNextComment()
+              setNote('Your next comment will be refused as too fast.')
+            }}
+            className={`${tool} mt-2 w-full`}
+          >
+            Rate-limit next comment
           </button>
         </div>
       )}

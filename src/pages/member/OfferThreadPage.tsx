@@ -1,6 +1,6 @@
 import { Button, toast } from '@heroui/react'
 import { useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Clock, Flag, LifeBuoy, LoaderCircle, SearchX } from 'lucide-react'
+import { ArrowLeft, Clock, Flag, LifeBuoy, LoaderCircle, MessageCircle, SearchX } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { OfferSum } from '@/components/domain/OfferSum'
@@ -34,7 +34,7 @@ import { isAvailable } from '@/lib/copy/status'
 import { useServerNow } from '@/lib/time/server-clock'
 import { formatWAT } from '@/lib/time/time'
 import { useSessionStore } from '@/stores/session'
-import type { Offer, OfferVersion } from '@/types/api'
+import type { Offer, OfferVersion, TransactionStatus } from '@/types/api'
 
 /** FE-OFF-07..12: `/offers/:id`, for the two people in the negotiation only. */
 export function OfferThreadPage() {
@@ -220,6 +220,13 @@ function Thread({
       </header>
 
       <ListingPin listing={offer.listing} ownerName={offer.owner.displayName} label="Offer for" />
+      <Link
+        to={`/messages?offer=${offer.id}`}
+        className="-mt-2 inline-flex min-h-11 items-center gap-1.5 self-start rounded-control text-compact font-semibold text-action underline-offset-4 hover:underline"
+      >
+        <MessageCircle aria-hidden className="size-4" />
+        Message {other.displayName}
+      </Link>
 
       <Notices
         notice={notice}
@@ -376,6 +383,14 @@ function DecisionBar({ children }: { children: ReactNode }) {
   )
 }
 
+/** An accepted offer whose deal has since moved on. Awaiting handover keeps the "accepted" wording. */
+const dealOutcomes: Partial<Record<TransactionStatus, { title: string; body: string }>> = {
+  COMPLETED: { title: 'Exchange completed', body: 'You both confirmed the exchange.' },
+  CANCELLED: { title: 'The deal was cancelled', body: 'Both people agreed to cancel, and the items were released.' },
+  EXPIRED: { title: 'Reservation ended', body: 'The deal’s reservation ended before both people confirmed.' },
+  DISPUTED: { title: 'Under review', body: 'A problem was reported with this deal. Support will review it.' },
+}
+
 function ClosedState({ offer, expiredOnScreen }: { offer: Offer; expiredOnScreen: boolean }) {
   const other = counterpartOf(offer)
   const mine = offer.viewerRole
@@ -396,19 +411,32 @@ function ClosedState({ offer, expiredOnScreen }: { offer: Offer; expiredOnScreen
     )
   }
   switch (offer.status) {
-    case 'ACCEPTED':
+    case 'ACCEPTED': {
+      // The deal moves on after acceptance: say where it stands now, not what was true then (FE-NTF-01)
+      const ended = dealOutcomes[offer.transactionStatus ?? 'AWAITING_HANDOVER']
       return (
         <div className="flex flex-col gap-2">
-          <p className="text-body font-semibold text-ink">Offer accepted</p>
-          <p className="text-compact text-ink">{copy.offerAccepted}</p>
-          <p className="text-compact text-muted">{copy.handoverCaution}</p>
+          <p className="text-body font-semibold text-ink">{ended?.title ?? 'Offer accepted'}</p>
+          {ended ? (
+            <p className="text-compact text-ink">{ended.body}</p>
+          ) : (
+            <>
+              <p className="text-compact text-ink">{copy.offerAccepted}</p>
+              <p className="text-compact text-muted">{copy.handoverCaution}</p>
+            </>
+          )}
           {offer.transactionId && (
-            <ButtonLink to={`/transactions/${offer.transactionId}`} className="self-start">
-              View the agreement
+            <ButtonLink
+              to={`/transactions/${offer.transactionId}`}
+              variant={ended ? 'secondary' : 'primary'}
+              className="self-start"
+            >
+              {ended ? 'View the deal' : 'View the agreement'}
             </ButtonLink>
           )}
         </div>
       )
+    }
     case 'REJECTED':
       return (
         <p className="text-body text-ink">

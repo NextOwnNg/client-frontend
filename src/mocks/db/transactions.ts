@@ -1,6 +1,7 @@
 import { requiredChecks } from '@/features/transactions/transaction-view'
 import { authDb } from '@/mocks/db/auth'
 import { listingsDb } from '@/mocks/db/listings'
+import { notificationsDb } from '@/mocks/db/notifications'
 import { offersDb } from '@/mocks/db/offers'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { seedTransactions } from '@/mocks/fixtures/transactions'
@@ -10,6 +11,7 @@ import type {
   ConfirmCheck,
   DisputeCategory,
   Meeting,
+  NotificationKind,
   Review,
   ReviewWithContext,
   Transaction,
@@ -95,6 +97,17 @@ load()
 
 export const roleOf = (tx: StoredTransaction, userId: string) => (userId === tx.offererId ? 'offerer' : 'owner')
 const otherOf = (tx: StoredTransaction, userId: string) => (userId === tx.offererId ? tx.ownerId : tx.offererId)
+
+/** Tells the other person what `actorId` just did (MSG-03). Never the meeting place or time. */
+function notifyOther(tx: StoredTransaction, actorId: string, kind: NotificationKind, verb: string) {
+  notificationsDb.notify(
+    otherOf(tx, actorId),
+    kind,
+    `${authDb.seller(actorId).displayName} ${verb}`,
+    `/transactions/${tx.id}`,
+    tx.agreement.listingItem.title,
+  )
+}
 
 function touch(tx: StoredTransaction) {
   tx.updatedAt = new Date().toISOString()
@@ -191,6 +204,7 @@ export const transactionsDb = {
 
   proposeMeeting(tx: StoredTransaction, userId: string, meeting: Pick<Meeting, 'place' | 'time' | 'note'>) {
     tx.meeting = { ...meeting, proposedBy: userId, agreedBy: [userId] }
+    notifyOther(tx, userId, 'MEETING_UPDATED', 'suggested where and when to meet')
     touch(tx)
     save()
   },
@@ -204,6 +218,7 @@ export const transactionsDb = {
   /** Records one person's confirmation; the second one completes the deal (FE-TRX-07). */
   confirm(tx: StoredTransaction, userId: string) {
     tx.confirmations[roleOf(tx, userId)] = new Date().toISOString()
+    notifyOther(tx, userId, 'CONFIRMED', 'confirmed the exchange')
     if (tx.confirmations.offerer && tx.confirmations.owner) {
       tx.status = 'COMPLETED'
       tx.completedAt = new Date().toISOString()
@@ -224,6 +239,7 @@ export const transactionsDb = {
       note: note?.trim() || undefined,
       requestedAt: new Date().toISOString(),
     }
+    notifyOther(tx, userId, 'CANCEL_REQUESTED', 'asked to cancel the deal')
     touch(tx)
     save()
   },
@@ -248,6 +264,7 @@ export const transactionsDb = {
       openedAt: new Date().toISOString(),
       category,
     }
+    notifyOther(tx, userId, 'DISPUTE_OPENED', 'reported a problem with the deal')
     touch(tx)
     save()
   },

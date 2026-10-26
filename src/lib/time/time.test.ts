@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatWAT, relativeDeadline } from '@/lib/time/time'
+import { formatWAT, relativeDeadline, timeAgo } from '@/lib/time/time'
 
 const HOUR = 3_600_000
 const now = Date.parse('2026-10-22T12:00:00Z')
@@ -47,5 +47,21 @@ describe('formatWAT', () => {
 
   it('can omit the time', () => {
     expect(formatWAT('2026-10-24T17:00:00Z', { withTime: false })).toBe('Sat 24 Oct')
+  })
+})
+
+describe('timeAgo', () => {
+  const now = Date.parse('2026-10-24T17:00:00Z')
+  const at = (minutes: number) => new Date(now - minutes * 60_000).toISOString()
+
+  it('stays short for recent activity', () => {
+    expect(timeAgo(at(0.5), now)).toBe('Just now')
+    expect(timeAgo(at(5), now)).toBe('5 min ago')
+    expect(timeAgo(at(180), now)).toBe('3h ago')
+  })
+
+  it('names the day once it is older than a day', () => {
+    expect(timeAgo(at(26 * 60), now)).toBe('Yesterday')
+    expect(timeAgo(at(3 * 24 * 60), now)).toBe('Wed 21 Oct')
   })
 })

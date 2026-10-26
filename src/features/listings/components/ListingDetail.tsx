@@ -14,6 +14,7 @@ import { cx } from '@/lib/cx'
 import { formatWAT } from '@/lib/time/time'
 import { useSessionStore } from '@/stores/session'
 import { unavailableMessage } from '@/features/listings/copy'
+import { useIsSaved, useToggleSave } from '@/features/saved/api'
 import type { Intent } from '@/features/listings/components/SignInPrompt'
 import type { ListingDetail } from '@/types/api'
 
@@ -226,17 +227,26 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
   const available = isAvailable(listing.status)
   const own = userId !== null && userId === listing.seller.id
   const bar = layout === 'bar'
+  const saved = useIsSaved('listing', listing.id)
+  const toggleSave = useToggleSave()
 
   async function act(next: Intent) {
+    // Saving works in any state, so only an offer needs the fresh check (FE-LDT-03)
+    if (next === 'save') {
+      if (userId) toggleSave.mutate({ kind: 'listing', id: listing.id, on: !saved })
+      else {
+        setIntent(next)
+        setPromptOpen(true)
+      }
+      return
+    }
     setChecking(true)
     const fresh = await recheck().finally(() => setChecking(false))
     if (!fresh || !isAvailable(fresh.status)) return
     if (!userId) {
       setIntent(next)
       setPromptOpen(true)
-    } else if (next === 'offer') void navigate(`/offers/new?listing=${fresh.id}`)
-    // Saved items arrive with Phase 6; say so rather than pretend
-    else void import('@heroui/react').then(({ toast }) => toast("Saved items aren't available yet in this preview."))
+    } else void navigate(`/offers/new?listing=${fresh.id}`)
   }
 
   // Back from signing in with `?intent=save` (QA-01): finish the save once, then tidy the URL
@@ -246,7 +256,8 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
     const rest = new URLSearchParams(params)
     rest.delete('intent')
     setParams(rest, { replace: true, preventScrollReset: true })
-    void act('save')
+    // Saving is the intent: an item that is already saved stays saved
+    toggleSave.mutate({ kind: 'listing', id: listing.id, on: true })
   })
   useEffect(() => {
     if (!resumed.current && userId && params.get('intent') === 'save') resumeSave()
@@ -255,14 +266,14 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
   const save = (
     <PlainButton
       variant="secondary"
+      aria-pressed={saved}
       onClick={() => void act('save')}
       onPointerEnter={loadSignInPrompt}
-      disabled={checking}
       fullWidth={!bar}
       className={cx(bar && 'shrink-0 px-5')}
     >
-      <Bookmark aria-hidden className="size-5" />
-      Save
+      <Bookmark aria-hidden className={cx('size-5', saved && 'fill-current')} />
+      {saved ? 'Saved' : 'Save'}
     </PlainButton>
   )
 

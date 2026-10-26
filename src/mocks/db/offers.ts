@@ -1,9 +1,19 @@
 import { authDb } from '@/mocks/db/auth'
 import { listingsDb, toSummary } from '@/mocks/db/listings'
+import { notificationsDb } from '@/mocks/db/notifications'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { seedOffers } from '@/mocks/fixtures/offers'
 import { transactionsDb } from '@/mocks/db/transactions'
-import type { ListingDetail, Offer, OfferItemInput, OfferStatus, OfferTerms, SnapshotItem, SwapItem } from '@/types/api'
+import type {
+  ListingDetail,
+  NotificationKind,
+  Offer,
+  OfferItemInput,
+  OfferStatus,
+  OfferTerms,
+  SnapshotItem,
+  SwapItem,
+} from '@/types/api'
 
 /**
  * The mock API's negotiations and offer-only items. FICTIONAL. Offers keep their versions as they were sent;
@@ -244,6 +254,13 @@ function accept(offer: StoredOffer) {
   }
 }
 
+/** Tells the other person what `actorId` just did (MSG-03). */
+function notifyOther(offer: StoredOffer, actorId: string, kind: NotificationKind, verb: string) {
+  const to = actorId === offer.offererId ? offer.ownerId : offer.offererId
+  const title = listingsDb.byIdOrSlug(offer.listingId)?.detail.title
+  notificationsDb.notify(to, kind, `${seller(actorId).displayName} ${verb}`, `/offers/${offer.id}`, title)
+}
+
 export const offersDb = {
   /** Every offer the person is part of, newest activity first. */
   forUser(userId: string): Offer[] {
@@ -292,22 +309,29 @@ export const offersDb = {
     }
     addVersion(offer, offererId, terms)
     offers.set(offer.id, offer)
+    notifyOther(offer, offererId, 'OFFER_RECEIVED', 'made an offer')
     save()
     return offer
   },
 
   counter(offer: StoredOffer, authorId: string, terms: OfferTerms) {
     addVersion(offer, authorId, terms)
+    notifyOther(offer, authorId, 'OFFER_COUNTERED', 'countered your offer')
     save()
   },
 
   accept(offer: StoredOffer) {
+    const actor = turnOf(offer)!
     accept(offer)
+    notifyOther(offer, actor, 'OFFER_ACCEPTED', 'accepted your offer')
     save()
   },
 
   end(offer: StoredOffer, status: 'REJECTED' | 'WITHDRAWN') {
     close(offer, status)
+    // The owner declines and the offerer withdraws (ruling R4-2)
+    if (status === 'WITHDRAWN') notifyOther(offer, offer.offererId, 'OFFER_WITHDRAWN', 'withdrew their offer')
+    else notifyOther(offer, offer.ownerId, 'OFFER_DECLINED', 'declined your offer')
     save()
   },
 

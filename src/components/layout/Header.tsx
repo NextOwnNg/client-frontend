@@ -3,18 +3,37 @@ import { Link, NavLink, useLocation } from 'react-router'
 import { Logo, LogoMark } from '@/components/brand/Logo'
 import { AreaPicker } from '@/components/layout/AreaPicker'
 import { ButtonLink } from '@/components/ui/Button'
+import { useNotificationCounts } from '@/features/notifications/api'
 import { loginPath } from '@/lib/auth/next'
 import { cx } from '@/lib/cx'
 import { useSessionStore } from '@/stores/session'
 
-function IconLink({ to, label, icon: Icon }: { to: string; label: string; icon: typeof Bell }) {
+function IconLink({
+  to,
+  label,
+  icon: Icon,
+  count = 0,
+}: {
+  to: string
+  label: string
+  icon: typeof Bell
+  count?: number
+}) {
   return (
     <Link
       to={to}
-      aria-label={label}
-      className="flex size-11 items-center justify-center rounded-full text-ink transition-[background-color,transform] duration-120 ease-out active:scale-95 pointer-fine:hover:bg-mint"
+      aria-label={count > 0 ? `${label}, ${count} unread` : label}
+      className="relative flex size-11 items-center justify-center rounded-full text-ink transition-[background-color,transform] duration-120 ease-out active:scale-95 pointer-fine:hover:bg-mint"
     >
       <Icon aria-hidden className="size-5.5" strokeWidth={1.75} />
+      {count > 0 && (
+        <span
+          aria-hidden
+          className="tabular absolute top-1 right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-action px-1 text-[0.6875rem] leading-none font-bold text-action-foreground ring-2 ring-surface"
+        >
+          {count > 9 ? '9+' : count}
+        </span>
+      )}
     </Link>
   )
 }
@@ -23,6 +42,7 @@ function IconLink({ to, label, icon: Icon }: { to: string; label: string; icon: 
 function SessionLinks() {
   const status = useSessionStore((s) => s.status)
   const { pathname, search } = useLocation()
+  const { data: counts } = useNotificationCounts()
 
   // Nothing until the session check answers, so the header doesn't flash "Sign in" at a member
   if (status === 'unknown') return null
@@ -38,8 +58,8 @@ function SessionLinks() {
   }
   return (
     <>
-      <IconLink to="/messages" label="Messages" icon={MessageCircle} />
-      <IconLink to="/notifications" label="Notifications" icon={Bell} />
+      <IconLink to="/messages" label="Messages" icon={MessageCircle} count={counts?.messages} />
+      <IconLink to="/notifications" label="Notifications" icon={Bell} count={counts?.notifications} />
       {/* Phones reach the profile from the bottom nav */}
       <span className="hidden desktop:contents">
         <IconLink to="/me" label="Your profile" icon={UserRound} />
