@@ -1,6 +1,5 @@
-import { Clock, Info, LifeBuoy } from 'lucide-react'
+import { Clock, Info } from 'lucide-react'
 import { type ReactNode } from 'react'
-import { Link } from 'react-router'
 import { OfferSum } from '@/components/domain/OfferSum'
 import { TextAreaField } from '@/components/ui/TextAreaField'
 import { offerOnlyNote } from '@/features/offers/components/OfferItemForm'
@@ -15,6 +14,7 @@ import {
 } from '@/features/offers/offer-terms'
 import { draftTerms } from '@/features/offers/use-offer-draft'
 import { copy } from '@/lib/copy/copy'
+import { PolicyLinks } from '@/features/trust/components/PolicyLinks'
 import { useServerNow } from '@/lib/time/server-clock'
 import { formatWAT } from '@/lib/time/time'
 import type { SwapItem } from '@/types/api'
@@ -109,18 +109,10 @@ export function ReviewStep({
         </li>
         <li className="flex items-start gap-2">
           <Info aria-hidden className="mt-0.5 size-4 shrink-0 text-action" />
-          <span>
-            <span>{copy.handoverCaution}</span>{' '}
-            <Link
-              to="/support"
-              className="inline-flex items-center gap-1 font-semibold text-action underline-offset-4 hover:underline"
-            >
-              <LifeBuoy aria-hidden className="size-3.5" />
-              Safety tips
-            </Link>
-          </span>
+          {copy.handoverCaution}
         </li>
       </ul>
+      <PolicyLinks className="-mt-3" />
 
       {status}
     </div>

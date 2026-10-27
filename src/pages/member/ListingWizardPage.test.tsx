@@ -252,6 +252,12 @@ describe('Listing wizard: preview and publish', () => {
     await openWizard(`/listings/${draft.id}/edit?step=preview`)
 
     expect(screen.getByText('Preview: this is how buyers will see your listing')).toBeInTheDocument()
+    // FE-TRU-05: the rules are linked where the seller publishes
+    const rules = screen.getByRole('list', { name: 'Rules and safety' })
+    expect(within(rules).getByRole('link', { name: 'Prohibited items' })).toHaveAttribute(
+      'href',
+      '/community-rules#prohibited',
+    )
     expect(screen.getByRole('heading', { name: 'Galaxy S21 · 128GB' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Condition and defects' })).toBeInTheDocument()
     expect(screen.getByText('₦250,000')).toBeInTheDocument()

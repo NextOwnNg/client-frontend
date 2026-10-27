@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, toast } from '@heroui/react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Ban, Handshake, LoaderCircle, PackageX, SearchX, ShieldAlert, X } from 'lucide-react'
+import { Ban, Handshake, LoaderCircle, OctagonAlert, PackageX, SearchX, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
@@ -32,7 +32,7 @@ import {
   type ComposerStep,
 } from '@/features/offers/use-offer-draft'
 import { toApiError } from '@/lib/api/api-error'
-import { errorReason, fieldErrorsOf, isNotFound, isSignedOut } from '@/lib/api/error-message'
+import { errorReason, fieldErrorsOf, isNotFound, isRefused, isSignedOut } from '@/lib/api/error-message'
 import { apiClient } from '@/lib/api/client'
 import { flattenErrors } from '@/lib/forms/form-errors'
 import { copy } from '@/lib/copy/copy'
@@ -95,10 +95,10 @@ export function OfferComposerPage() {
   if (restricted) {
     return (
       <Blocked
-        icon={ShieldAlert}
+        icon={OctagonAlert}
         title="Your account can’t make offers right now"
         pin={pin}
-        actions={<ButtonLink to="/support?topic=appeal">Ask for a review</ButtonLink>}
+        actions={<ButtonLink to="/appeal">Ask for a review</ButtonLink>}
       >
         While your account is restricted you can’t send offers. Offers and deals you already have stay available.
       </Blocked>
@@ -147,7 +147,7 @@ type Outcome =
   | { kind: 'unknown' }
   | { kind: 'unavailable' }
   | { kind: 'exists'; offerId: string }
-  | { kind: 'refused' }
+  | { kind: 'refused'; reason: string }
 
 /** Long enough to read, so a quick answer doesn't flash past (PRD §7.4 read-before-retry). */
 const MIN_CHECK_MS = 500
@@ -268,7 +268,7 @@ function Composer({
       }
       // Signing in again is handled by the session prompt; the draft stays put
       if (isSignedOut(e)) return
-      if (e.status === 403) return setOutcome({ kind: 'refused' })
+      if (isRefused(e)) return setOutcome({ kind: 'refused', reason: errorReason(e) })
       setOutcome({ kind: 'not-sent', reason: errorReason(e) })
     }
   }
@@ -431,8 +431,8 @@ function SendStatus({
       )
     case 'refused':
       return (
-        <Banner tone="danger" title="This action isn’t available.">
-          Your account may have changed. Reload the page to see what you can do.
+        <Banner tone="danger" title="Your offer wasn’t sent.">
+          {outcome.reason}
         </Banner>
       )
   }

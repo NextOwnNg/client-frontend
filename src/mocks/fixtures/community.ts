@@ -30,7 +30,6 @@ export type StoredConversation = {
   userIds: string[]
   /** Every offer between the two people on this listing, oldest first. */
   offerIds: string[]
-  blockedBy: string | null
   /** When each person last read the thread. */
   readAt: Record<string, string>
   createdAt: string
@@ -138,7 +137,6 @@ export function seedConversations(): { conversations: StoredConversation[]; mess
         listingId: 'l10',
         userIds: ['u-tolu', 'u-chidi'],
         offerIds: ['o-xbox-accepted'],
-        blockedBy: null,
         readAt: { 'u-tolu': ago(5), 'u-chidi': ago(5) },
         createdAt: ago(50),
       },
@@ -147,7 +145,6 @@ export function seedConversations(): { conversations: StoredConversation[]; mess
         listingId: 'l1',
         userIds: ['u-chidi', 'u-tolu'],
         offerIds: ['o-macbook-for-iphone'],
-        blockedBy: null,
         readAt: { 'u-tolu': ago(5), 'u-chidi': ago(4) },
         createdAt: ago(5),
       },

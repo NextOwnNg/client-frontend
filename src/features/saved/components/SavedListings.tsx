@@ -26,22 +26,25 @@ export function SavedListings() {
     )
   }
   return (
-    <ul aria-label="Saved listings" className="grid gap-2 tablet:grid-cols-2 tablet:gap-x-4">
-      {items.map((listing) => (
-        <li key={listing.id} className="flex flex-col">
-          {listing.status === 'REMOVED' ? (
-            <div className="flex h-30 flex-col justify-center rounded-card border border-dashed border-border bg-surface px-4">
-              <p className="text-body font-semibold text-muted">Listing removed</p>
-              <p className="text-compact text-muted">This item is no longer on NextOwn.</p>
+    <>
+      <h2 className="sr-only">Saved listings</h2>
+      <ul aria-label="Saved listings" className="grid gap-2 tablet:grid-cols-2 tablet:gap-x-4">
+        {items.map((listing) => (
+          <li key={listing.id} className="flex flex-col">
+            {listing.status === 'REMOVED' ? (
+              <div className="flex h-30 flex-col justify-center rounded-card border border-dashed border-border bg-surface px-4">
+                <p className="text-body font-semibold text-muted">Listing removed</p>
+                <p className="text-compact text-muted">This item is no longer on NextOwn.</p>
+              </div>
+            ) : (
+              <ListingRow listing={listing} />
+            )}
+            <div className="-mb-2 flex justify-end">
+              <RemoveSavedButton listing={listing} />
             </div>
-          ) : (
-            <ListingRow listing={listing} />
-          )}
-          <div className="-mb-2 flex justify-end">
-            <RemoveSavedButton listing={listing} />
-          </div>
-        </li>
-      ))}
-    </ul>
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }

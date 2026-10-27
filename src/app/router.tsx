@@ -2,7 +2,6 @@ import { createBrowserRouter, type RouteObject } from 'react-router'
 import { RedirectIfAuthed, RequireAuth } from '@/app/guards'
 import { AppLayout } from '@/app/layouts/AppLayout'
 import { RootLayout } from '@/app/layouts/RootLayout'
-import { ComingSoonPage } from '@/pages/ComingSoonPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { HomePage } from '@/pages/public/HomePage'
 
@@ -19,24 +18,20 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
     ]
   : []
 
-/** Screens from later phases render a placeholder so the shell's navigation can be reviewed now. */
-type Upcoming = { path: string; title: string; phase: string }
-
-const upcomingPublic: Upcoming[] = [
-  { path: 'how-it-works', title: 'How it works', phase: 'Phase 7 (Trust and finish)' },
-  { path: 'support', title: 'Safety and help', phase: 'Phase 7 (Trust and finish)' },
-  { path: 'community-rules', title: 'Community rules', phase: 'Phase 7 (Trust and finish)' },
-  { path: 'terms', title: 'Terms', phase: 'Phase 7 (Trust and finish)' },
-  { path: 'privacy', title: 'Privacy', phase: 'Phase 7 (Trust and finish)' },
+/** Help and policy pages: public, each its own small chunk (PRD §6.1). */
+const helpPages: { path: string; load: () => Promise<{ Component: React.ComponentType }> }[] = [
+  { path: 'support', load: async () => ({ Component: (await import('@/pages/public/SupportPage')).SupportPage }) },
+  {
+    path: 'how-it-works',
+    load: async () => ({ Component: (await import('@/pages/public/HowItWorksPage')).HowItWorksPage }),
+  },
+  {
+    path: 'community-rules',
+    load: async () => ({ Component: (await import('@/pages/public/CommunityRulesPage')).CommunityRulesPage }),
+  },
+  { path: 'terms', load: async () => ({ Component: (await import('@/pages/public/TermsPage')).TermsPage }) },
+  { path: 'privacy', load: async () => ({ Component: (await import('@/pages/public/PrivacyPage')).PrivacyPage }) },
 ]
-
-/** Member-only placeholders sit behind sign-in already, so the redirects can be reviewed now (PRD §6.3). */
-const upcomingMember: Upcoming[] = [{ path: 'report/:type/:id', title: 'Report', phase: 'Phase 7 (Trust and finish)' }]
-
-const placeholder = ({ path, title, phase }: Upcoming): RouteObject => ({
-  path,
-  element: <ComingSoonPage title={title} phase={phase} />,
-})
 
 export const routes: RouteObject[] = [
   {
@@ -60,7 +55,7 @@ export const routes: RouteObject[] = [
             lazy: async () => ({ Component: (await import('@/pages/public/ProfilePage')).ProfilePage }),
           },
           { path: 'feed', lazy: async () => ({ Component: (await import('@/pages/public/FeedPage')).FeedPage }) },
-          ...upcomingPublic.map(placeholder),
+          ...helpPages.map(({ path, load }) => ({ path, lazy: load })),
           {
             Component: RequireAuth,
             children: [
@@ -139,7 +134,18 @@ export const routes: RouteObject[] = [
                 path: 'saved',
                 lazy: async () => ({ Component: (await import('@/pages/member/SavedPage')).SavedPage }),
               },
-              ...upcomingMember.map(placeholder),
+              {
+                path: 'me/reports',
+                lazy: async () => ({ Component: (await import('@/pages/member/MyReportsPage')).MyReportsPage }),
+              },
+              {
+                path: 'appeal',
+                lazy: async () => ({ Component: (await import('@/pages/member/AppealPage')).AppealPage }),
+              },
+              {
+                path: 'report/:type/:id',
+                lazy: async () => ({ Component: (await import('@/pages/member/ReportPage')).ReportPage }),
+              },
             ],
           },
           ...devRoutes,

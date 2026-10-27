@@ -15,7 +15,7 @@ export function SellerCard({ listing }: { listing: ListingDetail }) {
         Listed by
       </h2>
       <div className="flex items-center gap-3">
-        <Avatar name={seller.displayName} />
+        <Avatar name={seller.displayName} src={seller.avatarUrl} />
         <div className="flex min-w-0 flex-col">
           <p className="truncate text-body font-semibold text-ink">{seller.displayName}</p>
           <AreaLabel name={seller.areaName} />

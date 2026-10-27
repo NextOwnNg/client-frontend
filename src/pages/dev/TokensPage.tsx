@@ -44,7 +44,7 @@ export function TokensPage() {
   return (
     <div className="flex flex-col gap-12">
       <Seo title="Design tokens" noindex />
-      <h1 className="text-h1 text-ink">Design tokens</h1>
+      <h1 className="text-h2 text-ink tablet:text-h1">Design tokens</h1>
       <Link to="/dev/components" className="text-body font-medium text-action underline">
         Component gallery
       </Link>

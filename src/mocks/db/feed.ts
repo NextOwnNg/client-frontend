@@ -75,9 +75,10 @@ const commentView = (c: StoredComment): FeedComment => ({
 })
 
 export const feedDb = {
-  /** Newest first, `size` at a time from the cursor (ruling R6-1). */
-  page(cursor: number, size: number): { items: FeedPost[]; nextCursor: string | null } {
-    const sorted = [...posts].sort(newest)
+  /** Newest first, `size` at a time from the cursor (ruling R6-1), without posts from `hidden` authors. */
+  page(cursor: number, size: number, hidden = new Set<string>()): { items: FeedPost[]; nextCursor: string | null } {
+    // People the viewer blocked drop out of their feed (ruling R7-4)
+    const sorted = posts.filter((p) => !hidden.has(p.authorId)).sort(newest)
     const next = cursor + size
     return { items: sorted.slice(cursor, next).map(view), nextCursor: next < sorted.length ? String(next) : null }
   },
@@ -87,6 +88,8 @@ export const feedDb = {
   },
 
   view,
+
+  comment: (id: string) => comments.find((c) => c.id === id),
 
   views(ids: string[]): FeedPost[] {
     return ids.flatMap((id) => {

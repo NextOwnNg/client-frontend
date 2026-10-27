@@ -75,6 +75,7 @@ export function FeedPage() {
   } else {
     body = (
       <>
+        <h2 className="sr-only">Posts</h2>
         <ul aria-label="Posts" className="flex flex-col gap-4">
           {data.map((post, i) => (
             <li key={post.id}>

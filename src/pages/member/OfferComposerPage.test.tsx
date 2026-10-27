@@ -123,6 +123,8 @@ describe('Offer composer: cash (FE-OFF-02, FE-OFF-05)', () => {
     expect(screen.getByText(copy.beforeSend)).toBeInTheDocument()
     expect(screen.getByText('This is an offer, not a completed transaction.')).toBeInTheDocument()
     expect(screen.getByText(copy.handoverCaution)).toBeInTheDocument()
+    const rules = screen.getByRole('list', { name: 'Rules and safety' })
+    expect(within(rules).getByRole('link', { name: 'Community rules' })).toHaveAttribute('href', '/community-rules')
     expect(screen.getByText(/If Zainab M\. doesn’t answer, this offer expires/)).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: 'Send offer' }))

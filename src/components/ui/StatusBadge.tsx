@@ -6,7 +6,7 @@ import type { StatusTone } from '@/lib/copy/status'
 const tones: Record<StatusTone, string> = {
   neutral: 'bg-cloud text-muted ring-1 ring-border',
   info: 'bg-mint text-action',
-  success: 'bg-success/10 text-success',
+  success: 'bg-success/[0.07] text-success',
   warning: 'bg-warning/10 text-warning',
   danger: 'bg-danger/10 text-danger',
   highlight: 'bg-highlight-tint text-ink ring-1 ring-highlight',

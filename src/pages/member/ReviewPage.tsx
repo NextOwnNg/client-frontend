@@ -1,6 +1,8 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, toast } from '@heroui/react'
 import { Lock, SearchX } from 'lucide-react'
-import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { useNavigate, useParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
@@ -16,6 +18,8 @@ import { copy } from '@/lib/copy/copy'
 import { formatWAT } from '@/lib/time/time'
 import { useSessionStore } from '@/stores/session'
 import type { Transaction } from '@/types/api'
+
+const NOTE_MAX = 500
 
 /** UX-24: `/transactions/:id/review`. The form exists only for a completed deal, whatever the link says. */
 export function ReviewPage() {
@@ -82,27 +86,43 @@ function Shell({ title, tx, children }: { title: string; tx: Transaction; childr
   )
 }
 
+const reviewSchema = z.object({
+  // Nothing is chosen at first; the transform turns "nothing" into the message and narrows the type
+  rating: z
+    .number()
+    .int()
+    .min(1)
+    .max(5)
+    .nullable()
+    .transform((rating, ctx) => {
+      if (rating) return rating
+      ctx.addIssue({ code: 'custom', message: 'Choose a rating from 1 to 5 stars.' })
+      return z.NEVER
+    }),
+  note: z.string().trim().max(NOTE_MAX),
+})
+
+type ReviewInput = z.input<typeof reviewSchema>
+type ReviewForm = z.output<typeof reviewSchema>
+
 function ReviewForm({ tx, viewerId, otherName }: { tx: Transaction; viewerId: string; otherName: string }) {
   const navigate = useNavigate()
   const { run, pending } = useTransactionAction(tx, viewerId)
-  const [rating, setRating] = useState<number | null>(null)
-  const [note, setNote] = useState('')
-  const [shown, setShown] = useState(false)
-  const [failure, setFailure] = useState<string | null>(null)
+  const { control, handleSubmit, setError, formState } = useForm<ReviewInput, unknown, ReviewForm>({
+    resolver: zodResolver(reviewSchema),
+    defaultValues: { rating: null, note: '' },
+  })
 
-  async function submit() {
-    setShown(true)
-    setFailure(null)
-    if (rating === null) return
-    const result = await run({ kind: 'review', rating, note: note.trim() })
+  const submit = handleSubmit(async ({ rating, note }) => {
+    const result = await run({ kind: 'review', rating, note })
     if (result.kind === 'done') {
       toast.success('Review posted.')
       void navigate(`/transactions/${tx.id}`, { replace: true })
-    } else if (result.kind === 'refused') setFailure(result.message)
+    } else if (result.kind === 'refused') setError('root', { message: result.message })
     else if (!(result.kind === 'not-done' && result.silent)) {
-      setFailure('Your review wasn’t posted. Check your connection and try again.')
+      setError('root', { message: 'Your review wasn’t posted. Check your connection and try again.' })
     }
-  }
+  })
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6">
@@ -122,24 +142,34 @@ function ReviewForm({ tx, viewerId, otherName }: { tx: Transaction; viewerId: st
           void submit()
         }}
       >
-        <StarRating
-          value={rating}
-          onChange={setRating}
-          error={shown && rating === null ? 'Choose a rating from 1 to 5 stars.' : null}
+        <Controller
+          control={control}
+          name="rating"
+          render={({ field, fieldState }) => (
+            <StarRating value={field.value} onChange={field.onChange} error={fieldState.error?.message ?? null} />
+          )}
         />
-        <TextAreaField
-          label="Add a few words (optional)"
-          hint="Keep it about this exchange: timekeeping, the item, how it went."
-          rows={4}
-          maxLength={500}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
+        <Controller
+          control={control}
+          name="note"
+          render={({ field }) => (
+            <TextAreaField
+              label="Add a few words (optional)"
+              hint="Keep it about this exchange: timekeeping, the item, how it went."
+              rows={4}
+              maxLength={NOTE_MAX}
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+            />
+          )}
         />
         <p className="flex items-start gap-2 text-compact text-muted">
           <Lock aria-hidden className="mt-0.5 size-4 shrink-0" />
           Your review appears on {otherName}’s profile with your name. You can leave one review per exchange.
         </p>
-        {failure && <Banner tone="danger" title={failure} />}
+        {formState.errors.root && <Banner tone="danger" title={formState.errors.root.message ?? ''} />}
         <Button type="submit" isPending={pending} className="self-start px-8">
           Post review
         </Button>

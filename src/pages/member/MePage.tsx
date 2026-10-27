@@ -1,6 +1,7 @@
 import {
   Bookmark,
   ChevronRight,
+  Flag,
   Handshake,
   LifeBuoy,
   Package,
@@ -31,7 +32,8 @@ const groups: { label: string; links: HubLink[] }[] = [
     label: 'Account',
     links: [
       { to: '/settings', label: 'Account settings', hint: 'Profile, messages, sign out', icon: Settings },
-      { to: '/support', label: 'Safety and help', hint: 'Meeting safely, reports, appeals', icon: LifeBuoy },
+      { to: '/me/reports', label: 'My reports', hint: 'Status of what you reported', icon: Flag },
+      { to: '/support', label: 'Safety and help', hint: 'Meeting safely, reporting, appeals', icon: LifeBuoy },
     ],
   },
 ]

@@ -1,6 +1,8 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { apiBaseUrl } from '@/lib/env'
 import { authDb, authLimits } from '@/mocks/db/auth'
+import { mediaDb } from '@/mocks/db/media'
+import { trustDb } from '@/mocks/db/trust'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { network } from '@/mocks/handlers/network'
 import type { Me, MeUpdate } from '@/types/api'
@@ -21,6 +23,12 @@ const error = (
 const authRequired = () => error(401, 'AUTH_REQUIRED', 'Sign in to continue')
 const invalid = (fieldErrors: Record<string, string>) =>
   error(422, 'VALIDATION_ERROR', 'Check the highlighted fields', { fieldErrors })
+
+/** `/me` as the client sees it: with any appeal the member has made (ruling R7-5). */
+const withAppeal = (me: Me): Me => {
+  const appeal = trustDb.appealOf(me.id)
+  return appeal ? { ...me, appeal } : me
+}
 
 const isNigerianMobile = (phone: unknown): phone is string =>
   typeof phone === 'string' && /^\+234[789]\d{9}$/.test(phone)
@@ -86,7 +94,7 @@ export const authHandlers: RequestHandler[] = [
     const failure = await network()
     if (failure) return failure
     const me = authDb.current()
-    return me ? HttpResponse.json<Me>(me) : authRequired()
+    return me ? HttpResponse.json<Me>(withAppeal(me)) : authRequired()
   }),
 
   http.patch(`${API}/me`, async ({ request }) => {
@@ -98,13 +106,16 @@ export const authHandlers: RequestHandler[] = [
     const errors = validateUpdate(body)
     if (Object.keys(errors).length) return invalid(errors)
 
-    const { acceptTerms, ...changes } = body
+    const { acceptTerms, avatarId, ...changes } = body
+    // A profile photo must be one the member uploaded (FE-SET-01); null removes it
+    if (avatarId && !(await mediaDb.get(avatarId))) return invalid({ avatarId: 'Upload the photo again.' })
     const me = authDb.update({
       ...changes,
+      ...(avatarId !== undefined && { avatarUrl: avatarId ? `${API}/media/${avatarId}` : undefined }),
       ...(changes.displayName && { displayName: changes.displayName.trim() }),
       ...(acceptTerms && { onboarded: true }),
     })
-    return HttpResponse.json<Me>(me)
+    return HttpResponse.json<Me>(withAppeal(me!))
   }),
 
   http.post(`${API}/me/delete-request`, async () => {
