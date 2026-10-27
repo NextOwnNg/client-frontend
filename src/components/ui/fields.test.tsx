@@ -57,6 +57,54 @@ describe('PhoneField', () => {
 
     expect(onChange).toHaveBeenLastCalledWith('+2348031234567')
   })
+
+  it('spaces the digits like the placeholder as they are typed', async () => {
+    render(<PhoneField value="" onChange={vi.fn()} />)
+    const input = screen.getByLabelText('Phone number')
+
+    await userEvent.type(input, '8031234567')
+    expect(input).toHaveValue('803 123 4567')
+
+    await userEvent.clear(input)
+    await userEvent.type(input, '08031234567')
+    expect(input).toHaveValue('0803 123 4567')
+  })
+
+  it('formats a pasted number, dropping +234', async () => {
+    const onChange = vi.fn()
+    render(<PhoneField value="" onChange={onChange} />)
+    const input = screen.getByLabelText('Phone number')
+
+    await userEvent.click(input)
+    await userEvent.paste('+234 803 123 4567')
+
+    expect(input).toHaveValue('803 123 4567')
+    expect(onChange).toHaveBeenLastCalledWith('+2348031234567')
+  })
+
+  it('deletes the digit before a space on Backspace, instead of getting stuck', async () => {
+    render(<PhoneField value="" onChange={vi.fn()} />)
+    const input = screen.getByLabelText('Phone number')
+
+    await userEvent.type(input, '8031')
+    expect(input).toHaveValue('803 1')
+    await userEvent.type(input, '{Backspace}{Backspace}')
+
+    expect(input).toHaveValue('80')
+  })
+
+  it('keeps the caret where the person is editing', async () => {
+    render(<PhoneField value="" onChange={vi.fn()} />)
+    const input = screen.getByLabelText<HTMLInputElement>('Phone number')
+    await userEvent.type(input, '803123456')
+
+    // Fix a digit in the middle: after "80", type "9" → "809 312 3456", caret right after the 9
+    input.setSelectionRange(2, 2)
+    await userEvent.type(input, '9', { initialSelectionStart: 2, initialSelectionEnd: 2 })
+
+    expect(input).toHaveValue('809 312 3456')
+    expect(input.selectionStart).toBe(3)
+  })
 })
 
 describe('RadioCards', () => {
