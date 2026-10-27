@@ -58,7 +58,10 @@ export function OfferSum({
             <dt className="min-w-0 flex-1 text-body text-ink">{item.title}</dt>
             <dd
               className={
-                item.kind === 'cash' ? 'shrink-0 text-body font-semibold text-ink' : 'shrink-0 text-caption text-muted'
+                item.kind === 'cash'
+                  ? 'shrink-0 text-body font-semibold text-ink'
+                  : // Centred on the item name's first line: on the shared baseline the smaller label looked low
+                    'shrink-0 self-start text-caption leading-6 text-muted'
               }
             >
               {item.kind === 'cash' && item.kobo !== undefined ? formatNaira(item.kobo) : 'item'}
