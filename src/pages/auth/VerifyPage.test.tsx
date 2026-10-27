@@ -89,7 +89,7 @@ describe('Confirm phone code', () => {
     await userEvent.type(await codeInput(), '000000')
     await confirm()
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('wait 10 minutes')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Wait 10 minutes, then try again.')
   })
 
   it('asks for all six digits before checking', async () => {

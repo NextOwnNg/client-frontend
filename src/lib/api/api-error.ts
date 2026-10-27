@@ -24,6 +24,7 @@ type ApiErrorBody = {
   message?: string
   field_errors?: Record<string, string>
   details?: Record<string, unknown>
+  retry_after_seconds?: number
 }
 
 /** The single error shape every API failure is normalised into (PRD §4.4). */
@@ -88,7 +89,8 @@ export function toApiError(error: unknown): ApiError {
   }
 
   const { status, data, headers } = error.response
-  const retryAfter = Number(headers['retry-after'])
+  // The Retry-After header, or the same wait in the body
+  const retryAfter = Number(headers['retry-after'] ?? data?.retry_after_seconds)
 
   return new ApiError({
     kind: 'http',

@@ -102,8 +102,9 @@ describe('Offer composer: cash (FE-OFF-02, FE-OFF-05)', () => {
     await open(IPAD)
     await choose(/^Cash offer/)
 
+    const amount = await screen.findByLabelText('Your offer')
     expect(screen.queryByRole('radio', { name: /I add cash/ })).not.toBeInTheDocument()
-    await userEvent.type(screen.getByLabelText('Your offer'), '0')
+    await userEvent.type(amount, '0')
     await userEvent.click(continueButton())
     expect(await screen.findAllByText('Enter an amount above ₦0.')).not.toHaveLength(0)
 

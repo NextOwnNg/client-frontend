@@ -2,8 +2,10 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
+import { apiClient } from '@/lib/api/client'
 import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
 import { renderWithProviders } from '@/test/utils'
+import type { SavedIds } from '@/types/api'
 
 describe('app routes', () => {
   it('renders the home page inside the app shell', async () => {
@@ -41,7 +43,9 @@ describe('signing in from where you were (QA-01)', () => {
 
     await waitFor(() => expect(path(router)).toBe('/listings/ps5-disc-edition'))
     expect(await screen.findByRole('heading', { level: 1, name: 'PS5 Disc Edition' })).toBeInTheDocument()
-    expect(await screen.findAllByText("Saved items aren't available yet in this preview.")).toHaveLength(1)
+    await waitFor(async () => expect((await apiClient.get<SavedIds>('/saved/ids')).data.listings).toContain('l3'))
+    expect((await screen.findAllByRole('button', { name: 'Saved' }))[0]).toHaveAttribute('aria-pressed', 'true')
+    expect(router.state.location.search).toBe('')
   })
 
   it('takes a guest who tapped Make an offer on to the offer screen for that listing', async () => {

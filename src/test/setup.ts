@@ -2,6 +2,10 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { mockAuth } from '@/mocks/db/auth'
+import { mockFeed } from '@/mocks/db/feed'
+import { mockMessages } from '@/mocks/db/messages'
+import { mockNotifications } from '@/mocks/db/notifications'
+import { mockSaved } from '@/mocks/db/saved'
 import { mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
 import { mockTransactions } from '@/mocks/db/transactions'
@@ -44,6 +48,10 @@ afterEach(() => {
   mockListings.reset()
   mockOffers.reset()
   mockTransactions.reset()
+  mockFeed.reset()
+  mockMessages.reset()
+  mockNotifications.reset()
+  mockSaved.reset()
   mediaDb.reset()
   // Client stores outlive a render; every test starts signed out with no drafts
   useSessionStore.setState({ status: 'unknown', userId: null, onboarded: false, restricted: false, expired: false })

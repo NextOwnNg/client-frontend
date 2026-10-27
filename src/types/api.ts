@@ -300,3 +300,105 @@ export type ReviewWithContext = Review & {
   itemTitle: string
   transactionId: string
 }
+
+/** A feed highlight (FE-FED-01): a caption on one of the author's listings. Price and status are the listing's own. */
+export type FeedPost = {
+  id: string
+  author: PublicSeller
+  caption: string
+  /** The listing as it is now; null once the listing or the post was removed. */
+  listing: ListingSummary | null
+  commentCount: number
+  createdAt: string
+  /** Set when moderators removed the post or its listing (ruling R6-2). */
+  removed?: boolean
+}
+
+export type FeedComment = {
+  id: string
+  author: PublicSeller
+  /** Empty when moderators removed it. */
+  body: string
+  removed: boolean
+  createdAt: string
+}
+
+/** What the member has saved, for toggles (FE-SAV-01). */
+export type SavedIds = { listings: string[]; posts: string[] }
+
+export type SavedKind = 'listing' | 'post'
+
+/** An offer version as it appears in chat: the terms in words come from these, never from message text (R6-6). */
+export type OfferCardData = {
+  offerId: string
+  versionNumber: number
+  authorId: string
+  terms: OfferTerms
+  listingTitle: string
+  itemTitle: string | null
+  /** The offer's status now, and whether this is still the version on the table. */
+  offerStatus: OfferStatus
+  current: boolean
+}
+
+export type ChatMessage = {
+  id: string
+  /** Chosen by the sender; a retry with the same one is stored once (FE-MSG-02). */
+  clientId: string
+  senderId: string
+  kind: 'text' | 'offer' | 'event'
+  /** Plain text. Empty when moderated. */
+  body: string
+  moderated?: boolean
+  offer?: OfferCardData
+  /** For events: where the line links, e.g. the deal. */
+  link?: string
+  createdAt: string
+}
+
+export type ConversationBlock = 'none' | 'by-me' | 'by-them'
+
+/** A chat between two people about one listing, tied to an offer and, once accepted, a deal (ruling R6-5). */
+export type Conversation = {
+  id: string
+  listing: ListingSummary
+  other: PublicSeller
+  /** The reader's side in the offer, so offer cards read from their side. */
+  viewerRole: 'offerer' | 'owner'
+  offerId: string
+  offerStatus: OfferStatus
+  transactionId?: string
+  transactionStatus?: TransactionStatus
+  blocked: ConversationBlock
+  lastMessage?: { body: string; senderId: string; createdAt: string; kind: ChatMessage['kind'] }
+  unreadCount: number
+  updatedAt: string
+}
+
+export type ConversationDetail = Conversation & { messages: ChatMessage[] }
+
+export type NotificationKind =
+  | 'OFFER_RECEIVED'
+  | 'OFFER_COUNTERED'
+  | 'OFFER_ACCEPTED'
+  | 'OFFER_DECLINED'
+  | 'OFFER_WITHDRAWN'
+  | 'MEETING_UPDATED'
+  | 'CONFIRMED'
+  | 'CANCEL_REQUESTED'
+  | 'DISPUTE_OPENED'
+  | 'MESSAGE'
+  | 'COMMENT'
+
+/** An in-app alert (FE-NTF-01). The text says what happened then; `link` opens where things stand now. */
+export type AppNotification = {
+  id: string
+  kind: NotificationKind
+  title: string
+  body?: string
+  link: string
+  read: boolean
+  createdAt: string
+}
+
+export type NotificationCounts = { notifications: number; messages: number }

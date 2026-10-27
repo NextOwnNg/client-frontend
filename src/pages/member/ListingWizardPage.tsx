@@ -1,6 +1,8 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, toast } from '@heroui/react'
 import { CircleCheck, CloudOff, LoaderCircle, SearchX, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
@@ -14,23 +16,26 @@ import { useMeProfile } from '@/features/account/use-me-profile'
 import { useRuntimeConfig } from '@/features/config/api'
 import { useListingAction, useOwnListing } from '@/features/selling/api'
 import { PreviewStep, PublishResult } from '@/features/selling/components/PreviewStep'
-import { BasicsStep, ConditionStep, TradeStep } from '@/features/selling/components/WizardSteps'
+import { BasicsStep } from '@/features/selling/components/BasicsStep'
+import { ConditionStep } from '@/features/selling/components/ConditionStep'
+import { TradeStep } from '@/features/selling/components/TradeStep'
 import {
   emptyListingInput,
   ownToInput,
   stepOfField,
   tabOf,
-  validateListing,
-  validateStep,
   wizardSteps,
   type FieldErrors,
   type WizardStep,
 } from '@/features/selling/listing-input'
+import { fieldsOfStep, listingSchema } from '@/features/selling/listing-schema'
 import { draftKey, moveDraft, useListingDraft } from '@/features/selling/use-listing-draft'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorMessage, fieldErrorsOf, isNotFound } from '@/lib/api/error-message'
+import { flattenErrors } from '@/lib/forms/form-errors'
 import { cx } from '@/lib/cx'
 import { useSessionStore } from '@/stores/session'
-import type { Me, OwnListing, PublicSeller, RuntimeConfig } from '@/types/api'
+import type { ListingInput, Me, OwnListing, PublicSeller, RuntimeConfig } from '@/types/api'
 
 const parseStep = (raw: string | null): WizardStep => wizardSteps.find((s) => s.id === raw)?.id ?? 'basics'
 
@@ -65,7 +70,7 @@ export function ListingWizardPage() {
     )
   }
   if (id && own.isError && !own.data) {
-    if (isApiError(own.error) && own.error.status === 404) {
+    if (isNotFound(own.error)) {
       return (
         <EmptyState
           icon={SearchX}
@@ -118,8 +123,6 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
   const published = Boolean(listing && listing.status !== 'DRAFT')
   const profile = useMeProfile()
   const action = useListingAction()
-  const [shown, setShown] = useState<Partial<Record<WizardStep, boolean>>>({})
-  const [serverErrors, setServerErrors] = useState<FieldErrors>({})
   const [uploading, setUploading] = useState(false)
   const [waitForPhotos, setWaitForPhotos] = useState(false)
   const [duplicate, setDuplicate] = useState<{ slug: string; id: string } | null>(null)
@@ -137,7 +140,19 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
       void navigate(`/listings/${created.id}/edit${location.search}`, { replace: true })
     },
   })
-  const { input } = draft
+  const schema = useMemo(() => listingSchema(config), [config])
+  const { watch, setValue, trigger, setError, formState } = useForm<ListingInput>({
+    resolver: zodResolver(schema),
+    defaultValues: draft.input,
+  })
+  const input = watch()
+  const { change: saveDraft } = draft
+
+  // Every change goes to the draft, which autosaves it (published listings save on request)
+  useEffect(() => {
+    const subscription = watch((values) => saveDraft(values as ListingInput))
+    return () => subscription.unsubscribe()
+  }, [watch, saveDraft])
 
   if (result) return <PublishResult listing={result} />
 
@@ -153,24 +168,24 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
     void navigate(stepHref(target))
   }
 
-  const change: typeof draft.change = (changes) => {
-    // Fixing a field clears the server's complaint about it
-    if (Object.keys(serverErrors).length) {
-      setServerErrors((errors) => Object.fromEntries(Object.entries(errors).filter(([f]) => !(f in changes))))
+  const errorMessages = flattenErrors(formState.errors)
+  const visibleErrors = Object.fromEntries(Object.entries(errorMessages).filter(([f]) => stepOfField(f) === step))
+
+  // A field that is showing a problem is checked again as it changes, so the message goes once it's fixed
+  const change = (changes: Partial<ListingInput>) => {
+    for (const [field, value] of Object.entries(changes) as [keyof ListingInput, never][]) {
+      const showing = Object.keys(errorMessages).some((f) => f === field || f.startsWith(`${field}.`))
+      setValue(field, value, { shouldDirty: true, shouldValidate: showing })
     }
-    draft.change(changes)
   }
 
-  const stepErrors = validateStep(step, input, config)
-  const visibleErrors: FieldErrors = {
-    ...(shown[step] ? stepErrors : {}),
-    ...Object.fromEntries(Object.entries(serverErrors).filter(([f]) => stepOfField(f) === step)),
-  }
-
-  function next() {
+  async function next() {
     if (step === 'basics' && uploading) return setWaitForPhotos(true)
-    if (Object.keys(stepErrors).length) return setShown((s) => ({ ...s, [step]: true }))
-    goTo(wizardSteps[stepIndex + 1]!.id)
+    if (await trigger(fieldsOfStep(step))) goTo(wizardSteps[stepIndex + 1]!.id)
+  }
+
+  const showServerErrors = (fields: Record<string, string>) => {
+    for (const [field, message] of Object.entries(fields)) setError(field as keyof ListingInput, { message })
   }
 
   /** Everything that blocks publishing, each linked to its step. */
@@ -180,7 +195,6 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
       return {
         message: `${wizardSteps.find((s) => s.id === owner)!.label}: ${message}`,
         onSelect: () => {
-          setShown((s) => ({ ...s, [owner]: true }))
           goTo(owner)
           setTimeout(() => focusField(field), 50)
         },
@@ -190,13 +204,13 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
   async function submit() {
     setFailure(null)
     setDuplicate(null)
-    const errors = validateListing(input, config)
-    if (Object.keys(errors).length) return setServerErrors(errors)
+    if (!(await trigger())) return
     try {
       await draft.flush()
     } catch (error) {
-      if (isApiError(error) && error.fieldErrors) return setServerErrors(error.fieldErrors)
-      return setFailure('We couldn’t save your changes. Check your connection and try again.')
+      const fields = fieldErrorsOf(error)
+      if (fields) return showServerErrors(fields)
+      return setFailure(errorMessage(error, 'We couldn’t save your changes.'))
     }
     if (published) {
       draft.discardLocal()
@@ -213,17 +227,18 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
           setResult(listing)
         },
         onError: (error) => {
-          if (isApiError(error) && error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
-            return setServerErrors(error.fieldErrors)
-          }
-          if (isApiError(error) && error.code === 'DUPLICATE_ITEM') {
-            const { existingSlug, existingId } = error.details ?? {}
+          const fields = fieldErrorsOf(error)
+          if (fields) return showServerErrors(fields)
+          // A likely duplicate opens its own panel linking to the existing listing
+          const { code, details } = toApiError(error)
+          if (code === 'DUPLICATE_ITEM') {
+            const { existingSlug, existingId } = details ?? {}
             return setDuplicate({
               slug: typeof existingSlug === 'string' ? existingSlug : '',
               id: typeof existingId === 'string' ? existingId : '',
             })
           }
-          setFailure('We couldn’t publish your listing. Check your connection and try again. Your draft is saved.')
+          setFailure(`${errorMessage(error, 'We couldn’t publish your listing.')} Your draft is saved.`)
         },
       },
     )
@@ -239,7 +254,7 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
 
   const summaryItems: SummaryItem[] =
     step === 'preview'
-      ? allProblems(serverErrors)
+      ? allProblems(errorMessages)
       : [
           ...(waitForPhotos
             ? [{ message: 'Wait for your photos to finish uploading.', onSelect: () => focusField('photos') }]
@@ -296,7 +311,7 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
         noValidate
         onSubmit={(e) => {
           e.preventDefault()
-          if (step !== 'preview') next()
+          if (step !== 'preview') void next()
         }}
       >
         {step === 'basics' && <BasicsStep {...stepProps} onUploadingChange={setUploading} />}

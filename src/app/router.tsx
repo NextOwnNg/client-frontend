@@ -23,7 +23,6 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
 type Upcoming = { path: string; title: string; phase: string }
 
 const upcomingPublic: Upcoming[] = [
-  { path: 'feed', title: 'Feed', phase: 'Phase 6 (Community)' },
   { path: 'how-it-works', title: 'How it works', phase: 'Phase 7 (Trust and finish)' },
   { path: 'support', title: 'Safety and help', phase: 'Phase 7 (Trust and finish)' },
   { path: 'community-rules', title: 'Community rules', phase: 'Phase 7 (Trust and finish)' },
@@ -32,12 +31,7 @@ const upcomingPublic: Upcoming[] = [
 ]
 
 /** Member-only placeholders sit behind sign-in already, so the redirects can be reviewed now (PRD §6.3). */
-const upcomingMember: Upcoming[] = [
-  { path: 'messages', title: 'Messages', phase: 'Phase 6 (Community)' },
-  { path: 'notifications', title: 'Notifications', phase: 'Phase 6 (Community)' },
-  { path: 'saved', title: 'Saved', phase: 'Phase 6 (Community)' },
-  { path: 'report/:type/:id', title: 'Report', phase: 'Phase 7 (Trust and finish)' },
-]
+const upcomingMember: Upcoming[] = [{ path: 'report/:type/:id', title: 'Report', phase: 'Phase 7 (Trust and finish)' }]
 
 const placeholder = ({ path, title, phase }: Upcoming): RouteObject => ({
   path,
@@ -65,6 +59,7 @@ export const routes: RouteObject[] = [
             path: 'users/:id',
             lazy: async () => ({ Component: (await import('@/pages/public/ProfilePage')).ProfilePage }),
           },
+          { path: 'feed', lazy: async () => ({ Component: (await import('@/pages/public/FeedPage')).FeedPage }) },
           ...upcomingPublic.map(placeholder),
           {
             Component: RequireAuth,
@@ -119,6 +114,30 @@ export const routes: RouteObject[] = [
               {
                 path: 'offers/new',
                 lazy: async () => ({ Component: (await import('@/pages/member/OfferComposerPage')).OfferComposerPage }),
+              },
+              {
+                path: 'messages',
+                lazy: async () => ({ Component: (await import('@/pages/member/MessagesPage')).MessagesLayout }),
+                children: [
+                  {
+                    index: true,
+                    lazy: async () => ({ Component: (await import('@/pages/member/MessagesIndexPage')).MessagesIndex }),
+                  },
+                  {
+                    path: ':id',
+                    lazy: async () => ({
+                      Component: (await import('@/pages/member/ConversationPage')).ConversationPage,
+                    }),
+                  },
+                ],
+              },
+              {
+                path: 'notifications',
+                lazy: async () => ({ Component: (await import('@/pages/member/NotificationsPage')).NotificationsPage }),
+              },
+              {
+                path: 'saved',
+                lazy: async () => ({ Component: (await import('@/pages/member/SavedPage')).SavedPage }),
               },
               ...upcomingMember.map(placeholder),
             ],

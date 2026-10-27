@@ -6,10 +6,10 @@ import { BackButton } from '@/components/ui/BackButton'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { listingQueryOptions, useListing } from '@/features/listings/api'
-import { OfferActions } from '@/features/listings/components/ListingDetail'
+import { OfferActions } from '@/features/listings/components/OfferActions'
 import { ListingView } from '@/features/listings/components/ListingView'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
-import { isApiError } from '@/lib/api/api-error'
+import { isNotFound } from '@/lib/api/error-checks'
 import { buildListingMeta } from '@/lib/seo/listing-meta'
 import { siteOrigin } from '@/lib/seo/origin'
 
@@ -53,7 +53,7 @@ function ListingDetailContent() {
   if (isPending) return <DetailSkeleton />
 
   if (error && !listing) {
-    if (isApiError(error) && error.status === 404) {
+    if (isNotFound(error)) {
       return (
         <>
           <Seo title="Listing not found" noindex />

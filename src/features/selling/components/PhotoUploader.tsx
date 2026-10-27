@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState, type DragEvent } from 'react'
 import { Button, Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components'
 import { uploadPhoto } from '@/features/selling/api'
 import { useSortable } from '@/features/selling/use-sortable'
-import { isApiError } from '@/lib/api/api-error'
+import { errorMessage } from '@/lib/api/error-message'
 import { ACCEPTED_PHOTO_TYPES, isAcceptedPhoto, preparePhoto } from '@/lib/images/compress'
 import { cx } from '@/lib/cx'
 import type { MediaRef } from '@/types/api'
@@ -33,12 +33,6 @@ type PhotoUploaderProps = {
 }
 
 const tile = 'relative aspect-square overflow-hidden rounded-control border border-border bg-cloud'
-
-function failureMessage(error: unknown) {
-  if (isApiError(error) && error.code === 'UNSUPPORTED_FORMAT') return 'This file type isn’t supported.'
-  if (isApiError(error) && error.code === 'FILE_TOO_LARGE') return 'This photo is over 10 MB.'
-  return 'Check your connection and try again.'
-}
 
 const move = <T,>(list: T[], from: number, to: number) => {
   const next = [...list]
@@ -96,7 +90,7 @@ export function PhotoUploader({ value, onChange, limits, itemName, error, onBusy
       // The newest onChange: the form may have moved on (a new draft gets its id) while this was uploading
       onChangeRef.current(latest.current)
     } catch (e) {
-      if (!controller.signal.aborted) patch(entry.key, { status: 'failed', error: failureMessage(e) })
+      if (!controller.signal.aborted) patch(entry.key, { status: 'failed', error: errorMessage(e) })
     } finally {
       controllers.current.delete(entry.key)
     }

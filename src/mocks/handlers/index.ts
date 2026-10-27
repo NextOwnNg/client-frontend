@@ -4,6 +4,7 @@ import { apiBaseUrl } from '@/lib/env'
 import { authDb } from '@/mocks/db/auth'
 import { listingsDb, toSummary } from '@/mocks/db/listings'
 import { authHandlers } from '@/mocks/handlers/auth'
+import { communityHandlers } from '@/mocks/handlers/community'
 import { network } from '@/mocks/handlers/network'
 import { offersHandlers } from '@/mocks/handlers/offers'
 import { transactionsHandlers } from '@/mocks/handlers/transactions'
@@ -52,6 +53,7 @@ export const handlers: RequestHandler[] = [
   ...sellingHandlers,
   ...offersHandlers,
   ...transactionsHandlers,
+  ...communityHandlers,
 
   http.get(`${API}/config`, async () => (await network()) ?? HttpResponse.json(runtimeConfig)),
 

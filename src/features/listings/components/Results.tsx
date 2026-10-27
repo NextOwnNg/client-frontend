@@ -1,30 +1,15 @@
 import { SearchX } from 'lucide-react'
-import { useEffect, useRef } from 'react'
 import { PlainButton } from '@/components/ui/Button'
 import { ListingRowSkeleton, ListingTileSkeleton } from '@/components/ui/Skeletons'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { useListings } from '@/features/listings/api'
 import { ListingRow, ListingTile } from '@/features/listings/components/ListingCards'
 import type { ListingFilters } from '@/features/listings/filters'
+import { useAutoLoad } from '@/hooks/useAutoLoad'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
 import { cx } from '@/lib/cx'
 
 const grid = 'grid grid-cols-1 gap-3 tablet:grid-cols-2 tablet:gap-4 desktop:grid-cols-3'
-
-/** Loads the next page when the end of the list scrolls near; the visible button covers everything else. */
-function useAutoLoad(onVisible: () => void, enabled: boolean) {
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || !enabled || typeof IntersectionObserver === 'undefined') return
-    const observer = new IntersectionObserver((entries) => entries[0]?.isIntersecting && onVisible(), {
-      rootMargin: '600px 0px',
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [onVisible, enabled])
-  return ref
-}
 
 /**
  * Explore results (UX-02): rows on phones (the direction's horizontal row), tiles from 768px.

@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useCreateListing, useSaveListing } from '@/features/selling/api'
 import { emptyListingInput } from '@/features/selling/listing-input'
 import { useDraftStore, useFormDraft } from '@/stores/drafts'
@@ -84,10 +84,13 @@ export function useListingDraft({
     return () => clearTimeout(timer)
   }, [input, autosave, dirty, state])
 
-  const change = (changes: Partial<ListingInput>) => {
-    if (state === 'error') setState('idle')
-    setDraft({ ...latest.current, ...changes })
-  }
+  const change = useCallback(
+    (changes: Partial<ListingInput>) => {
+      setState((current) => (current === 'error' ? 'idle' : current))
+      setDraft({ ...latest.current, ...changes })
+    },
+    [setDraft],
+  )
 
   return {
     input,

@@ -2,7 +2,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { fetchOffer, offerKeys, useOfferDecision, type OfferDecision } from '@/features/offers/api'
 import type { FieldErrors } from '@/features/selling/listing-input'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { fieldErrorsOf, isRefused, isSignedOut } from '@/lib/api/error-message'
 import type { Offer } from '@/types/api'
 
 export type DecisionResult =
@@ -39,6 +40,13 @@ function happened(decision: OfferDecision, fresh: Offer, before: Offer, viewerId
  * decision is retried. When the answer is lost, it says "Checking the latest status…", rereads the offer and
  * reports what really happened, never "failed".
  */
+/** Codes that mean the offer moved on since it was loaded; each opens its own state on the offer page. */
+const offerMovedOn: Partial<Record<string, 'stale' | 'unavailable' | 'expired'>> = {
+  STALE_OFFER_VERSION: 'stale',
+  ITEM_UNAVAILABLE: 'unavailable',
+  OFFER_EXPIRED: 'expired',
+}
+
 export function useDecision(offer: Offer, viewerId: string) {
   const queryClient = useQueryClient()
   const mutation = useOfferDecision(offer.id)
@@ -68,8 +76,8 @@ export function useDecision(offer: Offer, viewerId: string) {
       const result = await mutation.mutateAsync({ decision, idempotencyKey: keyFor(decision) })
       return { kind: 'done', offer: result }
     } catch (error) {
-      if (!isApiError(error)) return { kind: 'not-done' }
-      if (error.isOutcomeUnknown) {
+      const e = toApiError(error)
+      if (e.isOutcomeUnknown) {
         setChecking(true)
         try {
           const [fresh] = await Promise.all([reread(), new Promise((r) => setTimeout(r, MIN_CHECK_MS))])
@@ -80,27 +88,17 @@ export function useDecision(offer: Offer, viewerId: string) {
           setChecking(false)
         }
       }
-      switch (error.code) {
-        case 'STALE_OFFER_VERSION':
-          rereadQuietly()
-          return { kind: 'stale' }
-        case 'ITEM_UNAVAILABLE':
-          rereadQuietly()
-          return { kind: 'unavailable' }
-        case 'OFFER_EXPIRED':
-          rereadQuietly()
-          return { kind: 'expired' }
-        case 'VALIDATION_ERROR':
-          return { kind: 'invalid', fieldErrors: error.fieldErrors ?? {} }
-        case 'FORBIDDEN':
-          rereadQuietly()
-          return { kind: 'refused' }
-        // The session prompt takes over; nothing to add here
-        case 'AUTH_REQUIRED':
-          return { kind: 'not-done', silent: true }
-        default:
-          return { kind: 'not-done' }
+      const fields = fieldErrorsOf(e)
+      if (fields) return { kind: 'invalid', fieldErrors: fields }
+      // The session prompt takes over; nothing to add here
+      if (isSignedOut(e)) return { kind: 'not-done', silent: true }
+      // Show the offer as it is now, with the state that explains why
+      const outcome = offerMovedOn[e.code]
+      if (outcome || isRefused(e)) {
+        rereadQuietly()
+        return { kind: outcome ?? 'refused' }
       }
+      return { kind: 'not-done' }
     }
   }
 

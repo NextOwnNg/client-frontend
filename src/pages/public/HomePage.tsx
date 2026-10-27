@@ -1,14 +1,12 @@
-import { Seo } from '@/components/seo/Seo'
 import { useAreaSheet } from '@/components/layout/use-area-sheet'
+import { Seo } from '@/components/seo/Seo'
 import { useRuntimeConfig } from '@/features/config/api'
-import {
-  CategoryShortcuts,
-  ExampleSum,
-  HeroActions,
-  HomeSearch,
-  HowItWorks,
-  TradeRoutes,
-} from '@/features/home/components/HomeSections'
+import { CategoryShortcuts } from '@/features/home/components/CategoryShortcuts'
+import { ExampleSum } from '@/features/home/components/ExampleSum'
+import { HeroActions } from '@/features/home/components/HeroActions'
+import { HomeSearch } from '@/features/home/components/HomeSearch'
+import { HowItWorks } from '@/features/home/components/HowItWorks'
+import { TradeRoutes } from '@/features/home/components/TradeRoutes'
 import { RecentListings } from '@/features/listings/components/RecentListings'
 import { copy } from '@/lib/copy/copy'
 import { siteOrigin } from '@/lib/seo/origin'

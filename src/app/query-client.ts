@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query'
-import { isApiError } from '@/lib/api/api-error'
+import { isRetryable } from '@/lib/api/error-checks'
 
 export function createQueryClient() {
   return new QueryClient({
@@ -9,7 +9,7 @@ export function createQueryClient() {
         refetchOnWindowFocus: true,
         // Retry safe reads on network/5xx only; never retry 4xx (PRD §4.4)
         retry: (failureCount, error) => {
-          if (isApiError(error) && error.status !== undefined && error.status < 500) return false
+          if (!isRetryable(error)) return false
           return failureCount < 2
         },
       },

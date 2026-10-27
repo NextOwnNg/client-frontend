@@ -1,13 +1,17 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, toast } from '@heroui/react'
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { useRequestCode, useVerifyCode } from '@/features/account/api'
 import { CodeField } from '@/features/account/components/CodeField'
-import { authCopy, waitText } from '@/features/account/copy'
+import { authCopy } from '@/features/account/copy'
 import { formatCountdown, useCountdown } from '@/features/account/use-countdown'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorReason, inputProblem, waitSeconds } from '@/lib/api/error-message'
 import { loginPath, onboardingPath, safeNext } from '@/lib/auth/next'
 import { useMockApi } from '@/lib/env'
 import { formatPhoneDisplay } from '@/lib/phone/phone'
@@ -24,77 +28,67 @@ export function VerifyPage() {
   return <CodeStep phone={state.phone} initialResendAt={state.resendAt} next={next} />
 }
 
-type Problem = { field?: string; banner?: { title: string; body: string } }
+const codeSchema = z.object({ code: z.string().length(6, authCopy.incompleteCode) })
+
+type CodeForm = z.infer<typeof codeSchema>
+
+/** A problem with the request rather than the code (waiting, connection); Send again can raise it too. */
+type BannerProblem = { title: string; body: string }
 
 function CodeStep({ phone, initialResendAt, next }: { phone: string; initialResendAt: number; next: string }) {
   const navigate = useNavigate()
-  const [code, setCode] = useState('')
   const [resendAt, setResendAt] = useState(initialResendAt)
-  const [problem, setProblem] = useState<Problem>({})
+  const [banner, setBanner] = useState<BannerProblem | null>(null)
+  const { control, handleSubmit, setError, reset } = useForm<CodeForm>({
+    resolver: zodResolver(codeSchema),
+    defaultValues: { code: '' },
+  })
   const [notice, setNotice] = useState<string | null>(null)
   const verify = useVerifyCode()
   const resend = useRequestCode()
   const secondsLeft = useCountdown(resendAt)
 
-  function submit(event: FormEvent) {
-    event.preventDefault()
+  const submit = handleSubmit(async ({ code }) => {
     setNotice(null)
-    if (code.length !== 6) return setProblem({ field: authCopy.incompleteCode })
-    setProblem({})
-    verify.mutate(
-      { phone, code },
-      {
-        onSuccess: ({ user }) => {
-          if (!user.onboarded) {
-            void navigate(onboardingPath(next), { replace: true, state: { confirmed: true } })
-            return
-          }
-          toast.success(`${authCopy.phoneConfirmed}. Welcome back.`)
-          void navigate(next, { replace: true })
-        },
-        onError: (error) => {
-          if (!isApiError(error)) return setProblem({ banner: networkProblem })
-          if (error.code === 'OTP_INVALID') return setProblem({ field: authCopy.wrongCode })
-          if (error.code === 'OTP_EXPIRED') {
-            setResendAt(0)
-            return setProblem({ field: authCopy.expiredCode })
-          }
-          if (error.code === 'RATE_LIMITED') {
-            const wait = error.retryAfterSeconds ?? 600
-            setResendAt(Date.now() + wait * 1000)
-            return setProblem({
-              banner: {
-                title: 'Too many tries',
-                body: `For your security, wait ${waitText(wait)}, then send a new code.`,
-              },
-            })
-          }
-          setProblem({ banner: networkProblem })
-        },
-      },
-    )
-  }
+    setBanner(null)
+    try {
+      const { user } = await verify.mutateAsync({ phone, code })
+      if (!user.onboarded) {
+        void navigate(onboardingPath(next), { replace: true, state: { confirmed: true } })
+        return
+      }
+      toast.success(`${authCopy.phoneConfirmed}. Welcome back.`)
+      void navigate(next, { replace: true })
+    } catch (error) {
+      const wait = waitSeconds(error)
+      if (wait !== undefined) {
+        setResendAt(Date.now() + wait * 1000)
+        return setBanner({ title: 'Too many tries', body: errorReason(error) })
+      }
+      const field = inputProblem(error)
+      if (!field) return setBanner({ title: "We couldn't check the code", body: errorReason(error) })
+      // An expired code can't be fixed by retyping it, so a new one can be sent straight away
+      if (toApiError(error).code === 'OTP_EXPIRED') setResendAt(0)
+      setError('code', { message: field })
+    }
+  })
 
   function sendAgain() {
     setNotice(null)
     resend.mutate(phone, {
       onSuccess: ({ resendAfterSeconds }) => {
-        setCode('')
-        setProblem({})
+        reset()
+        setBanner(null)
         setResendAt(Date.now() + resendAfterSeconds * 1000)
         setNotice(authCopy.codeResent)
       },
       onError: (error) => {
-        if (isApiError(error) && error.code === 'RATE_LIMITED') {
-          setResendAt(Date.now() + (error.retryAfterSeconds ?? 60) * 1000)
-          return setProblem({
-            banner: {
-              title: 'Please wait before asking for another code',
-              body: `Try again in ${waitText(error.retryAfterSeconds)}.`,
-            },
-          })
-        }
-        setProblem({ banner: { title: "We couldn't send a new code", body: 'Check your connection and try again.' } })
+        const wait = waitSeconds(error)
+        if (wait !== undefined) setResendAt(Date.now() + wait * 1000)
+        setBanner({
+          title: wait !== undefined ? 'Please wait before asking for another code' : "We couldn't send a new code",
+          body: errorReason(error),
+        })
       },
     })
   }
@@ -116,13 +110,19 @@ function CodeStep({ phone, initialResendAt, next }: { phone: string; initialRese
         Change number
       </Link>
 
-      <form noValidate onSubmit={submit} className="mt-4 flex flex-col gap-5">
-        {problem.banner && (
-          <Banner tone="warning" title={problem.banner.title}>
-            {problem.banner.body}
+      <form noValidate onSubmit={(e) => void submit(e)} className="mt-4 flex flex-col gap-5">
+        {banner && (
+          <Banner tone="warning" title={banner.title}>
+            {banner.body}
           </Banner>
         )}
-        <CodeField value={code} onChange={setCode} error={problem.field} />
+        <Controller
+          control={control}
+          name="code"
+          render={({ field, fieldState }) => (
+            <CodeField value={field.value} onChange={field.onChange} error={fieldState.error?.message} />
+          )}
+        />
         <Button type="submit" fullWidth isPending={verify.isPending}>
           Confirm phone
         </Button>
@@ -157,5 +157,3 @@ function CodeStep({ phone, initialResendAt, next }: { phone: string; initialRese
     </>
   )
 }
-
-const networkProblem = { title: "We couldn't check the code", body: 'Check your connection and try again.' }

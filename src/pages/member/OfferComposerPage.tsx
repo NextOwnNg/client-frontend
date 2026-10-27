@@ -1,7 +1,9 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button, toast } from '@heroui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Ban, Handshake, LoaderCircle, PackageX, SearchX, ShieldAlert, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
@@ -14,19 +16,25 @@ import { useRuntimeConfig } from '@/features/config/api'
 import { useListing } from '@/features/listings/api'
 import { unavailableMessage } from '@/features/listings/copy'
 import { offerKeys, useMyItems, useOffers, useSendOffer } from '@/features/offers/api'
-import { ItemStep, ReviewStep, TermsStep, TypeStep } from '@/features/offers/components/ComposerSteps'
+import { ItemStep } from '@/features/offers/components/ItemStep'
+import { ReviewStep } from '@/features/offers/components/ReviewStep'
+import { TermsStep } from '@/features/offers/components/TermsStep'
+import { TypeStep } from '@/features/offers/components/TypeStep'
 import { ListingPin, OfferBlocked } from '@/features/offers/components/OfferParts'
 import {
   composerSteps,
   draftTerms,
-  offerStepErrors,
+  fieldsOfStep,
+  offerSchema,
   stepOfOfferField,
   useOfferDraft,
+  type OfferFields,
   type ComposerStep,
 } from '@/features/offers/use-offer-draft'
-import type { FieldErrors } from '@/features/selling/listing-input'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorReason, fieldErrorsOf, isNotFound, isSignedOut } from '@/lib/api/error-message'
 import { apiClient } from '@/lib/api/client'
+import { flattenErrors } from '@/lib/forms/form-errors'
 import { copy } from '@/lib/copy/copy'
 import { isAvailable } from '@/lib/copy/status'
 import { useSessionStore } from '@/stores/session'
@@ -44,7 +52,7 @@ export function OfferComposerPage() {
 
   const loaded = listing.data && !listing.isPlaceholderData
   if (!listingId || (listing.isError && !listing.data)) {
-    if (listingId && !(isApiError(listing.error) && listing.error.status === 404)) {
+    if (listingId && !isNotFound(listing.error)) {
       return <ErrorState title="We couldn't load this item" onRetry={() => void listing.refetch()} />
     }
     return (
@@ -135,7 +143,7 @@ function Blocked(props: Parameters<typeof OfferBlocked>[0]) {
 
 type Outcome =
   | { kind: 'checking' }
-  | { kind: 'not-sent' }
+  | { kind: 'not-sent'; reason: string }
   | { kind: 'unknown' }
   | { kind: 'unavailable' }
   | { kind: 'exists'; offerId: string }
@@ -159,19 +167,30 @@ function Composer({
   const location = useLocation()
   const queryClient = useQueryClient()
   const [params] = useSearchParams()
-  const { draft, change, sendKey, clear } = useOfferDraft(userId, listing.id)
+  const { draft: stored, change: save, sendKey, clear } = useOfferDraft(userId, listing.id)
   const myItems = useMyItems()
   const send = useSendOffer()
-  const [shown, setShown] = useState<Partial<Record<ComposerStep, boolean>>>({})
-  const [serverErrors, setServerErrors] = useState<FieldErrors>({})
   const [outcome, setOutcome] = useState<Outcome | null>(null)
+  const items = useMemo(() => myItems.data ?? [], [myItems.data])
+  const schema = useMemo(() => offerSchema(listing.acceptedModes, items), [listing.acceptedModes, items])
+  const { idempotencyKey: _key, ...storedFields } = stored
+  const { watch, setValue, trigger, setError, getValues, formState } = useForm<OfferFields>({
+    resolver: zodResolver(schema),
+    defaultValues: storedFields,
+  })
+  const draft = watch()
+
+  // Every change is kept in the draft store (and drops the send key, since the terms are new)
+  useEffect(() => {
+    const subscription = watch((values) => save(values as Partial<OfferFields>))
+    return () => subscription.unsubscribe()
+  }, [watch, save])
 
   const steps = composerSteps(draft.mode)
   const requested = params.get('step') as ComposerStep | null
   // A step that doesn't belong to the chosen kind of offer (or a review with nothing chosen) starts at the top
   const step: ComposerStep = requested && steps.some((s) => s.id === requested) && draft.mode ? requested : 'type'
   const index = steps.findIndex((s) => s.id === step)
-  const items = myItems.data ?? []
   const item = items.find((i) => i.id === draft.offeredItemId)
 
   const stepHref = (target: ComposerStep) => {
@@ -182,24 +201,20 @@ function Composer({
   }
   const goTo = (target: ComposerStep) => void navigate(stepHref(target))
 
-  const stepErrors = offerStepErrors(step, draft, listing.acceptedModes)
-  if (step === 'item' && item && !item.available) stepErrors.offeredItemId = `${item.title}: ${item.unavailableReason}.`
-  const visible: FieldErrors = {
-    ...(shown[step] ? stepErrors : {}),
-    ...Object.fromEntries(Object.entries(serverErrors).filter(([f]) => stepOfOfferField(f) === step)),
-  }
+  const errorMessages = flattenErrors(formState.errors)
+  // Each step shows its own fields' problems; the review lists everything, with a way back to each
+  const visible = Object.fromEntries(Object.entries(errorMessages).filter(([f]) => stepOfOfferField(f) === step))
 
-  const update = (changes: Parameters<typeof change>[0]) => {
+  // A field that is showing a problem is checked again as it changes, so the message goes once it's fixed
+  const update = (changes: Partial<OfferFields>) => {
     setOutcome(null)
-    if (Object.keys(serverErrors).length) {
-      setServerErrors((errors) => Object.fromEntries(Object.entries(errors).filter(([f]) => !(f in changes))))
+    for (const [field, value] of Object.entries(changes) as [keyof OfferFields, never][]) {
+      setValue(field, value, { shouldDirty: true, shouldValidate: field in errorMessages })
     }
-    change(changes)
   }
 
-  function next() {
-    if (Object.keys(stepErrors).length) return setShown((s) => ({ ...s, [step]: true }))
-    goTo(steps[index + 1]!.id)
+  async function next() {
+    if (await trigger(fieldsOfStep(step))) goTo(steps[index + 1]!.id)
   }
 
   function finish(offer: Offer) {
@@ -222,47 +237,46 @@ function Composer({
         (o) => o.listing.id === listing.id && o.viewerRole === 'offerer' && o.status === 'PENDING',
       )
       if (sent) finish(sent)
-      else setOutcome({ kind: 'not-sent' })
+      else setOutcome({ kind: 'not-sent', reason: 'Check your connection and send it again.' })
     } catch {
       setOutcome({ kind: 'unknown' })
     }
   }
 
   async function submit() {
-    const errors = offerStepErrors('review', draft, listing.acceptedModes)
-    if (Object.keys(errors).length) {
-      setServerErrors(errors)
-      return
-    }
+    if (!(await trigger())) return
     setOutcome(null)
     try {
       const offer = await send.mutateAsync({
-        offer: { listingId: listing.id, ...draftTerms(draft) },
+        offer: { listingId: listing.id, ...draftTerms(getValues()) },
         idempotencyKey: sendKey(),
       })
       finish(offer)
     } catch (error) {
-      if (!isApiError(error)) return setOutcome({ kind: 'not-sent' })
-      if (error.isOutcomeUnknown) return void check()
-      if (error.code === 'ITEM_UNAVAILABLE') return setOutcome({ kind: 'unavailable' })
-      if (error.code === 'OFFER_EXISTS' && typeof error.details?.offerId === 'string') {
-        return setOutcome({ kind: 'exists', offerId: error.details.offerId })
+      const e = toApiError(error)
+      if (e.isOutcomeUnknown) return void check()
+      // These two open their own panels: the item is gone, or there's already an offer to go to
+      if (e.code === 'ITEM_UNAVAILABLE') return setOutcome({ kind: 'unavailable' })
+      if (e.code === 'OFFER_EXISTS' && typeof e.details?.offerId === 'string') {
+        return setOutcome({ kind: 'exists', offerId: e.details.offerId })
       }
-      if (error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
+      const fields = fieldErrorsOf(e)
+      if (fields) {
         void myItems.refetch()
-        return setServerErrors(error.fieldErrors)
+        for (const [field, message] of Object.entries(fields)) setError(field as keyof OfferFields, { message })
+        return
       }
       // Signing in again is handled by the session prompt; the draft stays put
-      if (error.code === 'AUTH_REQUIRED') return
-      if (error.code === 'FORBIDDEN') return setOutcome({ kind: 'refused' })
-      setOutcome({ kind: 'not-sent' })
+      if (isSignedOut(e)) return
+      if (e.status === 403) return setOutcome({ kind: 'refused' })
+      setOutcome({ kind: 'not-sent', reason: errorReason(e) })
     }
   }
 
   const sending = send.isPending || outcome?.kind === 'checking'
   const summary =
     step === 'review'
-      ? Object.entries(serverErrors).map(([field, message]) => ({
+      ? Object.entries(errorMessages).map(([field, message]) => ({
           message,
           onSelect: () => {
             goTo(stepOfOfferField(field))
@@ -294,7 +308,7 @@ function Composer({
         onSubmit={(e) => {
           e.preventDefault()
           if (step === 'review') void submit()
-          else next()
+          else void next()
         }}
       >
         {step === 'type' && <TypeStep {...stepProps} />}
@@ -372,8 +386,7 @@ function SendStatus({
     case 'not-sent':
       return (
         <Banner tone="warning" title="Your offer wasn’t sent">
-          Nothing reached {listing.seller.displayName}. Check your connection and send it again; your offer is saved
-          here.
+          Nothing reached {listing.seller.displayName}. {outcome.reason} Your offer is saved here.
         </Banner>
       )
     case 'unknown':
