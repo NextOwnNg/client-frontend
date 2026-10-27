@@ -9,7 +9,7 @@ import { EmptyState, ErrorState } from '@/components/ui/States'
 import { usePublicProfile, useUserListings } from '@/features/account/api'
 import { ListingRow, ListingTile } from '@/features/listings/components/ListingCards'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
-import { isApiError } from '@/lib/api/api-error'
+import { isNotFound } from '@/lib/api/error-checks'
 import { formatMonthYear } from '@/lib/time/time'
 import type { PublicProfile } from '@/types/api'
 
@@ -27,7 +27,7 @@ export function ProfilePage() {
     return <div aria-busy="true" aria-label="Loading profile" className="h-40 animate-pulse rounded-card bg-cloud" />
   }
   if (!profile) {
-    if (isApiError(error) && error.status === 404) {
+    if (isNotFound(error)) {
       return (
         <>
           <Seo title="Person not found" noindex />

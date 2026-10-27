@@ -71,7 +71,7 @@ describe('Phone sign-in', () => {
 
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Please wait before asking for another code')
-    expect(alert).toHaveTextContent('Try again in 4 minutes.')
+    expect(alert).toHaveTextContent('Wait 4 minutes, then try again.')
     expect(alert.textContent).not.toMatch(/account|registered|exists/i)
   })
 

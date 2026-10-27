@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { conversationKeys, postMessage } from '@/features/messages/api'
-import { isApiError } from '@/lib/api/api-error'
+import { isRefused } from '@/lib/api/error-checks'
 import type { ConversationDetail } from '@/types/api'
 
 /** A message on screen before the server has it: "Sending…", or "Not sent" with Retry. */
@@ -32,7 +32,7 @@ export function useSendMessage(conversationId: string) {
     } catch (error) {
       mark(clientId, 'failed')
       // Blocked meanwhile: reload the thread so the composer gives way to the notice
-      if (isApiError(error) && error.status === 403) {
+      if (isRefused(error)) {
         void queryClient.invalidateQueries({ queryKey: conversationKeys.one(conversationId) })
       }
     }

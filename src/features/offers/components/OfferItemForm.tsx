@@ -9,7 +9,7 @@ import { TextField } from '@/components/ui/TextField'
 import { useCreateItem } from '@/features/offers/api'
 import { PhotoUploader } from '@/features/selling/components/PhotoUploader'
 import type { FieldErrors } from '@/features/selling/listing-input'
-import { isApiError } from '@/lib/api/api-error'
+import { errorMessage } from '@/lib/api/error-message'
 import { conditionHelp, conditionLabel } from '@/lib/copy/labels'
 import { useFormDraft } from '@/stores/drafts'
 import type { ItemCondition, OfferItemInput, RuntimeConfig, SwapItem } from '@/types/api'
@@ -70,11 +70,7 @@ export function OfferItemForm({
       clear()
       onCreated(item)
     } catch (error) {
-      setFailure(
-        isApiError(error) && error.code === 'VALIDATION_ERROR'
-          ? 'Some details are missing. Check the highlighted fields.'
-          : 'We couldn’t add the item. Check your connection and try again.',
-      )
+      setFailure(errorMessage(error, 'We couldn’t add the item.'))
     }
   }
 

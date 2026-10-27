@@ -6,8 +6,8 @@ import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { PhoneField } from '@/components/ui/PhoneField'
 import { useRequestCode } from '@/features/account/api'
-import { authCopy, waitText } from '@/features/account/copy'
-import { isApiError } from '@/lib/api/api-error'
+import { authCopy } from '@/features/account/copy'
+import { errorReason, fieldError, fieldErrorsOf, waitSeconds } from '@/lib/api/error-message'
 import { safeNext } from '@/lib/auth/next'
 import { normalisePhone } from '@/lib/phone/phone'
 
@@ -24,8 +24,7 @@ export function LoginPage() {
   const [attempted, setAttempted] = useState(false)
   const request = useRequestCode()
 
-  const serverPhoneError =
-    isApiError(request.error) && request.error.code === 'VALIDATION_ERROR' ? authCopy.invalidPhone : null
+  const serverPhoneError = fieldError(request.error, 'phone')
   const phoneError = (attempted && !phone ? authCopy.invalidPhone : null) ?? serverPhoneError
 
   function submit(event: FormEvent) {
@@ -82,17 +81,15 @@ export function LoginPage() {
 }
 
 function RequestError({ error }: { error: Error | null }) {
-  if (!error || (isApiError(error) && error.code === 'VALIDATION_ERROR')) return null
-  if (isApiError(error) && error.code === 'RATE_LIMITED') {
-    return (
-      <Banner tone="warning" title="Please wait before asking for another code">
-        Try again in {waitText(error.retryAfterSeconds)}.
-      </Banner>
-    )
-  }
+  // A rejected number shows on the field instead
+  if (!error || fieldErrorsOf(error)) return null
+  const waiting = waitSeconds(error) !== undefined
   return (
-    <Banner tone="danger" title="We couldn't send the code">
-      Check your connection and try again.
+    <Banner
+      tone={waiting ? 'warning' : 'danger'}
+      title={waiting ? 'Please wait before asking for another code' : "We couldn't send the code"}
+    >
+      {errorReason(error)}
     </Banner>
   )
 }

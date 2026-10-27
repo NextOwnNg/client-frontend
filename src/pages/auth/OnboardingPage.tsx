@@ -11,7 +11,7 @@ import { InterestPicker } from '@/features/account/components/InterestPicker'
 import { TERMS_VERSION } from '@/features/account/policy'
 import { RestrictedBanner } from '@/features/account/RestrictedBanner'
 import { useRuntimeConfig } from '@/features/config/api'
-import { isApiError } from '@/lib/api/api-error'
+import { errorMessage, fieldError, isSignedOut } from '@/lib/api/error-message'
 import { safeNext } from '@/lib/auth/next'
 import { copy } from '@/lib/copy/copy'
 import { cx } from '@/lib/cx'
@@ -66,7 +66,7 @@ export function OnboardingPage() {
   const city = config?.cityName ?? 'the pilot city'
   const nameError =
     (attempted === 1 && !validName(form.displayName) ? 'Enter a name between 2 and 40 characters.' : null) ??
-    (isApiError(update.error) ? (update.error.fieldErrors?.displayName ?? null) : null)
+    fieldError(update.error, 'displayName')
   const showConsentErrors = attempted === 2
 
   function goToStep(target: 1 | 2) {
@@ -102,7 +102,7 @@ export function OnboardingPage() {
           toast.success('You’re all set.')
         },
         onError: (error) => {
-          if (isApiError(error) && error.fieldErrors?.displayName) goToStep(1)
+          if (fieldError(error, 'displayName')) goToStep(1)
         },
       },
     )
@@ -150,9 +150,10 @@ export function OnboardingPage() {
         </form>
       ) : (
         <form noValidate onSubmit={submitStepTwo} className="mt-6 flex flex-col gap-6">
-          {update.error && !isApiError(update.error) && (
+          {/* The name has its own field on step 1; an ended session gets the sign-in prompt */}
+          {update.error && !fieldError(update.error, 'displayName') && !isSignedOut(update.error) && (
             <Banner tone="danger" title="We couldn't save your profile">
-              Check your connection and try again. Your answers are kept.
+              {errorMessage(update.error)} Your answers are kept.
             </Banner>
           )}
           <div className="flex flex-col gap-2">

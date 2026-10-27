@@ -27,7 +27,8 @@ import {
   type WizardStep,
 } from '@/features/selling/listing-input'
 import { draftKey, moveDraft, useListingDraft } from '@/features/selling/use-listing-draft'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorMessage, fieldErrorsOf, isNotFound } from '@/lib/api/error-message'
 import { cx } from '@/lib/cx'
 import { useSessionStore } from '@/stores/session'
 import type { Me, OwnListing, PublicSeller, RuntimeConfig } from '@/types/api'
@@ -65,7 +66,7 @@ export function ListingWizardPage() {
     )
   }
   if (id && own.isError && !own.data) {
-    if (isApiError(own.error) && own.error.status === 404) {
+    if (isNotFound(own.error)) {
       return (
         <EmptyState
           icon={SearchX}
@@ -195,8 +196,9 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
     try {
       await draft.flush()
     } catch (error) {
-      if (isApiError(error) && error.fieldErrors) return setServerErrors(error.fieldErrors)
-      return setFailure('We couldn’t save your changes. Check your connection and try again.')
+      const fields = fieldErrorsOf(error)
+      if (fields) return setServerErrors(fields)
+      return setFailure(errorMessage(error, 'We couldn’t save your changes.'))
     }
     if (published) {
       draft.discardLocal()
@@ -213,17 +215,18 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
           setResult(listing)
         },
         onError: (error) => {
-          if (isApiError(error) && error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
-            return setServerErrors(error.fieldErrors)
-          }
-          if (isApiError(error) && error.code === 'DUPLICATE_ITEM') {
-            const { existingSlug, existingId } = error.details ?? {}
+          const fields = fieldErrorsOf(error)
+          if (fields) return setServerErrors(fields)
+          // A likely duplicate opens its own panel linking to the existing listing
+          const { code, details } = toApiError(error)
+          if (code === 'DUPLICATE_ITEM') {
+            const { existingSlug, existingId } = details ?? {}
             return setDuplicate({
               slug: typeof existingSlug === 'string' ? existingSlug : '',
               id: typeof existingId === 'string' ? existingId : '',
             })
           }
-          setFailure('We couldn’t publish your listing. Check your connection and try again. Your draft is saved.')
+          setFailure(`${errorMessage(error, 'We couldn’t publish your listing.')} Your draft is saved.`)
         },
       },
     )

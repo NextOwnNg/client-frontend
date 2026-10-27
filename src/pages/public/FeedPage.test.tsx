@@ -139,7 +139,7 @@ describe('Comments (FE-FED-03, UX-06)', () => {
     await user.click(within(sheet).getByRole('button', { name: 'Post' }))
     expect(
       await within(sheet).findByText(
-        'Your comment wasn’t posted. You’re going a bit fast. Wait a minute, then try again.',
+        'Your comment wasn’t posted. That’s a lot in a short time. Wait a minute, then try again.',
       ),
     ).toBeInTheDocument()
     expect(within(sheet).getByLabelText('Add a comment')).toHaveValue('Another one')

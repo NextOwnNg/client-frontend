@@ -11,7 +11,7 @@ import { useTransaction } from '@/features/transactions/api'
 import { Stars } from '@/features/transactions/components/Agreement'
 import { StarRating } from '@/features/transactions/components/StarRating'
 import { useTransactionAction } from '@/features/transactions/use-transaction-action'
-import { isApiError } from '@/lib/api/api-error'
+import { isMissingOrPrivate } from '@/lib/api/error-checks'
 import { copy } from '@/lib/copy/copy'
 import { formatWAT } from '@/lib/time/time'
 import { useSessionStore } from '@/stores/session'
@@ -26,7 +26,7 @@ export function ReviewPage() {
   if (isPending)
     return <div aria-busy="true" aria-label="Loading" className="h-80 animate-pulse rounded-card bg-cloud" />
   if (isError && !tx) {
-    if (isApiError(error) && (error.status === 404 || error.status === 403)) {
+    if (isMissingOrPrivate(error)) {
       return (
         <EmptyState
           icon={SearchX}

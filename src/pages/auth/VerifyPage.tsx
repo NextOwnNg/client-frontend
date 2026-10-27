@@ -5,9 +5,10 @@ import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { useRequestCode, useVerifyCode } from '@/features/account/api'
 import { CodeField } from '@/features/account/components/CodeField'
-import { authCopy, waitText } from '@/features/account/copy'
+import { authCopy } from '@/features/account/copy'
 import { formatCountdown, useCountdown } from '@/features/account/use-countdown'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorReason, inputProblem, waitSeconds } from '@/lib/api/error-message'
 import { loginPath, onboardingPath, safeNext } from '@/lib/auth/next'
 import { useMockApi } from '@/lib/env'
 import { formatPhoneDisplay } from '@/lib/phone/phone'
@@ -53,23 +54,16 @@ function CodeStep({ phone, initialResendAt, next }: { phone: string; initialRese
           void navigate(next, { replace: true })
         },
         onError: (error) => {
-          if (!isApiError(error)) return setProblem({ banner: networkProblem })
-          if (error.code === 'OTP_INVALID') return setProblem({ field: authCopy.wrongCode })
-          if (error.code === 'OTP_EXPIRED') {
-            setResendAt(0)
-            return setProblem({ field: authCopy.expiredCode })
-          }
-          if (error.code === 'RATE_LIMITED') {
-            const wait = error.retryAfterSeconds ?? 600
+          const wait = waitSeconds(error)
+          if (wait !== undefined) {
             setResendAt(Date.now() + wait * 1000)
-            return setProblem({
-              banner: {
-                title: 'Too many tries',
-                body: `For your security, wait ${waitText(wait)}, then send a new code.`,
-              },
-            })
+            return setProblem({ banner: { title: 'Too many tries', body: errorReason(error) } })
           }
-          setProblem({ banner: networkProblem })
+          const field = inputProblem(error)
+          if (!field) return setProblem({ banner: { title: "We couldn't check the code", body: errorReason(error) } })
+          // An expired code can't be fixed by retyping it, so a new one can be sent straight away
+          if (toApiError(error).code === 'OTP_EXPIRED') setResendAt(0)
+          setProblem({ field })
         },
       },
     )
@@ -85,16 +79,14 @@ function CodeStep({ phone, initialResendAt, next }: { phone: string; initialRese
         setNotice(authCopy.codeResent)
       },
       onError: (error) => {
-        if (isApiError(error) && error.code === 'RATE_LIMITED') {
-          setResendAt(Date.now() + (error.retryAfterSeconds ?? 60) * 1000)
-          return setProblem({
-            banner: {
-              title: 'Please wait before asking for another code',
-              body: `Try again in ${waitText(error.retryAfterSeconds)}.`,
-            },
-          })
-        }
-        setProblem({ banner: { title: "We couldn't send a new code", body: 'Check your connection and try again.' } })
+        const wait = waitSeconds(error)
+        if (wait !== undefined) setResendAt(Date.now() + wait * 1000)
+        setProblem({
+          banner: {
+            title: wait !== undefined ? 'Please wait before asking for another code' : "We couldn't send a new code",
+            body: errorReason(error),
+          },
+        })
       },
     })
   }
@@ -157,5 +149,3 @@ function CodeStep({ phone, initialResendAt, next }: { phone: string; initialRese
     </>
   )
 }
-
-const networkProblem = { title: "We couldn't check the code", body: 'Check your connection and try again.' }

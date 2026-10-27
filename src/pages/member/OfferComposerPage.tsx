@@ -25,7 +25,8 @@ import {
   type ComposerStep,
 } from '@/features/offers/use-offer-draft'
 import type { FieldErrors } from '@/features/selling/listing-input'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorReason, fieldErrorsOf, isNotFound, isSignedOut } from '@/lib/api/error-message'
 import { apiClient } from '@/lib/api/client'
 import { copy } from '@/lib/copy/copy'
 import { isAvailable } from '@/lib/copy/status'
@@ -44,7 +45,7 @@ export function OfferComposerPage() {
 
   const loaded = listing.data && !listing.isPlaceholderData
   if (!listingId || (listing.isError && !listing.data)) {
-    if (listingId && !(isApiError(listing.error) && listing.error.status === 404)) {
+    if (listingId && !isNotFound(listing.error)) {
       return <ErrorState title="We couldn't load this item" onRetry={() => void listing.refetch()} />
     }
     return (
@@ -135,7 +136,7 @@ function Blocked(props: Parameters<typeof OfferBlocked>[0]) {
 
 type Outcome =
   | { kind: 'checking' }
-  | { kind: 'not-sent' }
+  | { kind: 'not-sent'; reason: string }
   | { kind: 'unknown' }
   | { kind: 'unavailable' }
   | { kind: 'exists'; offerId: string }
@@ -222,7 +223,7 @@ function Composer({
         (o) => o.listing.id === listing.id && o.viewerRole === 'offerer' && o.status === 'PENDING',
       )
       if (sent) finish(sent)
-      else setOutcome({ kind: 'not-sent' })
+      else setOutcome({ kind: 'not-sent', reason: 'Check your connection and send it again.' })
     } catch {
       setOutcome({ kind: 'unknown' })
     }
@@ -242,20 +243,22 @@ function Composer({
       })
       finish(offer)
     } catch (error) {
-      if (!isApiError(error)) return setOutcome({ kind: 'not-sent' })
-      if (error.isOutcomeUnknown) return void check()
-      if (error.code === 'ITEM_UNAVAILABLE') return setOutcome({ kind: 'unavailable' })
-      if (error.code === 'OFFER_EXISTS' && typeof error.details?.offerId === 'string') {
-        return setOutcome({ kind: 'exists', offerId: error.details.offerId })
+      const e = toApiError(error)
+      if (e.isOutcomeUnknown) return void check()
+      // These two open their own panels: the item is gone, or there's already an offer to go to
+      if (e.code === 'ITEM_UNAVAILABLE') return setOutcome({ kind: 'unavailable' })
+      if (e.code === 'OFFER_EXISTS' && typeof e.details?.offerId === 'string') {
+        return setOutcome({ kind: 'exists', offerId: e.details.offerId })
       }
-      if (error.code === 'VALIDATION_ERROR' && error.fieldErrors) {
+      const fields = fieldErrorsOf(e)
+      if (fields) {
         void myItems.refetch()
-        return setServerErrors(error.fieldErrors)
+        return setServerErrors(fields)
       }
       // Signing in again is handled by the session prompt; the draft stays put
-      if (error.code === 'AUTH_REQUIRED') return
-      if (error.code === 'FORBIDDEN') return setOutcome({ kind: 'refused' })
-      setOutcome({ kind: 'not-sent' })
+      if (isSignedOut(e)) return
+      if (e.status === 403) return setOutcome({ kind: 'refused' })
+      setOutcome({ kind: 'not-sent', reason: errorReason(e) })
     }
   }
 
@@ -372,8 +375,7 @@ function SendStatus({
     case 'not-sent':
       return (
         <Banner tone="warning" title="Your offer wasn’t sent">
-          Nothing reached {listing.seller.displayName}. Check your connection and send it again; your offer is saved
-          here.
+          Nothing reached {listing.seller.displayName}. {outcome.reason} Your offer is saved here.
         </Banner>
       )
     case 'unknown':

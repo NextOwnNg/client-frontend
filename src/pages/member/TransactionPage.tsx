@@ -22,7 +22,7 @@ import {
 } from '@/features/transactions/transaction-view'
 import { useTransactionAction, type ActionResult } from '@/features/transactions/use-transaction-action'
 import { useOnline } from '@/hooks/useOnline'
-import { isApiError } from '@/lib/api/api-error'
+import { isMissingOrPrivate } from '@/lib/api/error-checks'
 import { copy, disputeRecorded } from '@/lib/copy/copy'
 import { transactionStatus } from '@/lib/copy/transaction-status'
 import { cx } from '@/lib/cx'
@@ -55,7 +55,7 @@ export function TransactionPage() {
   }
   if (isError && !tx) {
     // Not found and not yours look the same, so a deal's existence never leaks (QA-16)
-    if (isApiError(error) && (error.status === 404 || error.status === 403)) {
+    if (isMissingOrPrivate(error)) {
       return (
         <>
           <Seo title="Transaction" noindex />

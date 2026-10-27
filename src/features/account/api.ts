@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { isApiError } from '@/lib/api/api-error'
+import { isNotFound, isSignedOut } from '@/lib/api/error-checks'
 import { apiClient } from '@/lib/api/client'
 import { applyMe } from '@/stores/session'
 import type { ListingSummary, Me, MeUpdate, Paginated, PublicProfile } from '@/types/api'
@@ -16,7 +16,7 @@ export function useMe() {
         .get<Me>('/me', { signal })
         .then((r) => r.data)
         .catch((error: unknown) => {
-          if (isApiError(error) && error.status === 401) return null
+          if (isSignedOut(error)) return null
           throw error
         }),
     staleTime: 5 * 60_000,
@@ -87,7 +87,7 @@ export function usePublicProfile(id: string) {
   return useQuery({
     queryKey: accountKeys.profile(id),
     queryFn: ({ signal }) => apiClient.get<PublicProfile>(`/users/${id}`, { signal }).then((r) => r.data),
-    retry: (count, error) => !(isApiError(error) && error.status === 404) && count < 2,
+    retry: (count, error) => !isNotFound(error) && count < 2,
   })
 }
 

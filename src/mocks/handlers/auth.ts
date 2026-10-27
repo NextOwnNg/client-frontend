@@ -48,7 +48,7 @@ export const authHandlers: RequestHandler[] = [
     if (failure) return failure
 
     const { phone } = (await request.json()) as { phone?: unknown }
-    if (!isNigerianMobile(phone)) return invalid({ phone: 'Enter a Nigerian mobile number.' })
+    if (!isNigerianMobile(phone)) return invalid({ phone: 'Enter a Nigerian mobile number, like 0803 123 4567.' })
 
     // The same answer whether or not the number has an account (FE-AUT-03)
     const result = authDb.requestCode(phone)

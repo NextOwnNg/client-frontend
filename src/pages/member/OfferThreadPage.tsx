@@ -27,7 +27,7 @@ import {
 import { useDecision, type DecisionResult } from '@/features/offers/use-offer-decision'
 import type { FieldErrors } from '@/features/selling/listing-input'
 import { useOnline } from '@/hooks/useOnline'
-import { isApiError } from '@/lib/api/api-error'
+import { isMissingOrPrivate } from '@/lib/api/error-checks'
 import { copy } from '@/lib/copy/copy'
 import { offerStatus } from '@/lib/copy/offer-status'
 import { isAvailable } from '@/lib/copy/status'
@@ -63,7 +63,7 @@ export function OfferThreadPage() {
   }
   if (isError && !offer) {
     // Not found and not yours look the same, so an offer's existence never leaks (QA-16)
-    if (isApiError(error) && (error.status === 404 || error.status === 403)) {
+    if (isMissingOrPrivate(error)) {
       return (
         <>
           <Seo title="Offer" noindex />

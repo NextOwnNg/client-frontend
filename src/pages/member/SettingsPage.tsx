@@ -11,7 +11,7 @@ import { TextField } from '@/components/ui/TextField'
 import { useDeleteRequest, useLogout, useMe, useUpdateMe } from '@/features/account/api'
 import { InterestPicker } from '@/features/account/components/InterestPicker'
 import { useRuntimeConfig } from '@/features/config/api'
-import { isApiError } from '@/lib/api/api-error'
+import { errorMessage, fieldError, isSignedOut } from '@/lib/api/error-message'
 import { formatWAT } from '@/lib/time/time'
 import { useFormDraft } from '@/stores/drafts'
 import type { Me, RuntimeConfig } from '@/types/api'
@@ -83,9 +83,9 @@ function ProfileSection({ me, config }: { me: Me; config?: RuntimeConfig }) {
   const dirty = !sameForm(form, saved)
 
   const nameValid = form.displayName.trim().length >= 2 && form.displayName.trim().length <= 40
-  const fieldErrors = isApiError(update.error) ? update.error.fieldErrors : undefined
   const nameError =
-    (attempted && !nameValid ? 'Enter a name between 2 and 40 characters.' : null) ?? fieldErrors?.displayName ?? null
+    (attempted && !nameValid ? 'Enter a name between 2 and 40 characters.' : null) ??
+    fieldError(update.error, 'displayName')
 
   const change = (changes: Partial<ProfileForm>) => {
     setSavedNotice(false)
@@ -111,10 +111,10 @@ function ProfileSection({ me, config }: { me: Me; config?: RuntimeConfig }) {
   return (
     <Section title="Profile">
       <form noValidate onSubmit={submit} className="flex flex-col gap-6">
-        {/* Field errors sit on their fields; an expired session gets its own sign-in prompt */}
-        {update.error && !(isApiError(update.error) && [401, 422].includes(update.error.status ?? 0)) && (
+        {/* The name has its own field; an expired session gets its own sign-in prompt */}
+        {update.error && !fieldError(update.error, 'displayName') && !isSignedOut(update.error) && (
           <Banner tone="danger" title="We couldn't save your profile">
-            Check your connection and try again. Your changes are kept.
+            {errorMessage(update.error)} Your changes are kept.
           </Banner>
         )}
         <TextField
@@ -200,7 +200,7 @@ function MessagesSection({ me }: { me: Me }) {
       </Checkbox>
       {update.isError && (
         <p role="alert" className="text-compact text-danger">
-          We couldn’t update this. Check your connection and try again.
+          {errorMessage(update.error, 'We couldn’t update this.')}
         </p>
       )}
     </Section>
@@ -225,7 +225,7 @@ function AccountSection({ me }: { me: Me }) {
         </Button>
         {logout.isError && (
           <p role="alert" className="text-compact text-danger">
-            We couldn’t sign you out. Check your connection and try again.
+            {errorMessage(logout.error, 'We couldn’t sign you out.')}
           </p>
         )}
       </div>
@@ -249,7 +249,7 @@ function AccountSection({ me }: { me: Me }) {
         )}
         {deletion.isError && (
           <p role="alert" className="text-compact text-danger">
-            We couldn’t send your request. Check your connection and try again.
+            {errorMessage(deletion.error, 'We couldn’t send your request.')}
           </p>
         )}
       </div>

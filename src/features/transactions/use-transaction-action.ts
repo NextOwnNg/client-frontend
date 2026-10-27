@@ -7,7 +7,8 @@ import {
   type TransactionAction,
 } from '@/features/transactions/api'
 import type { FieldErrors } from '@/features/selling/listing-input'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { fieldErrorsOf, isSignedOut } from '@/lib/api/error-message'
 import type { Transaction } from '@/types/api'
 
 export type ActionResult =
@@ -74,8 +75,8 @@ export function useTransactionAction(tx: Transaction, viewerId: string) {
     try {
       return { kind: 'done', tx: await mutation.mutateAsync({ action, idempotencyKey: keyFor(action) }) }
     } catch (error) {
-      if (!isApiError(error)) return { kind: 'not-done' }
-      if (error.isOutcomeUnknown) {
+      const e = toApiError(error)
+      if (e.isOutcomeUnknown) {
         setChecking(true)
         try {
           const [fresh] = await Promise.all([reread(), new Promise((r) => setTimeout(r, MIN_CHECK_MS))])
@@ -86,11 +87,13 @@ export function useTransactionAction(tx: Transaction, viewerId: string) {
           setChecking(false)
         }
       }
-      if (error.code === 'VALIDATION_ERROR') return { kind: 'invalid', fieldErrors: error.fieldErrors ?? {} }
-      if (error.code === 'AUTH_REQUIRED') return { kind: 'not-done', silent: true }
-      if (error.status === 403 || error.status === 409) {
+      const fields = fieldErrorsOf(e)
+      if (fields) return { kind: 'invalid', fieldErrors: fields }
+      if (isSignedOut(e)) return { kind: 'not-done', silent: true }
+      // The deal moved on (the other person acted, or it's no longer open): show its state and why
+      if (e.status === 403 || e.status === 409) {
         void reread().catch(() => undefined)
-        return { kind: 'refused', message: error.message }
+        return { kind: 'refused', message: e.message }
       }
       return { kind: 'not-done' }
     }

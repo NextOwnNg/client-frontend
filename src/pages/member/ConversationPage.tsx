@@ -15,7 +15,7 @@ import {
 import { useSendMessage } from '@/features/messages/use-send-message'
 import { ItemThumb } from '@/features/offers/components/OfferParts'
 import { useOnline } from '@/hooks/useOnline'
-import { isApiError } from '@/lib/api/api-error'
+import { isMissingOrPrivate } from '@/lib/api/error-checks'
 import { copy } from '@/lib/copy/copy'
 import { useServerNow } from '@/lib/time/server-clock'
 import { useSessionStore } from '@/stores/session'
@@ -101,7 +101,7 @@ export function ConversationPage() {
     )
   }
   if (isError && !conv) {
-    if (isApiError(error) && (error.status === 404 || error.status === 403)) {
+    if (isMissingOrPrivate(error)) {
       return (
         <EmptyState
           icon={SearchX}
