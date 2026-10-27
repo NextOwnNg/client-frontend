@@ -1,13 +1,15 @@
-import { Compass, Newspaper, Plus } from 'lucide-react'
+import { Newspaper, Plus } from 'lucide-react'
 import { lazy, Suspense, useCallback, useState } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
-import { ButtonLink, PlainButton } from '@/components/ui/Button'
+import { PlainButton } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import type { GuestIntent } from '@/features/account/components/GuestPrompt'
-import { useRuntimeConfig } from '@/features/config/api'
 import { useFeed, usePost } from '@/features/feed/api'
+import { CategoryRail } from '@/features/feed/components/CategoryRail'
+import { ExploreLink } from '@/features/feed/components/ExploreLink'
 import { PostCard } from '@/features/feed/components/PostCard'
+import { PostSkeleton } from '@/features/feed/components/PostSkeleton'
 import { useAutoLoad } from '@/hooks/useAutoLoad'
 import { siteOrigin } from '@/lib/seo/origin'
 import { useServerNow } from '@/lib/time/server-clock'
@@ -22,51 +24,6 @@ const GuestPrompt = lazy(() =>
   import('@/features/account/components/GuestPrompt').then((m) => ({ default: m.GuestPrompt })),
 )
 const ShareSheet = lazy(() => import('@/features/feed/components/ShareSheet').then((m) => ({ default: m.ShareSheet })))
-
-/** FE-FED-04: the way to the full marketplace, at the top of the feed and in its empty state. */
-function ExploreLink({ className }: { className?: string }) {
-  return (
-    <ButtonLink to="/explore" variant="secondary" className={className}>
-      <Compass aria-hidden className="size-5" />
-      Explore marketplace
-    </ButtonLink>
-  )
-}
-
-function PostSkeleton() {
-  return (
-    <div className="flex flex-col gap-3 rounded-card border border-border bg-surface p-4">
-      <div className="flex items-center gap-3">
-        <div className="size-10 animate-pulse rounded-full bg-cloud" />
-        <div className="h-4 w-32 animate-pulse rounded bg-cloud" />
-      </div>
-      <div className="aspect-[4/3] animate-pulse rounded-control bg-cloud" />
-      <div className="h-4 w-48 animate-pulse rounded bg-cloud" />
-    </div>
-  )
-}
-
-function CategoryRail() {
-  const { data } = useRuntimeConfig()
-  if (!data) return null
-  return (
-    <nav aria-label="Browse by category" className="rounded-card border border-border bg-surface p-4">
-      <h2 className="text-compact font-semibold text-ink">Browse by category</h2>
-      <ul className="mt-2 flex flex-col">
-        {data.categories.map((c) => (
-          <li key={c.id}>
-            <Link
-              to={`/explore?category=${encodeURIComponent(c.id)}`}
-              className="flex min-h-10 items-center rounded-control px-2 text-compact text-ink transition-colors duration-120 pointer-fine:hover:bg-mint"
-            >
-              {c.name}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  )
-}
 
 /**
  * UX-05: `/feed`. Highlights from local members, each tied to a real listing whose price and status are

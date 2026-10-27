@@ -5,13 +5,11 @@ import { Seo } from '@/components/seo/Seo'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { useConversation, useMarkConversationRead } from '@/features/messages/api'
-import {
-  Composer,
-  EventLine,
-  OfferCardBubble,
-  PendingBubble,
-  TextBubble,
-} from '@/features/messages/components/ThreadParts'
+import { EventLine } from '@/features/messages/components/EventLine'
+import { MessageComposer } from '@/features/messages/components/MessageComposer'
+import { OfferCardBubble } from '@/features/messages/components/OfferCardBubble'
+import { PendingBubble } from '@/features/messages/components/PendingBubble'
+import { TextBubble } from '@/features/messages/components/TextBubble'
 import { useSendMessage } from '@/features/messages/use-send-message'
 import { ItemThumb } from '@/features/offers/components/OfferParts'
 import { useOnline } from '@/hooks/useOnline'
@@ -210,7 +208,7 @@ export function ConversationPage() {
           </p>
         )}
         {conv.blocked === 'none' ? (
-          <Composer onSend={send} />
+          <MessageComposer onSend={send} />
         ) : (
           <p className="flex items-start gap-2 text-compact text-ink">
             <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-muted" />

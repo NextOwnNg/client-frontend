@@ -5,6 +5,7 @@ import { Deadline } from '@/components/domain/Deadline'
 import { Price } from '@/components/domain/Price'
 import { ButtonLink } from '@/components/ui/Button'
 import { ImageWithFade } from '@/components/ui/ImageWithFade'
+import { RemovedPost } from '@/features/feed/components/RemovedPost'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { SaveToggle } from '@/features/saved/components/SaveToggle'
 import { conditionLabel, isAvailable, listingStatus } from '@/lib/copy/status'
@@ -13,16 +14,6 @@ import { timeAgo } from '@/lib/time/time'
 import type { FeedPost } from '@/types/api'
 
 const chip = 'inline-flex h-7 items-center gap-1 rounded-full bg-mint px-2.5 text-caption font-semibold text-action'
-
-/** A post whose listing was removed, or that moderators took down (ruling R6-2). */
-function RemovedPost() {
-  return (
-    <article className="rounded-card border border-dashed border-border bg-surface px-4 py-5 text-center">
-      <p className="text-compact font-semibold text-ink">This post is no longer available</p>
-      <p className="mt-1 text-compact text-muted">It was removed, or the item it showed is no longer listed.</p>
-    </article>
-  )
-}
 
 /**
  * One feed highlight (FE-FED-01): the author, their caption, and the listing as it is now. Price and status

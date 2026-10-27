@@ -121,7 +121,7 @@ export const routes: RouteObject[] = [
                 children: [
                   {
                     index: true,
-                    lazy: async () => ({ Component: (await import('@/pages/member/MessagesPage')).MessagesIndex }),
+                    lazy: async () => ({ Component: (await import('@/pages/member/MessagesIndexPage')).MessagesIndex }),
                   },
                   {
                     path: ':id',
