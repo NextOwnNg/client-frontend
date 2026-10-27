@@ -131,4 +131,23 @@ describe('RadioCards', () => {
     expect(screen.getByRole('radio', { name: /Swap \+ cash/ })).toBeDisabled()
     expect(screen.getByText('The seller only accepts cash.')).toBeInTheDocument()
   })
+
+  it('shows the not-allowed cursor on options that can’t be chosen, and the pointer on the rest', () => {
+    render(
+      <RadioCards
+        label="How do you want to trade?"
+        value={null}
+        onChange={vi.fn()}
+        options={[
+          { value: 'CASH', title: 'Cash offer' },
+          { value: 'MIXED', title: 'Swap + cash', disabled: true, disabledReason: 'The seller only accepts cash.' },
+        ]}
+      />,
+    )
+    const card = (name: RegExp) => screen.getByRole('radio', { name }).closest('label')!
+
+    expect(card(/Swap \+ cash/)).toHaveClass('cursor-not-allowed')
+    expect(card(/Swap \+ cash/)).not.toHaveClass('cursor-pointer')
+    expect(card(/Cash offer/)).toHaveClass('cursor-pointer')
+  })
 })
