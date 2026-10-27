@@ -14,7 +14,9 @@ import { useMeProfile } from '@/features/account/use-me-profile'
 import { useRuntimeConfig } from '@/features/config/api'
 import { useListingAction, useOwnListing } from '@/features/selling/api'
 import { PreviewStep, PublishResult } from '@/features/selling/components/PreviewStep'
-import { BasicsStep, ConditionStep, TradeStep } from '@/features/selling/components/WizardSteps'
+import { BasicsStep } from '@/features/selling/components/BasicsStep'
+import { ConditionStep } from '@/features/selling/components/ConditionStep'
+import { TradeStep } from '@/features/selling/components/TradeStep'
 import {
   emptyListingInput,
   ownToInput,

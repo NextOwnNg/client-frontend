@@ -31,6 +31,12 @@ export default defineConfig({
               includeDependenciesRecursively: false,
             },
             {
+              // The listing page's sections live in separate files; one chunk keeps them compressing together
+              name: 'listing-detail',
+              test: /src[\\/]features[\\/]listings[\\/]components[\\/](ListingView|Gallery|ListingHeader|SellerCard|ConditionAndDefects|ListingBody|OfferActions|DetailSection|listing-styles)\.tsx?$/,
+              includeDependenciesRecursively: false,
+            },
+            {
               // First-load icons that member screens use too: one chunk instead of a tiny file each
               name: 'shell-icons',
               test: /lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](map-pin|phone|star|circle-check)\.mjs$/,

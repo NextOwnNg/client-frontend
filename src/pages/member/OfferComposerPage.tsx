@@ -14,7 +14,10 @@ import { useRuntimeConfig } from '@/features/config/api'
 import { useListing } from '@/features/listings/api'
 import { unavailableMessage } from '@/features/listings/copy'
 import { offerKeys, useMyItems, useOffers, useSendOffer } from '@/features/offers/api'
-import { ItemStep, ReviewStep, TermsStep, TypeStep } from '@/features/offers/components/ComposerSteps'
+import { ItemStep } from '@/features/offers/components/ItemStep'
+import { ReviewStep } from '@/features/offers/components/ReviewStep'
+import { TermsStep } from '@/features/offers/components/TermsStep'
+import { TypeStep } from '@/features/offers/components/TypeStep'
 import { ListingPin, OfferBlocked } from '@/features/offers/components/OfferParts'
 import {
   composerSteps,

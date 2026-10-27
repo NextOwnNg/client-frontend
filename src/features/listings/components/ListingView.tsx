@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react'
 import { Gallery } from '@/features/listings/components/Gallery'
-import {
-  ConditionAndDefects,
-  ListingBody,
-  ListingHeader,
-  SellerCard,
-} from '@/features/listings/components/ListingDetail'
+import { ConditionAndDefects } from '@/features/listings/components/ConditionAndDefects'
+import { ListingBody } from '@/features/listings/components/ListingBody'
+import { ListingHeader } from '@/features/listings/components/ListingHeader'
+import { SellerCard } from '@/features/listings/components/SellerCard'
 import type { ListingDetail } from '@/types/api'
 
 export type ListingSection = 'photos' | 'trade' | 'condition' | 'details'
