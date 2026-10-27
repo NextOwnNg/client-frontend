@@ -7,7 +7,7 @@ import { ButtonLink } from '@/components/ui/Button'
 import { Sheet } from '@/components/ui/Sheet'
 import { useAddComment, useComments } from '@/features/feed/api'
 import { COMMENT_MAX } from '@/features/feed/feed-limits'
-import { isApiError } from '@/lib/api/api-error'
+import { errorMessage } from '@/lib/api/error-message'
 import { copy } from '@/lib/copy/copy'
 import { isAvailable } from '@/lib/copy/status'
 import { serverNow } from '@/lib/time/server-clock'
@@ -71,13 +71,7 @@ function Composer({ post }: { post: FeedPost }) {
       setBody('')
     } catch (error) {
       // The draft stays, so nothing typed is lost
-      setProblem(
-        isApiError(error) && error.status === 429
-          ? 'You’re commenting quickly. Wait a minute, then try again.'
-          : isApiError(error) && error.fieldErrors?.body
-            ? error.fieldErrors.body
-            : 'Your comment wasn’t posted. Check your connection and try again.',
-      )
+      setProblem(errorMessage(error, 'Your comment wasn’t posted.', { field: 'body' }))
     }
   }
 

@@ -78,7 +78,10 @@ const feedHandlers: RequestHandler[] = [
     }
     if (!caption) return invalid({ caption: 'Add a short caption.' })
     if (caption.length > CAPTION_MAX) return invalid({ caption: `Keep it under ${CAPTION_MAX} characters.` })
-    if (feedDb.postFor(record.detail.id)) return json(409, 'ALREADY_SHARED', 'You’ve already shared this listing')
+    if (feedDb.postFor(record.detail.id))
+      return json(409, 'ALREADY_SHARED', 'You’ve already shared this listing', {
+        field_errors: { listingId: 'You’ve already shared this listing. Choose another.' },
+      })
     return HttpResponse.json(feedDb.create(auth.me.id, record.detail.id, caption), { status: 201 })
   }),
 

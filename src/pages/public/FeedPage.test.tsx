@@ -138,13 +138,29 @@ describe('Comments (FE-FED-03, UX-06)', () => {
     await user.type(within(sheet).getByLabelText('Add a comment'), 'Another one')
     await user.click(within(sheet).getByRole('button', { name: 'Post' }))
     expect(
-      await within(sheet).findByText('You’re commenting quickly. Wait a minute, then try again.'),
+      await within(sheet).findByText(
+        'Your comment wasn’t posted. You’re going a bit fast. Wait a minute, then try again.',
+      ),
     ).toBeInTheDocument()
     expect(within(sheet).getByLabelText('Add a comment')).toHaveValue('Another one')
   })
 })
 
 describe('Sharing a listing (FE-FED-06)', () => {
+  it('says beside the choice when a listing was already shared', async () => {
+    const user = userEvent.setup()
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    await openFeed()
+
+    await user.click(await screen.findByRole('button', { name: 'Share a listing' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Share a listing' })
+    await user.click(await within(sheet).findByRole('radio', { name: /iPhone 12 Pro · 128GB/ }))
+    await user.type(within(sheet).getByLabelText('Caption'), 'Again')
+    await user.click(within(sheet).getByRole('button', { name: 'Share to the feed' }))
+
+    expect(await within(sheet).findByText('You’ve already shared this listing. Choose another.')).toBeInTheDocument()
+  })
+
   it('offers only the member’s active listings and puts the post at the top', async () => {
     const user = userEvent.setup()
     mockAuth.signInAs(SAMPLE_MEMBER_ID)

@@ -9,7 +9,8 @@ import { TextAreaField } from '@/components/ui/TextAreaField'
 import { useSharePost } from '@/features/feed/api'
 import { CAPTION_MAX } from '@/features/feed/feed-limits'
 import { useMyListings } from '@/features/selling/api'
-import { isApiError } from '@/lib/api/api-error'
+import { toApiError } from '@/lib/api/api-error'
+import { errorMessage } from '@/lib/api/error-message'
 import { formatNaira } from '@/lib/money/money'
 
 /**
@@ -42,11 +43,9 @@ export function ShareSheet({ open, onClose, onShared }: { open: boolean; onClose
       reset()
       onShared()
     } catch (error) {
-      if (isApiError(error) && error.code === 'ALREADY_SHARED') {
-        setErrors({ listingId: 'You’ve already shared this listing. Choose another.' })
-      } else if (isApiError(error) && error.fieldErrors) {
-        setErrors(error.fieldErrors)
-      } else setErrors({ form: 'Your post wasn’t shared. Check your connection and try again.' })
+      // Field refusals sit beside their field; anything else is one line under the form
+      const fields = toApiError(error).fieldErrors
+      setErrors(fields ?? { form: errorMessage(error, 'Your post wasn’t shared.') })
     }
   }
 
