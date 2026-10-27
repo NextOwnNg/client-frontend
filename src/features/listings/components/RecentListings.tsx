@@ -5,7 +5,7 @@ import { ListingRowSkeleton, ListingTileSkeleton } from '@/components/ui/Skeleto
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { useListings } from '@/features/listings/api'
 import { ListingRow, ListingTile } from '@/features/listings/components/ListingCards'
-import { defaultFilters, serializeFilters } from '@/features/listings/filters'
+import { areaSummary, defaultFilters, serializeFilters } from '@/features/listings/filters'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
 import type { RuntimeConfig } from '@/types/api'
 
@@ -25,7 +25,7 @@ export function RecentListings({ areaIds, config, onChooseArea, onPreloadArea, o
   const filters = { ...defaultFilters, areas: areaIds }
   const { data, isPending, isError, refetch } = useListings(filters)
   const city = config?.cityName ?? 'the pilot city'
-  const place = config?.areas.find((a) => a.id === areaIds[0])?.name ?? city
+  const place = areaSummary(areaIds, config, city)
   const items = data?.pages[0]?.items.slice(0, SHOWN) ?? []
   const query = serializeFilters(filters).toString()
   const grid = 'grid grid-cols-1 gap-3 tablet:grid-cols-2 tablet:gap-4 desktop:grid-cols-3'

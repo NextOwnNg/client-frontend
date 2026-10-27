@@ -9,8 +9,8 @@ describe('UI preferences store', () => {
     expect(migrate({ areaId: null }, 0)).toEqual({ areaIds: [] })
   })
 
-  it('keeps only the first area from the multi-area version', () => {
-    expect(migrate({ areaIds: ['north', 'east'] }, 1)).toEqual({ areaIds: ['north'] })
+  it('keeps every saved area, since several can be chosen', () => {
+    expect(migrate({ areaIds: ['north', 'east'] }, 1)).toEqual({ areaIds: ['north', 'east'] })
   })
 
   it('recovers from a corrupted saved value', () => {
