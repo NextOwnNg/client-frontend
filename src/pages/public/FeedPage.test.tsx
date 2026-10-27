@@ -147,6 +147,22 @@ describe('Comments (FE-FED-03, UX-06)', () => {
 })
 
 describe('Sharing a listing (FE-FED-06)', () => {
+  it('asks for a listing and a caption before sharing', async () => {
+    const user = userEvent.setup()
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    await openFeed()
+
+    await user.click(await screen.findByRole('button', { name: 'Share a listing' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Share a listing' })
+    await within(sheet).findAllByRole('radio')
+    await user.type(within(sheet).getByLabelText('Caption'), '   ')
+    await user.click(within(sheet).getByRole('button', { name: 'Share to the feed' }))
+
+    expect(await within(sheet).findByText('Choose a listing to share.')).toBeInTheDocument()
+    expect(within(sheet).getByText('Add a short caption.')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Share a listing' })).toBeInTheDocument()
+  })
+
   it('says beside the choice when a listing was already shared', async () => {
     const user = userEvent.setup()
     mockAuth.signInAs(SAMPLE_MEMBER_ID)

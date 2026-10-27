@@ -146,7 +146,7 @@ describe('Listing wizard: steps and drafts', () => {
 
     await userEvent.click(continueButton())
     await waitFor(() => expect(path(router)).toBe(`/listings/${draft.id}/edit?step=condition`))
-    expect(screen.getByText('Step 2 of 4')).toBeInTheDocument()
+    expect(await screen.findByText('Step 2 of 4')).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: 'Back' }))
     await waitFor(() => expect(path(router)).toBe(`/listings/${draft.id}/edit`))
@@ -340,7 +340,7 @@ describe('Listing wizard: preview and publish', () => {
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument()
 
     await userEvent.click(continueButton())
-    await userEvent.click(screen.getAllByRole('button', { name: 'Save changes' })[0]!)
+    await userEvent.click((await screen.findAllByRole('button', { name: 'Save changes' }))[0]!)
 
     await waitFor(() => expect(path(router)).toBe('/me/listings?tab=active'))
     expect((await apiClient.get<OwnListing>('/me/listings/l1')).data.askingKobo).toBe(36_000_000)

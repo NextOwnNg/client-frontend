@@ -1,6 +1,8 @@
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@heroui/react'
 import { PackageOpen } from 'lucide-react'
-import { useState } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { Banner } from '@/components/ui/Banner'
 import { ButtonLink } from '@/components/ui/Button'
 import { RadioCards } from '@/components/ui/RadioCards'
@@ -9,9 +11,21 @@ import { TextAreaField } from '@/components/ui/TextAreaField'
 import { useSharePost } from '@/features/feed/api'
 import { CAPTION_MAX } from '@/features/feed/feed-limits'
 import { useMyListings } from '@/features/selling/api'
-import { toApiError } from '@/lib/api/api-error'
-import { errorMessage } from '@/lib/api/error-message'
+import { errorMessage, fieldErrorsOf } from '@/lib/api/error-message'
 import { formatNaira } from '@/lib/money/money'
+
+const shareSchema = z.object({
+  listingId: z.string().min(1, 'Choose a listing to share.'),
+  caption: z
+    .string()
+    .trim()
+    .min(1, 'Add a short caption.')
+    .max(CAPTION_MAX, `Keep it under ${CAPTION_MAX} characters.`),
+})
+
+type ShareForm = z.infer<typeof shareSchema>
+
+const empty: ShareForm = { listingId: '', caption: '' }
 
 /**
  * FE-FED-06: share one of your own active listings to the feed with a short caption. There are no price or
@@ -21,36 +35,31 @@ export function ShareSheet({ open, onClose, onShared }: { open: boolean; onClose
   const { data, isPending } = useMyListings()
   const share = useSharePost()
   const active = data?.filter((l) => l.status === 'ACTIVE') ?? []
-  const [listingId, setListingId] = useState<string | null>(null)
-  const [caption, setCaption] = useState('')
-  const [errors, setErrors] = useState<{ listingId?: string; caption?: string; form?: string }>({})
+  const { control, handleSubmit, reset, setError, formState } = useForm<ShareForm>({
+    resolver: zodResolver(shareSchema),
+    defaultValues: empty,
+  })
+  const { errors } = formState
 
-  function reset() {
-    setListingId(null)
-    setCaption('')
-    setErrors({})
-    share.reset()
-  }
-
-  async function submit() {
-    const next: typeof errors = {}
-    if (!listingId) next.listingId = 'Choose a listing to share.'
-    if (!caption.trim()) next.caption = 'Add a short caption.'
-    setErrors(next)
-    if (next.listingId || next.caption) return
+  const submit = handleSubmit(async (values) => {
     try {
-      await share.mutateAsync({ listingId: listingId!, caption: caption.trim() })
-      reset()
+      await share.mutateAsync(values)
+      reset(empty)
       onShared()
     } catch (error) {
       // Field refusals sit beside their field; anything else is one line under the form
-      const fields = toApiError(error).fieldErrors
-      setErrors(fields ?? { form: errorMessage(error, 'Your post wasn’t shared.') })
+      const fields = fieldErrorsOf(error)
+      if (!fields) return setError('root', { message: errorMessage(error, 'Your post wasn’t shared.') })
+      for (const [name, message] of Object.entries(fields)) {
+        if (name === 'listingId' || name === 'caption') setError(name, { message })
+        else setError('root', { message })
+      }
     }
-  }
+  })
 
   const close = () => {
-    reset()
+    reset(empty)
+    share.reset()
     onClose()
   }
 
@@ -61,7 +70,7 @@ export function ShareSheet({ open, onClose, onShared }: { open: boolean; onClose
       title="Share a listing"
       footer={
         active.length > 0 && (
-          <Button fullWidth isPending={share.isPending} onPress={() => void submit()}>
+          <Button fullWidth isPending={formState.isSubmitting} onPress={() => void submit()}>
             Share to the feed
           </Button>
         )
@@ -78,34 +87,55 @@ export function ShareSheet({ open, onClose, onShared }: { open: boolean; onClose
           </ButtonLink>
         </div>
       ) : (
-        <div className="flex flex-col gap-5">
+        <form
+          noValidate
+          className="flex flex-col gap-5"
+          onSubmit={(e) => {
+            e.preventDefault()
+            void submit()
+          }}
+        >
           <p className="text-compact text-muted">
             Posts show your listing’s photo, price and status as they are, so there’s nothing else to fill in.
           </p>
-          <div className="flex flex-col gap-1">
-            <RadioCards
-              label="Which listing?"
-              value={listingId}
-              onChange={setListingId}
-              options={active.map((l) => ({
-                value: l.id,
-                title: l.title,
-                description: l.askingKobo !== null ? formatNaira(l.askingKobo) : 'Swap only',
-              }))}
-            />
-            {errors.listingId && <p className="text-compact text-danger">{errors.listingId}</p>}
-          </div>
-          <TextAreaField
-            label="Caption"
-            hint={`What makes it worth a look? Up to ${CAPTION_MAX} characters.`}
-            rows={3}
-            maxLength={CAPTION_MAX}
-            value={caption}
-            error={errors.caption}
-            onChange={(e) => setCaption(e.target.value)}
+          <Controller
+            control={control}
+            name="listingId"
+            render={({ field, fieldState }) => (
+              <div className="flex flex-col gap-1">
+                <RadioCards
+                  label="Which listing?"
+                  value={field.value || null}
+                  onChange={field.onChange}
+                  options={active.map((l) => ({
+                    value: l.id,
+                    title: l.title,
+                    description: l.askingKobo !== null ? formatNaira(l.askingKobo) : 'Swap only',
+                  }))}
+                />
+                {fieldState.error && <p className="text-compact text-danger">{fieldState.error.message}</p>}
+              </div>
+            )}
           />
-          {errors.form && <Banner tone="danger" title={errors.form} />}
-        </div>
+          <Controller
+            control={control}
+            name="caption"
+            render={({ field, fieldState }) => (
+              <TextAreaField
+                label="Caption"
+                hint={`What makes it worth a look? Up to ${CAPTION_MAX} characters.`}
+                rows={3}
+                maxLength={CAPTION_MAX}
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          {errors.root && <Banner tone="danger" title={errors.root.message ?? ''} />}
+        </form>
       )}
     </Sheet>
   )
