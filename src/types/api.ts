@@ -146,7 +146,23 @@ export type RuntimeConfig = {
   quickSellOptionsHours: number[]
   reservationDays: number
   photoLimits: { min: number; max: number }
+  /** How to reach support (PRD §3.2: from config, never hard-coded). Each part is optional; unset ones aren't shown. */
+  support?: SupportContacts
+  /** Official social channels, in the order to show them. */
+  social?: SocialChannel[]
 }
+
+export type SupportContacts = {
+  email?: string
+  /** Display form, e.g. "+234 803 123 4567". */
+  phone?: string
+  /** International digits for a wa.me link, e.g. "2348031234567". */
+  whatsapp?: string
+  /** When a person answers, e.g. "Mon to Sat, 9am to 6pm WAT". */
+  hours?: string
+}
+
+export type SocialChannel = { network: 'instagram' | 'x' | 'tiktok' | 'facebook'; handle: string; url: string }
 
 /** How an offer is made up (PRD §7.1). Listings accept CASH and/or SWAP; Swap + cash balances a swap. */
 export type OfferMode = 'CASH' | 'SWAP' | 'SWAP_PLUS_CASH'

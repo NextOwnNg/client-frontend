@@ -44,10 +44,11 @@ describe('Public profile', () => {
   })
 
   it('never shows a phone number', async () => {
-    const { container } = renderProfile('u-tolu')
+    renderProfile('u-tolu')
     await screen.findByRole('list', { name: 'Active listings' })
 
-    expect(container.textContent).not.toMatch(/\+234|\b0[789][01]\d{8}\b/)
+    // The person's profile, not NextOwn's own support contacts in the footer
+    expect(screen.getByRole('main').textContent).not.toMatch(/\+234|\b0[789][01]\d{8}\b/)
   })
 
   it('shows a calm empty state when nothing is listed', async () => {

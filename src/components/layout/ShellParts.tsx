@@ -1,4 +1,5 @@
 import { WifiOff } from 'lucide-react'
+import { lazy, Suspense } from 'react'
 import { Link, useNavigation } from 'react-router'
 import { Logo } from '@/components/brand/Logo'
 import { useOnline } from '@/hooks/useOnline'
@@ -32,7 +33,18 @@ const footerLinks = [
   { to: '/privacy', label: 'Privacy' },
 ]
 
+const SiteFooter = lazy(() => import('@/components/layout/SiteFooter').then((m) => ({ default: m.SiteFooter })))
+
+/** The full footer loads after the page, keeping first-load code inside budget; the compact one holds its place. */
 export function Footer() {
+  return (
+    <Suspense fallback={<CompactFooter />}>
+      <SiteFooter />
+    </Suspense>
+  )
+}
+
+function CompactFooter() {
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto flex w-full max-w-content flex-col gap-4 px-4 py-8 tablet:px-6 desktop:flex-row desktop:items-center desktop:justify-between">
