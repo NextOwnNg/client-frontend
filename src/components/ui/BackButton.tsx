@@ -24,6 +24,8 @@ export function BackButton({ fallbackTo, fallbackLabel, className }: BackButtonP
   const navigate = useNavigate()
   // React Router gives the first entry of a visit the key "default"
   const cameFromApp = location.key !== 'default'
+  // Pages opened from inside a multi-step flow say how many entries to skip (see use-composer-trail)
+  const steps = (location.state as { backSteps?: number } | null)?.backSteps ?? 1
 
   if (!cameFromApp) {
     return (
@@ -35,7 +37,7 @@ export function BackButton({ fallbackTo, fallbackLabel, className }: BackButtonP
   }
 
   return (
-    <button type="button" onClick={() => navigate(-1)} className={cx(style, className)}>
+    <button type="button" onClick={() => void navigate(-steps)} className={cx(style, className)}>
       <ArrowLeft aria-hidden className={arrow} />
       Back
     </button>

@@ -7,6 +7,7 @@ import { isAvailable } from '@/lib/copy/status'
 import { cx } from '@/lib/cx'
 import { useSessionStore } from '@/stores/session'
 import { unavailableMessage } from '@/features/listings/copy'
+import { fromListingTrail } from '@/features/offers/use-composer-trail'
 import { useIsSaved, useToggleSave } from '@/features/saved/api'
 import type { Intent } from '@/features/listings/components/SignInPrompt'
 import type { ListingDetail } from '@/types/api'
@@ -56,7 +57,7 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
     if (!userId) {
       setIntent(next)
       setPromptOpen(true)
-    } else void navigate(`/offers/new?listing=${fresh.id}`)
+    } else void navigate(`/offers/new?listing=${fresh.id}`, { state: fromListingTrail })
   }
 
   // Back from signing in with `?intent=save` (QA-01): finish the save once, then tidy the URL

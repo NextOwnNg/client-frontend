@@ -17,11 +17,14 @@ export function StepMeter<T extends string>({
   steps,
   current,
   href,
+  state,
 }: {
   label: string
   steps: { id: T; label: string }[]
   current: T
   href: (step: T) => string
+  /** History state for the step links, e.g. how deep the visitor is in a multi-step flow. */
+  state?: unknown
 }) {
   const index = Math.max(
     0,
@@ -44,6 +47,7 @@ export function StepMeter<T extends string>({
             />
             <Link
               to={href(s.id)}
+              state={state}
               aria-current={s.id === current ? 'step' : undefined}
               className={cx(
                 'hidden min-h-11 items-start text-compact underline-offset-4 hover:underline tablet:flex',
