@@ -3,6 +3,7 @@ import { authDb } from '@/mocks/db/auth'
 import { listingsDb } from '@/mocks/db/listings'
 import { notificationsDb } from '@/mocks/db/notifications'
 import { offersDb } from '@/mocks/db/offers'
+import { trustDb } from '@/mocks/db/trust'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { seedTransactions } from '@/mocks/fixtures/transactions'
 import type {
@@ -264,6 +265,17 @@ export const transactionsDb = {
       openedAt: new Date().toISOString(),
       category,
     }
+    // Disputes are cases too, so they appear in the reporter's My reports (ruling R7-1)
+    trustDb.report({
+      reporterId: userId,
+      targetType: 'transaction',
+      targetId: tx.id,
+      targetLabel: `Deal for “${tx.agreement.listingItem.title}”`,
+      reason: category,
+      description: '',
+      evidenceIds: [],
+      caseRef: tx.dispute.caseRef,
+    })
     notifyOther(tx, userId, 'DISPUTE_OPENED', 'reported a problem with the deal')
     touch(tx)
     save()

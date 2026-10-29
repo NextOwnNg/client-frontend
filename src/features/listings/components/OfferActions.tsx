@@ -104,13 +104,19 @@ export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
         </ButtonLink>
       </>
     )
-  } else if (restricted && available) {
+  } else if ((restricted || listing.viewer?.blockedSeller) && available) {
+    // Restricted, or the viewer blocked the seller (ruling R7-4): say why and where to change it
     actions = (
       <>
         <p className={cx('text-compact text-ink', bar && 'min-w-0 flex-1')}>
-          Your account can’t make offers right now.{' '}
-          <Link to="/support?topic=appeal" className="font-semibold text-action underline-offset-4 hover:underline">
-            Why?
+          {restricted
+            ? 'Your account can’t make offers right now.'
+            : `You blocked ${listing.seller.displayName.replace(/\.?$/, '.')}`}{' '}
+          <Link
+            to={restricted ? '/appeal' : `/users/${listing.seller.id}`}
+            className="font-semibold text-action underline-offset-4 hover:underline"
+          >
+            {restricted ? 'Why?' : 'Unblock on their profile'}
           </Link>
         </p>
         {save}

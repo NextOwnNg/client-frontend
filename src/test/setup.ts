@@ -6,6 +6,7 @@ import { mockFeed } from '@/mocks/db/feed'
 import { mockMessages } from '@/mocks/db/messages'
 import { mockNotifications } from '@/mocks/db/notifications'
 import { mockSaved } from '@/mocks/db/saved'
+import { mockTrust } from '@/mocks/db/trust'
 import { mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
 import { mockTransactions } from '@/mocks/db/transactions'
@@ -52,6 +53,7 @@ afterEach(() => {
   mockMessages.reset()
   mockNotifications.reset()
   mockSaved.reset()
+  mockTrust.reset()
   mediaDb.reset()
   // Client stores outlive a render; every test starts signed out with no drafts
   useSessionStore.setState({ status: 'unknown', userId: null, onboarded: false, restricted: false, expired: false })

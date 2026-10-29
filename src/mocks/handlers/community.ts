@@ -10,6 +10,7 @@ import { notificationsDb } from '@/mocks/db/notifications'
 import { offersDb } from '@/mocks/db/offers'
 import { savedDb } from '@/mocks/db/saved'
 import { transactionsDb } from '@/mocks/db/transactions'
+import { trustDb } from '@/mocks/db/trust'
 import { network } from '@/mocks/handlers/network'
 import type { FeedComment, FeedPost, ListingSummary, NotificationCounts, Paginated, SavedKind } from '@/types/api'
 
@@ -54,7 +55,8 @@ const feedHandlers: RequestHandler[] = [
     const failure = await network()
     if (failure) return failure
     const cursor = Number(new URL(request.url).searchParams.get('cursor') ?? 0)
-    return HttpResponse.json<Paginated<FeedPost>>(feedDb.page(Number.isFinite(cursor) ? cursor : 0, FEED_PAGE))
+    const hidden = trustDb.hiddenFor(authDb.current()?.id)
+    return HttpResponse.json<Paginated<FeedPost>>(feedDb.page(Number.isFinite(cursor) ? cursor : 0, FEED_PAGE, hidden))
   }),
 
   http.get(`${API}/feed/:id`, async ({ params }) => {
@@ -89,7 +91,8 @@ const feedHandlers: RequestHandler[] = [
     const failure = await network()
     if (failure) return failure
     if (!feedDb.get(String(params.id))) return notFound('Post not found')
-    return HttpResponse.json<FeedComment[]>(feedDb.comments(String(params.id)))
+    const hidden = trustDb.hiddenFor(authDb.current()?.id)
+    return HttpResponse.json<FeedComment[]>(feedDb.comments(String(params.id)).filter((c) => !hidden.has(c.author.id)))
   }),
 
   http.post(`${API}/feed/:id/comments`, async ({ params, request }) => {
@@ -175,7 +178,9 @@ const messageHandlers: RequestHandler[] = [
     if ('response' in auth) return auth.response
     const conv = messagesDb.get(String(params.id), auth.me.id)
     if (!conv) return notFound('Conversation not found')
-    if (conv.blockedBy) return json(403, 'BLOCKED', 'You can’t send messages in this conversation')
+    const otherId = conv.userIds.find((u) => u !== auth.me.id)!
+    if (trustDb.between(auth.me.id, otherId))
+      return json(403, 'BLOCKED', 'You can’t send messages in this conversation')
     const input = await body(request)
     const clientId = text(input.clientId)
     const message = text(input.body)

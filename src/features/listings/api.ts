@@ -102,10 +102,17 @@ export function useListing(slug: string) {
   })
 }
 
-/** Start loading a listing on hover or touch so the detail opens with data (PRD §12). */
+/** The person asked their browser to save data (PRD §8 Save-Data): nothing is loaded ahead of a tap. */
+export const savesData = () =>
+  (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true
+
+/** Start loading a listing on hover or touch so the detail opens with data (PRD §12), unless saving data. */
 export function usePrefetchListing() {
   const queryClient = useQueryClient()
-  return (slug: string) => queryClient.prefetchQuery({ ...listingQueryOptions(queryClient, slug), staleTime: 30_000 })
+  return (slug: string) =>
+    savesData()
+      ? undefined
+      : queryClient.prefetchQuery({ ...listingQueryOptions(queryClient, slug), staleTime: 30_000 })
 }
 
 export function useListingSuggestions(q: string) {

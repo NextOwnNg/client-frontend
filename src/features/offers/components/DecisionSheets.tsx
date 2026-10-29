@@ -1,6 +1,9 @@
 import { Button } from '@heroui/react'
 import { Info } from 'lucide-react'
-import { useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMemo } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { OfferSum } from '@/components/domain/OfferSum'
 import { MoneyField } from '@/components/ui/MoneyField'
 import { RadioCards } from '@/components/ui/RadioCards'
@@ -18,6 +21,7 @@ import {
 } from '@/features/offers/offer-terms'
 import type { FieldErrors } from '@/features/selling/listing-input'
 import { copy } from '@/lib/copy/copy'
+import { addFieldIssues, flattenErrors } from '@/lib/forms/form-errors'
 import type { CashDirection, Offer, OfferTerms, OfferVersion } from '@/types/api'
 
 /**
@@ -88,6 +92,38 @@ function directionFor(choice: CashChoice, viewer: Offer['viewerRole']): CashDire
   return offererPays ? 'OFFERER_PAYS_OWNER' : 'OWNER_PAYS_OFFERER'
 }
 
+const counterFields = z.object({
+  choice: z.enum(['none', 'pay', 'receive']),
+  cashKobo: z.number().nullable(),
+  note: z.string(),
+})
+
+type CounterFields = z.infer<typeof counterFields>
+
+/** The counter's fields as offer terms: the item and a cash offer's kind stay as they are (ruling R4-3). */
+function termsOf({ choice, cashKobo, note }: CounterFields, latest: OfferVersion, viewer: Offer['viewerRole']) {
+  const isCash = latest.mode === 'CASH'
+  return toPayload({
+    mode: isCash ? 'CASH' : choice === 'none' ? 'SWAP' : 'SWAP_PLUS_CASH',
+    offeredItemId: latest.offeredItemId,
+    cashKobo: cashKobo ?? 0,
+    cashDirection: isCash ? 'OFFERER_PAYS_OWNER' : directionFor(choice, viewer),
+    note,
+  })
+}
+
+/** The same rules as a new offer and the server (`validateTerms`), plus "something must change". */
+const counterSchema = (offer: Offer) =>
+  counterFields.superRefine((fields, ctx) => {
+    const latest = offer.versions.at(-1)!
+    const terms = termsOf(fields, latest, offer.viewerRole)
+    const errors = validateTerms(terms, offer.listing.acceptedModes)
+    if (diffVersions(latest, terms, offer.viewerRole).length === 0 && !terms.note) {
+      errors.terms = 'Change the amount, who pays, or add a note to counter.'
+    }
+    addFieldIssues(ctx, errors)
+  })
+
 /**
  * A counteroffer (FE-OFF-09), filled in with the current terms. The amount, who pays and the note can change;
  * the item stays the same (ruling R4-3). What changed is spelled out as it's typed.
@@ -110,30 +146,23 @@ export function CounterSheet({
   const latest = offer.versions.at(-1)!
   const viewer = offer.viewerRole
   const isCash = latest.mode === 'CASH'
-  const [choice, setChoice] = useState<CashChoice>(() =>
-    latest.cashDirection === 'NONE' ? 'none' : viewerPays(latest, viewer) ? 'pay' : 'receive',
-  )
-  const [cashKobo, setCashKobo] = useState<number | null>(latest.cashKobo || null)
-  const [note, setNote] = useState('')
-  const [shown, setShown] = useState(false)
-
-  const terms: OfferTerms = toPayload({
-    mode: isCash ? 'CASH' : choice === 'none' ? 'SWAP' : 'SWAP_PLUS_CASH',
-    offeredItemId: latest.offeredItemId,
-    cashKobo: cashKobo ?? 0,
-    cashDirection: isCash ? 'OFFERER_PAYS_OWNER' : directionFor(choice, viewer),
-    note,
+  const schema = useMemo(() => counterSchema(offer), [offer])
+  const { control, handleSubmit, watch, formState } = useForm<CounterFields>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      choice: latest.cashDirection === 'NONE' ? 'none' : viewerPays(latest, viewer) ? 'pay' : 'receive',
+      cashKobo: latest.cashKobo || null,
+      note: '',
+    },
   })
+  const fields = watch()
+  const terms = termsOf(fields, latest, viewer)
   const changes = diffVersions(latest, terms, viewer)
-  const errors: FieldErrors = { ...validateTerms(terms, offer.listing.acceptedModes), ...serverErrors }
-  if (changes.length === 0 && !terms.note) errors.terms = 'Change the amount, who pays, or add a note to counter.'
-  const visible = shown ? errors : serverErrors
+  // Errors the rules found, and any the server sent back for the last attempt
+  const visible: FieldErrors = { ...flattenErrors(formState.errors), ...serverErrors }
   const parts = { ...partsOf(offer, latest), terms }
 
-  function submit() {
-    if (Object.keys(errors).length) return setShown(true)
-    onSubmit(terms, latest.id)
-  }
+  const submit = handleSubmit((values) => onSubmit(termsOf(values, latest, viewer), latest.id))
 
   return (
     <Sheet
@@ -150,7 +179,7 @@ export function CounterSheet({
           >
             Cancel
           </Button>
-          <Button isPending={pending} onPress={submit} className="w-full tablet:w-auto">
+          <Button isPending={pending} onPress={() => void submit()} className="w-full tablet:w-auto">
             Send counteroffer
           </Button>
         </div>
@@ -159,29 +188,49 @@ export function CounterSheet({
       <div className="flex flex-col gap-5">
         {!isCash && (
           <div className="flex flex-col gap-1">
-            <RadioCards<CashChoice>
-              label="Cash on top of the swap"
-              options={[
-                { value: 'none', title: 'No cash', description: 'A straight swap.' },
-                { value: 'pay', title: 'I add cash', description: 'You pay the other person on top.' },
-                { value: 'receive', title: 'I receive cash', description: 'The other person pays you on top.' },
-              ]}
-              value={choice}
-              onChange={setChoice}
+            <Controller
+              control={control}
+              name="choice"
+              render={({ field }) => (
+                <RadioCards<CashChoice>
+                  label="Cash on top of the swap"
+                  options={[
+                    { value: 'none', title: 'No cash', description: 'A straight swap.' },
+                    { value: 'pay', title: 'I add cash', description: 'You pay the other person on top.' },
+                    { value: 'receive', title: 'I receive cash', description: 'The other person pays you on top.' },
+                  ]}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
             />
             {visible.cashDirection && <p className="text-compact text-danger">{visible.cashDirection}</p>}
           </div>
         )}
-        {(isCash || choice !== 'none') && (
-          <MoneyField label="Cash amount" value={cashKobo} onChange={setCashKobo} error={visible.cashKobo} />
+        {(isCash || fields.choice !== 'none') && (
+          <Controller
+            control={control}
+            name="cashKobo"
+            render={({ field }) => (
+              <MoneyField label="Cash amount" value={field.value} onChange={field.onChange} error={visible.cashKobo} />
+            )}
+          />
         )}
-        <TextAreaField
-          label="Add a note (optional)"
-          rows={2}
-          maxLength={NOTE_MAX}
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          error={visible.note}
+        <Controller
+          control={control}
+          name="note"
+          render={({ field }) => (
+            <TextAreaField
+              label="Add a note (optional)"
+              rows={2}
+              maxLength={NOTE_MAX}
+              name={field.name}
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={visible.note}
+            />
+          )}
         />
 
         <div aria-live="polite" className="flex flex-col gap-2 rounded-control bg-mint/60 px-4 py-3">

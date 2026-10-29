@@ -32,14 +32,14 @@
   --text-display: 2.5rem; /* 40 / 48 */
   --text-display--line-height: 3rem;
   --text-display--font-weight: 700;
-  --text-h1: 2rem; /* 32 / 40 */
-  --text-h1--line-height: 2.5rem;
+  --text-h1: var(--nx-text-h1); /* 32 / 40, 36 / 44 from desktop */
+  --text-h1--line-height: var(--nx-text-h1-leading);
   --text-h1--font-weight: 700;
   --text-h2: 1.625rem; /* 26 / 34 */
   --text-h2--line-height: 2.125rem;
   --text-h2--font-weight: 700;
-  --text-h3: 1.3125rem; /* 21 / 28 */
-  --text-h3--line-height: 1.75rem;
+  --text-h3: var(--nx-text-h3); /* 18 / 24 on phones, 21 / 28 from tablet */
+  --text-h3--line-height: var(--nx-text-h3-leading);
   --text-h3--font-weight: 600;
   --text-body: 1rem; /* 16 / 24 */
   --text-body--line-height: 1.5rem;

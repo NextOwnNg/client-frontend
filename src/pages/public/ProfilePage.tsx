@@ -1,5 +1,5 @@
-import { CalendarDays, PackageOpen, UserX } from 'lucide-react'
-import { useParams } from 'react-router'
+import { CalendarDays, Flag, PackageOpen, UserX } from 'lucide-react'
+import { Link, useParams } from 'react-router'
 import { Avatar } from '@/components/domain/Avatar'
 import { AreaLabel, TrustModule } from '@/components/domain/TrustModule'
 import { Seo } from '@/components/seo/Seo'
@@ -8,9 +8,11 @@ import { ListingRowSkeleton, ListingTileSkeleton } from '@/components/ui/Skeleto
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { usePublicProfile, useUserListings } from '@/features/account/api'
 import { ListingRow, ListingTile } from '@/features/listings/components/ListingCards'
+import { BlockButton } from '@/features/trust/components/BlockButton'
 import { breakpoints, useMediaQuery } from '@/hooks/useMediaQuery'
 import { isNotFound } from '@/lib/api/error-checks'
 import { formatMonthYear } from '@/lib/time/time'
+import { useSessionStore } from '@/stores/session'
 import type { PublicProfile } from '@/types/api'
 
 const grid = 'grid grid-cols-1 gap-3 tablet:grid-cols-2 tablet:gap-4 desktop:grid-cols-2 wide:grid-cols-3'
@@ -50,7 +52,10 @@ export function ProfilePage() {
         description={`${profile.displayName} trades on NextOwn in ${profile.areaName}.`}
         canonical={`/users/${profile.id}`}
       />
-      <ProfileCard profile={profile} />
+      <div className="flex flex-col gap-2 desktop:sticky desktop:top-24">
+        <ProfileCard profile={profile} />
+        <SafetyActions person={profile} />
+      </div>
       <ActiveListings userId={profile.id} name={profile.displayName} />
     </div>
   )
@@ -60,10 +65,10 @@ export function ProfileCard({ profile }: { profile: PublicProfile }) {
   return (
     <section
       aria-labelledby="profile-name"
-      className="flex flex-col gap-4 rounded-card border border-border bg-surface p-5 desktop:sticky desktop:top-24"
+      className="flex flex-col gap-4 rounded-card border border-border bg-surface p-5"
     >
       <div className="flex items-center gap-4">
-        <Avatar name={profile.displayName} size="lg" />
+        <Avatar name={profile.displayName} src={profile.avatarUrl} size="lg" />
         <div className="flex min-w-0 flex-col gap-1">
           <h1 id="profile-name" className="truncate text-h2 text-ink">
             {profile.displayName}
@@ -83,6 +88,24 @@ export function ProfileCard({ profile }: { profile: PublicProfile }) {
         />
       </div>
     </section>
+  )
+}
+
+/** FE-TRU-01/02: report anyone; block them once signed in. Never on your own profile. */
+function SafetyActions({ person }: { person: PublicProfile }) {
+  const viewerId = useSessionStore((s) => s.userId)
+  if (viewerId === person.id) return null
+  return (
+    <div className="flex flex-wrap gap-x-2">
+      <Link
+        to={`/report/user/${person.id}`}
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-control px-2 text-compact font-semibold text-muted underline-offset-4 hover:text-ink hover:underline"
+      >
+        <Flag aria-hidden className="size-4" />
+        Report {person.displayName}
+      </Link>
+      {viewerId && <BlockButton person={person} />}
+    </div>
   )
 }
 

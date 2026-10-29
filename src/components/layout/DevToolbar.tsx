@@ -10,6 +10,7 @@ import { mockMessages } from '@/mocks/db/messages'
 import { listingsDb, mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
 import { mockTransactions } from '@/mocks/db/transactions'
+import { mockTrust } from '@/mocks/db/trust'
 import { useDevSettings } from '@/mocks/dev-settings'
 
 const tool = 'flex-1 rounded-control bg-white/10 px-2 py-2 font-medium hover:bg-white/20'
@@ -65,6 +66,7 @@ export function DevToolbar() {
     void queryClient.invalidateQueries({ queryKey: ['conversations'] })
     void queryClient.invalidateQueries({ queryKey: ['notifications'] })
     void queryClient.invalidateQueries({ queryKey: ['feed'] })
+    void queryClient.invalidateQueries({ queryKey: ['trust'] })
   }
 
   if (!open) {
@@ -369,6 +371,13 @@ export function DevToolbar() {
             className={`${tool} mt-2 w-full`}
           >
             Rate-limit next comment
+          </button>
+          <button
+            type="button"
+            onClick={() => communityAct('Your newest report moved on.', () => mockTrust.advanceNewestReport(me.id))}
+            className={`${tool} mt-2 w-full`}
+          >
+            Move my newest report forward
           </button>
         </div>
       )}

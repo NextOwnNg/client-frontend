@@ -142,7 +142,7 @@ export function ComponentsPage() {
     <div className="flex flex-col gap-12 pb-16">
       <Seo title="Component gallery" noindex />
       <div className="flex flex-col gap-2">
-        <h1 className="text-h1 text-ink">Component gallery</h1>
+        <h1 className="text-h2 text-ink tablet:text-h1">Component gallery</h1>
         <p className="max-w-2xl text-body text-muted">
           Phase 0 building blocks with fictional sample data. Use the Sample data button to slow the network or fail a
           request.

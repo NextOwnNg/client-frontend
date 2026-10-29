@@ -2,17 +2,10 @@ import { Button } from '@heroui/react'
 import { CalendarClock, Lock, MapPin, MessageCircle } from 'lucide-react'
 import { useId, useState } from 'react'
 import { Link } from 'react-router'
-import { TextAreaField } from '@/components/ui/TextAreaField'
-import { TextField } from '@/components/ui/TextField'
 import type { FieldErrors } from '@/features/selling/listing-input'
+import { MeetingForm } from '@/features/transactions/components/MeetingForm'
 import { formatWAT } from '@/lib/time/time'
 import type { Meeting } from '@/types/api'
-
-/** `2026-10-30T15:00` in West Africa Time, for a datetime-local field (WAT is UTC+1 all year). */
-function toLocalInput(iso: string) {
-  return new Date(Date.parse(iso) + 3_600_000).toISOString().slice(0, 16)
-}
-const fromLocalInput = (value: string) => (value ? new Date(`${value}:00+01:00`).toISOString() : '')
 
 /**
  * Where and when to meet (FE-TRX-03, ruling R5-2). Private to the two people, never printed or shared.
@@ -41,21 +34,7 @@ export function MeetingSection({
 }) {
   const headingId = useId()
   const [editing, setEditing] = useState(false)
-  const [place, setPlace] = useState(meeting?.place ?? '')
-  const [time, setTime] = useState(meeting ? toLocalInput(meeting.time) : '')
-  const [note, setNote] = useState('')
-  const [local, setLocal] = useState<FieldErrors>({})
   const agreedByBoth = Boolean(meeting && meeting.agreedBy.length >= 2)
-  const shown = { ...errors, ...local }
-
-  async function submit() {
-    const problems: FieldErrors = {}
-    if (!place.trim()) problems.place = 'Say where you’ll meet.'
-    if (!time) problems.time = 'Choose a date and time.'
-    setLocal(problems)
-    if (Object.keys(problems).length) return
-    if (await onPropose({ place: place.trim(), time: fromLocalInput(time), note: note.trim() })) setEditing(false)
-  }
 
   return (
     <section
@@ -98,65 +77,30 @@ export function MeetingSection({
         </p>
       )}
 
-      {editing && (
-        <div className="flex flex-col gap-4">
-          <TextField
-            label="Place"
-            hint="A public spot you both know, e.g. a mall entrance or bank hall."
-            value={place}
-            maxLength={120}
-            onChange={(e) => setPlace(e.target.value)}
-            error={shown.place}
-          />
-          <TextField
-            label="Date and time"
-            hint="West Africa Time."
-            type="datetime-local"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            error={shown.time}
-          />
-          <TextAreaField
-            label="Note (optional)"
-            rows={2}
-            maxLength={300}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
-        </div>
+      {editing && open && (
+        <MeetingForm
+          meeting={meeting}
+          pending={pending}
+          errors={errors}
+          onPropose={onPropose}
+          onCancel={() => setEditing(false)}
+        />
       )}
 
-      {open && (
+      {open && !editing && (
         <div className="flex flex-wrap gap-2">
-          {editing ? (
-            <>
-              <Button isPending={pending} onPress={() => void submit()}>
-                Send suggestion
-              </Button>
-              <Button variant="tertiary" isDisabled={pending} onPress={() => setEditing(false)}>
-                Cancel
-              </Button>
-            </>
-          ) : (
-            <>
-              {meeting && !agreedByBoth && meeting.proposedBy !== viewerId && (
-                <Button isPending={pending} onPress={onAgree}>
-                  Agree to this
-                </Button>
-              )}
-              <Button
-                variant={meeting ? 'tertiary' : 'secondary'}
-                isDisabled={pending}
-                onPress={() => setEditing(true)}
-              >
-                {meeting
-                  ? meeting.proposedBy === viewerId && !agreedByBoth
-                    ? 'Change'
-                    : 'Suggest a change'
-                  : 'Suggest a time and place'}
-              </Button>
-            </>
+          {meeting && !agreedByBoth && meeting.proposedBy !== viewerId && (
+            <Button isPending={pending} onPress={onAgree}>
+              Agree to this
+            </Button>
           )}
+          <Button variant={meeting ? 'tertiary' : 'secondary'} isDisabled={pending} onPress={() => setEditing(true)}>
+            {meeting
+              ? meeting.proposedBy === viewerId && !agreedByBoth
+                ? 'Change'
+                : 'Suggest a change'
+              : 'Suggest a time and place'}
+          </Button>
         </div>
       )}
 

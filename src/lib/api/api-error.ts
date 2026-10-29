@@ -16,6 +16,9 @@ export type ApiErrorCode =
   | 'DUPLICATE_ITEM'
   | 'UNSUPPORTED_FORMAT'
   | 'FILE_TOO_LARGE'
+  | 'BLOCKED'
+  | 'APPEAL_EXISTS'
+  | 'NOT_RESTRICTED'
   | 'SERVER_ERROR'
   | 'UNKNOWN'
 

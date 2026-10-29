@@ -8,6 +8,8 @@ import { communityHandlers } from '@/mocks/handlers/community'
 import { network } from '@/mocks/handlers/network'
 import { offersHandlers } from '@/mocks/handlers/offers'
 import { transactionsHandlers } from '@/mocks/handlers/transactions'
+import { trustHandlers } from '@/mocks/handlers/trust'
+import { trustDb } from '@/mocks/db/trust'
 import { sellingHandlers } from '@/mocks/handlers/selling'
 import type {
   ItemCondition,
@@ -54,6 +56,7 @@ export const handlers: RequestHandler[] = [
   ...offersHandlers,
   ...transactionsHandlers,
   ...communityHandlers,
+  ...trustHandlers,
 
   http.get(`${API}/config`, async () => (await network()) ?? HttpResponse.json(runtimeConfig)),
 
@@ -132,7 +135,15 @@ export const handlers: RequestHandler[] = [
     if (!listing || listing.status === 'DRAFT' || listing.status === 'PENDING_REVIEW') {
       return notFound('Listing not found')
     }
-    return HttpResponse.json(toPublicDetail(listing))
+    if (listing.status === 'REMOVED') return HttpResponse.json(toPublicDetail(listing))
+    const viewer = authDb.current()
+    const { avatarUrl } = authDb.seller(listing.seller.id)
+    return HttpResponse.json<ListingDetail>({
+      ...listing,
+      seller: { ...listing.seller, ...(avatarUrl && { avatarUrl }) },
+      // Only the viewer's own block is told; whether the seller blocked them stays private (ruling R7-4)
+      ...(viewer && { viewer: { blockedSeller: trustDb.isBlocked(viewer.id, listing.seller.id) } }),
+    })
   }),
 
   http.get(`${API}/users/:id`, async ({ params }) => {

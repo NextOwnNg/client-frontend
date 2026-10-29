@@ -45,7 +45,7 @@ export function PostCard({
   return (
     <article aria-labelledby={titleId} className="overflow-hidden rounded-card border border-border bg-surface">
       <header className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <Avatar name={post.author.displayName} />
+        <Avatar name={post.author.displayName} src={post.author.avatarUrl} />
         <div className="min-w-0 flex-1">
           <Link
             to={`/users/${post.author.id}`}

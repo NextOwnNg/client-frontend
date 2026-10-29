@@ -23,7 +23,7 @@ export function CommentItem({
   }
   return (
     <li className="flex gap-3">
-      <Avatar name={comment.author.displayName} />
+      <Avatar name={comment.author.displayName} src={comment.author.avatarUrl} />
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-baseline gap-x-2 text-compact">
           <Link

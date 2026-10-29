@@ -168,6 +168,7 @@ export const authDb = {
     return {
       id,
       displayName: account.displayName ?? seller?.displayName ?? 'Member',
+      ...(account.avatarUrl && { avatarUrl: account.avatarUrl }),
       phoneConfirmed: true,
       reviewCount: account.reviewCount,
       rating: account.rating,

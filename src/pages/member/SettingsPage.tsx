@@ -5,8 +5,10 @@ import { useRuntimeConfig } from '@/features/config/api'
 import { SettingsSection } from '@/features/account/components/SettingsSection'
 import { ProfileSection } from '@/features/account/components/ProfileSection'
 import { PhoneSection } from '@/features/account/components/PhoneSection'
+import { PhotoSection } from '@/features/account/components/PhotoSection'
 import { MessagesSection } from '@/features/account/components/MessagesSection'
 import { AccountSection } from '@/features/account/components/AccountSection'
+import { BlockedSection } from '@/features/trust/components/BlockedSection'
 
 /** UX-26 / FE-SET-01: grouped settings. Destructive actions confirm first; profile edits survive an expired session. */
 export function SettingsPage() {
@@ -22,8 +24,10 @@ export function SettingsPage() {
       ) : (
         <>
           <ProfileSection me={me} config={config} />
+          <PhotoSection me={me} />
           <PhoneSection me={me} />
           <MessagesSection me={me} />
+          <BlockedSection />
           <SettingsSection title="Privacy and policies">
             <ul className="flex flex-col">
               {[

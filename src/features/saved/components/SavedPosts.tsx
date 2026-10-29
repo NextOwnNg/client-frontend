@@ -30,18 +30,21 @@ export function SavedPosts() {
     )
   }
   return (
-    <ul aria-label="Saved posts" className="mx-auto flex w-full max-w-xl flex-col gap-4">
-      {items.map((post) => (
-        <li key={post.id}>
-          <PostCard
-            post={post}
-            now={now}
-            viewerId={userId}
-            onComments={(p) => void navigate(`/feed?post=${p.id}`)}
-            onGuestSave={() => {}}
-          />
-        </li>
-      ))}
-    </ul>
+    <>
+      <h2 className="sr-only">Saved posts</h2>
+      <ul aria-label="Saved posts" className="mx-auto flex w-full max-w-xl flex-col gap-4">
+        {items.map((post) => (
+          <li key={post.id}>
+            <PostCard
+              post={post}
+              now={now}
+              viewerId={userId}
+              onComments={(p) => void navigate(`/feed?post=${p.id}`)}
+              onGuestSave={() => {}}
+            />
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }

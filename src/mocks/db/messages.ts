@@ -2,6 +2,7 @@ import { authDb } from '@/mocks/db/auth'
 import { listingsDb, toSummary } from '@/mocks/db/listings'
 import { currentVersion, offersDb, type StoredOffer } from '@/mocks/db/offers'
 import { transactionsDb } from '@/mocks/db/transactions'
+import { mockTrust, trustDb } from '@/mocks/db/trust'
 import { seedConversations, type StoredConversation, type StoredMessage } from '@/mocks/fixtures/community'
 import type { ChatMessage, Conversation, ConversationDetail } from '@/types/api'
 
@@ -127,7 +128,7 @@ function summary(conv: StoredConversation, viewerId: string): Conversation {
     offerStatus: offer.status,
     transactionId: offer.transactionId,
     transactionStatus: offer.transactionId ? transactionsDb.statusOf(offer.transactionId) : undefined,
-    blocked: !conv.blockedBy ? 'none' : conv.blockedBy === viewerId ? 'by-me' : 'by-them',
+    blocked: trustDb.isBlocked(viewerId, otherId) ? 'by-me' : trustDb.isBlocked(otherId, viewerId) ? 'by-them' : 'none',
     lastMessage: last && {
       body: last.kind === 'offer' ? `Offer · version ${last.offer!.versionNumber}` : last.moderated ? '' : last.body,
       senderId: last.senderId,
@@ -167,7 +168,6 @@ export const messagesDb = {
         listingId: offer.listingId,
         userIds: pair,
         offerIds: [],
-        blockedBy: null,
         readAt: {},
         createdAt: new Date().toISOString(),
       }
@@ -242,13 +242,15 @@ export const mockMessages = {
     save()
     return true
   },
-  /** Toggles the other person blocking the member (blocking yourself arrives with Phase 7). */
+  /** Toggles the other person blocking the member. */
   toggleBlockedByOther(id?: string) {
     const conv = target(id)
     const me = authDb.current()?.id
     if (!conv || !me) return false
-    conv.blockedBy = conv.blockedBy ? null : conv.userIds.find((u) => u !== me)!
-    save()
+    mockTrust.toggleBlockedBy(
+      conv.userIds.find((u) => u !== me)!,
+      me,
+    )
     return true
   },
   reset() {
