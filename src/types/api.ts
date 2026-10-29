@@ -65,6 +65,8 @@ export type ListingDetail = ListingSummary & {
   desiredSwap?: string
   categoryFields: { label: string; value: string }[]
   seller: PublicSeller
+  /** For a signed-in viewer: whether they blocked the seller (ruling R7-4). Never says if the seller blocked them. */
+  viewer?: { blockedSeller: boolean }
 }
 
 /** A person's public profile (PRD FE-PRF-01): never a phone number or an exact location. */
@@ -86,11 +88,18 @@ export type Me = {
   rating?: number
   memberSince: string
   deletionRequestedAt: string | null
+  avatarUrl?: string
+  /** The member's open or decided request to lift a restriction (ruling R7-5). */
+  appeal?: Appeal
 }
+
+export type Appeal = { caseRef: string; status: 'RECEIVED' | 'IN_REVIEW' | 'DECIDED'; createdAt: string }
 
 /** `PATCH /me`. `acceptTerms` records the terms and 18+ acknowledgment that completes onboarding (ACC-04). */
 export type MeUpdate = Partial<Pick<Me, 'displayName' | 'areaId' | 'interests' | 'marketingOptIn'>> & {
   acceptTerms?: { version: string; adult: boolean }
+  /** An uploaded photo's media id, or null to remove the profile photo. */
+  avatarId?: string | null
 }
 
 /** An uploaded photo: the image plus the media id the listing refers to. */
@@ -402,3 +411,44 @@ export type AppNotification = {
 }
 
 export type NotificationCounts = { notifications: number; messages: number }
+
+/** What can be reported from `/report/:type/:id` (FE-TRU-01). Deals are reported from the deal (ruling R7-1). */
+export type ReportTargetType = 'listing' | 'post' | 'comment' | 'conversation' | 'offer' | 'user' | 'transaction'
+
+export type ReportReason = 'PROHIBITED' | 'SCAM' | 'MISLEADING' | 'HARASSMENT' | 'UNSAFE' | 'SPAM' | 'OTHER'
+
+export type ReportStatus = 'RECEIVED' | 'IN_REVIEW' | 'ACTION_TAKEN' | 'CLOSED'
+
+/** What a report is about, as the reporter may see it. `author` is who would be blocked alongside the report. */
+export type ReportTarget = {
+  type: ReportTargetType
+  id: string
+  label: string
+  author: { id: string; displayName: string } | null
+}
+
+export type NewReport = {
+  targetType: ReportTargetType
+  targetId: string
+  reason: ReportReason
+  description: string
+  evidenceIds: string[]
+  alsoBlock?: boolean
+}
+
+/** One of the member's own cases (FE-TRU-03): status only, never moderator notes. */
+export type CaseReport = {
+  id: string
+  caseRef: string
+  targetType: ReportTargetType
+  targetLabel: string
+  reason: ReportReason | DisputeCategory
+  status: ReportStatus
+  createdAt: string
+  updatedAt: string
+}
+
+/** `POST /reports`. `duplicate` when the same target was already reported and the case is still open. */
+export type ReportReceipt = { report: CaseReport; duplicate: boolean }
+
+export type BlockedPerson = { id: string; displayName: string; avatarUrl?: string; blockedAt: string }

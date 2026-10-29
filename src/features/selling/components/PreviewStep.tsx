@@ -8,6 +8,7 @@ import { ListingView, type ListingSection } from '@/features/listings/components
 import { inputToDetail, type WizardStep } from '@/features/selling/listing-input'
 import { useNow } from '@/hooks/useNow'
 import { copy } from '@/lib/copy/copy'
+import { PolicyLinks } from '@/features/trust/components/PolicyLinks'
 import type { ListingInput, OwnListing, PublicSeller, RuntimeConfig } from '@/types/api'
 
 const sectionStep: Record<ListingSection, { step: WizardStep; label: string }> = {
@@ -82,7 +83,9 @@ export function PreviewStep({ input, listing, seller, config, stepHref, action, 
           <li>Buyers see {area}, never your address or phone number.</li>
           <li>{copy.phoneBadgeExplainer}</li>
           <li>You can edit or close this listing at any time from My listings.</li>
+          <li>It must follow the community rules and can’t be a prohibited item.</li>
         </ul>
+        <PolicyLinks />
       </section>
     </div>
   )

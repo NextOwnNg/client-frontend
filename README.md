@@ -4,6 +4,8 @@ The user-facing web app for NextOwn, a person-to-person marketplace for selling,
 
 - Product and engineering requirements: [docs/prd.md](docs/prd.md)
 - Visual source of truth: [docs/NextOwn Brand Kit and Design System.md](docs/NextOwn%20Brand%20Kit%20and%20Design%20System.md)
+- Design system as built: [DESIGN.md](DESIGN.md)
+- API the client expects, and open contract questions: [docs/backend-handoff.md](docs/backend-handoff.md)
 
 ## Stack
 
@@ -95,12 +97,26 @@ Do not stretch, recolour outside these variants, add effects, or place the mark 
 
 ```
 src/
-  app/          router, providers, query client, layouts
-  pages/        thin route components (set <Seo> tags)
-  features/     one folder per domain: api hooks, components, schemas   (added as features land)
+  app/          router, providers, query client, layouts, auth guards
+  pages/        thin route components (set <Seo> tags): public/, member/, auth/, dev/
+  features/     one folder per domain: api hooks, components, schemas
+                (listings, explore, selling, offers, transactions, feed, messages,
+                 notifications, saved, account, trust, help, config, home)
   components/   shared UI: ui/ (HeroUI wrappers), domain/, layout/, seo/
-  stores/       Zustand stores (UI and session view only; API data stays in TanStack Query)
-  lib/          api (Axios client, ApiError), and later money, time, copy, analytics
+  stores/       Zustand stores (session view and form drafts; API data stays in TanStack Query)
+  lib/          api (client, errors: error-message + error-checks), forms, money, time, copy, images, seo
+  mocks/        the MSW mock API: handlers/, db/ (in-memory stores), fixtures/ (fictional data)
   styles/       design tokens and global CSS
-  test/         Vitest setup, MSW server and handlers, render helpers
+  test/         Vitest setup, MSW server, render helpers
 ```
+
+### Conventions
+
+- Forms use React Hook Form with a Zod schema (`zodResolver`). Server field errors go to `setError`.
+- Failed requests are worded only through `lib/api/error-message.ts`; screens never check status codes.
+- Page headings use `text-h2 tablet:text-h1`.
+- Public first loads (Home, Explore, a listing, Feed) stay within 170 KB gzipped. `vite.config.ts` groups shared chunks to keep them there.
+
+## Mock API
+
+Until the backend is live, `npm run dev` serves a typed mock API with MSW, using clearly fictional sample data. The **Sample data** button in the corner signs in as the sample member, slows the network, fails the next request, and acts as the other person or a moderator (reply, block, counter, restrict, move a report on). Tests use the same handlers. The endpoints and error codes are listed in [docs/backend-handoff.md](docs/backend-handoff.md).

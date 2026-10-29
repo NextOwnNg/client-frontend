@@ -33,9 +33,9 @@ typography:
     lineHeight: "2.125rem"
   h3:
     fontFamily: "Inter Variable, Inter Display, Inter, system-ui, Segoe UI, sans-serif"
-    fontSize: "1.3125rem"
+    fontSize: "1.125rem"
     fontWeight: 600
-    lineHeight: "1.75rem"
+    lineHeight: "1.5rem"
   body:
     fontFamily: "Inter Variable, Inter, system-ui, Segoe UI, sans-serif"
     fontSize: "1rem"
@@ -223,9 +223,9 @@ A restrained, high-confidence palette: Ink foundation, one Teal action colour, l
 
 ### Hierarchy
 - **Display** (700, 40/48px): the desktop home hero only.
-- **H1** (700, 32/40px): page titles from tablet width (768px) up.
+- **H1** (700, 32/40px, 36/44px from 1024px): page titles from tablet width (768px) up.
 - **H2** (700, 26/34px): section headings, and page titles on phones.
-- **H3** (600, 21/28px): sub-sections and large swap-only price text.
+- **H3** (600, 18/24px on phones, 21/28px from 768px): card and sub-section headings, sheet and dialog titles, and large swap-only price text. The H1 and H3 steps live in the token variables (`--nx-text-h1`, `--nx-text-h3`), so no page adds breakpoints for them.
 - **Body** (400, 16/24px): default copy, field text at every breakpoint (prevents iOS zoom), listing titles at 600.
 - **Compact** (400 to 600, 14/21px): secondary facts such as condition and defect lines, desktop nav links, banner detail.
 - **Caption** (500, 12/18px): badges, bottom-nav labels, the worked-sum heading, timestamps.
@@ -288,7 +288,7 @@ Confident and plain: one height, one radius, one weight.
 
 ### Cards / Containers
 - **Corner Style:** 16px.
-- **Background:** Paper on the Cloud page; Cloud for quiet inner explainers.
+- **Background:** Paper on the Cloud page. Cloud for quiet explainers inside a Paper card only: a quiet box sitting directly on the Cloud page uses Paper with a 1px Border, or it disappears.
 - **Shadow Strategy:** none at rest; see Elevation.
 - **Border:** 1px Border; listing cards shift to 40% Teal on fine-pointer hover.
 - **Press:** listing cards scale to 0.98 on press.
@@ -325,6 +325,17 @@ A single vertical corridor for transaction steps. A 2px line connects 24px circu
 ### Deadline
 Quick Sell time left. Compact form is the Gold chip. Detail form adds an Ink label with a warning-tone timer icon, the WAT end time in tabular caption, and a 4px Mint track whose Gold fill length is the real share of time remaining. It never animates or ticks by the second.
 
+### Avatar
+A 40px (or 64px on profiles) circle. It shows the person's photo cropped to cover, or their initials in bold Teal on Mint when there's no photo or it fails to load. It's decorative: the name always sits beside it.
+
+### Help and policy pages
+Read mode, through one layout (`PolicyPage`): the title, a lead line in Slate, and a Gold-tint draft note for texts awaiting legal sign-off. An "On this page" list wraps above the text on phones and sits in a sticky 14rem column from 1024px. Sections are H3-sized `h2`s with body text at a 65ch measure, disc lists with Teal markers, and numbered steps in Mint circles where order matters. Anchors land below the sticky header. The content lives in typed data files (`features/help/content`), never in the layout.
+
+### Report, block and appeal
+- **Report:** what's being reported comes first, in a Paper box, before anything is asked. The danger guidance banner comes first in the form, and the support limit is stated before sending. The confirmation is a calm Paper card with an inbox icon and the case reference. No ticks and no celebration.
+- **Block:** a confirmation that states the effect on both people and that they aren't told. Unblock is immediate and uses an undo arrow, never a person-with-tick icon.
+- **Case status:** a status badge plus one line saying what the status means. Never moderator notes.
+
 ### Motion
 Motion values come from `src/lib/motion/presets.ts`: fast 120ms, standard 200ms, slow 320ms, all on ease-out `cubic-bezier(0.16, 1, 0.3, 1)`. There are springs for sheets and press feedback; fade-rise entrances; 16px step slides in the direction of travel; and a 0.98 press scale.
 
@@ -351,3 +362,6 @@ First-load motion is CSS, so it stays smooth while a page loads and keeps Framer
 - **Don't** add shadows to cards at rest or to nested elements.
 - **Don't** add a dark theme; the pilot is light only.
 - **Don't** use auto-dismissing toasts for critical transaction errors; use a persistent banner.
+- **Don't** put shield or check-badge icons next to people or payments (PRD §10.2), including for Unblock.
+- **Don't** put a colored left border on callouts or boxes; the 2px Teal rule belongs only to sums, listing facts and timelines.
+- **Don't** end a sentence straight after a name that ends in an initial ("Chidi O."): add the full stop only when the name doesn't already have one.

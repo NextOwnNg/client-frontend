@@ -11,6 +11,7 @@ import { OfferCardBubble } from '@/features/messages/components/OfferCardBubble'
 import { PendingBubble } from '@/features/messages/components/PendingBubble'
 import { TextBubble } from '@/features/messages/components/TextBubble'
 import { useSendMessage } from '@/features/messages/use-send-message'
+import { BlockButton } from '@/features/trust/components/BlockButton'
 import { ItemThumb } from '@/features/offers/components/OfferParts'
 import { useOnline } from '@/hooks/useOnline'
 import { isMissingOrPrivate } from '@/lib/api/error-checks'
@@ -152,6 +153,7 @@ export function ConversationPage() {
         >
           <Flag aria-hidden className="size-4.5" strokeWidth={1.75} />
         </Link>
+        {conv.blocked !== 'by-me' && <BlockButton person={conv.other} iconOnly />}
       </header>
 
       {/* FE-MSG-03: in every thread, always visible */}
@@ -161,7 +163,7 @@ export function ConversationPage() {
       </p>
 
       {context && (
-        <p className="mt-3 rounded-control bg-cloud px-3 py-2 text-compact text-ink">
+        <p className="mt-3 rounded-control border border-border bg-surface px-3 py-2 text-compact text-ink">
           {context.text}{' '}
           <Link to={context.to} className="font-semibold text-action underline-offset-4 hover:underline">
             {context.link}
@@ -210,12 +212,15 @@ export function ConversationPage() {
         {conv.blocked === 'none' ? (
           <MessageComposer onSend={send} />
         ) : (
-          <p className="flex items-start gap-2 text-compact text-ink">
-            <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-muted" />
-            {conv.blocked === 'by-them'
-              ? 'You can’t send messages in this conversation. You can still read it, and your offers and deals stay on their own pages.'
-              : `You blocked ${conv.other.displayName}, so neither of you can send messages here.`}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-x-3">
+            <p className="flex min-w-0 flex-1 basis-60 items-start gap-2 text-compact text-ink">
+              <Lock aria-hidden className="mt-0.5 size-4 shrink-0 text-muted" />
+              {conv.blocked === 'by-them'
+                ? 'You can’t send messages in this conversation. You can still read it, and your offers and deals stay on their own pages.'
+                : `You blocked ${conv.other.displayName}, so neither of you can send messages here.`}
+            </p>
+            {conv.blocked === 'by-me' && <BlockButton person={conv.other} className="-ml-2" />}
+          </div>
         )}
       </div>
     </div>

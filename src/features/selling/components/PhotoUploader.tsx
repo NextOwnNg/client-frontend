@@ -1,5 +1,5 @@
 import { CircleAlert, Ellipsis, ImagePlus, LoaderCircle, RotateCcw, X } from 'lucide-react'
-import { useEffect, useId, useRef, useState, type DragEvent } from 'react'
+import { useEffect, useId, useRef, useState, type DragEvent, type ReactNode } from 'react'
 import { Button, Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components'
 import { uploadPhoto } from '@/features/selling/api'
 import { useSortable } from '@/features/selling/use-sortable'
@@ -30,6 +30,8 @@ type PhotoUploaderProps = {
   error?: string | null
   /** True while any photo is still preparing or uploading. */
   onBusyChange?: (busy: boolean) => void
+  /** Replaces the listing photo tips, for photos that aren't of an item (evidence, a profile photo). */
+  hint?: ReactNode
 }
 
 const tile = 'relative aspect-square overflow-hidden rounded-control border border-border bg-cloud'
@@ -45,7 +47,7 @@ const move = <T,>(list: T[], from: number, to: number) => {
  * The listing photo uploader (FE-LST-02): prepares each photo on the device, uploads it with progress, and
  * keeps going when one fails. Reorder by dragging (press and hold on a phone) or from each photo's menu.
  */
-export function PhotoUploader({ value, onChange, limits, itemName, error, onBusyChange }: PhotoUploaderProps) {
+export function PhotoUploader({ value, onChange, limits, itemName, error, onBusyChange, hint }: PhotoUploaderProps) {
   const [pending, setPending] = useState<Pending[]>([])
   const [notices, setNotices] = useState<string[]>([])
   const [dropping, setDropping] = useState(false)
@@ -298,11 +300,15 @@ export function PhotoUploader({ value, onChange, limits, itemName, error, onBusy
         </p>
       )}
       <div id={hintId} className="rounded-control border border-border bg-surface p-3 text-compact text-muted">
-        <p className="font-semibold text-ink">{PHOTO_TIP}</p>
-        <p className="mt-1">
-          Daylight works best. Show every side and its current state. The first photo is the cover; drag to reorder, or
-          press and hold on a phone.
-        </p>
+        {hint ?? (
+          <>
+            <p className="font-semibold text-ink">{PHOTO_TIP}</p>
+            <p className="mt-1">
+              Daylight works best. Show every side and its current state. The first photo is the cover; drag to reorder,
+              or press and hold on a phone.
+            </p>
+          </>
+        )}
       </div>
     </div>
   )

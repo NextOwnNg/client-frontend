@@ -92,7 +92,7 @@ describe('shell for guests and members', () => {
     renderWithProviders(routes, { initialPath: '/listings/ps5-disc-edition' })
 
     expect(await screen.findByText('Your account is restricted')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Ask for a review' })).toHaveAttribute('href', '/support?topic=appeal')
+    expect(screen.getByRole('link', { name: 'Ask for a review' })).toHaveAttribute('href', '/appeal')
     expect(await screen.findByText('Your account can’t make offers right now.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Make an offer' })).not.toBeInTheDocument()
   })

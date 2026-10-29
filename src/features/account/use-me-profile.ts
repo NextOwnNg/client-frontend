@@ -10,6 +10,7 @@ export function useMeProfile(): PublicProfile | undefined {
   return {
     id: me.id,
     displayName: me.displayName ?? 'New member',
+    avatarUrl: me.avatarUrl,
     areaName: config?.areas.find((a) => a.id === me.areaId)?.name ?? config?.cityName ?? 'Pilot city',
     phoneConfirmed: true,
     reviewCount: me.reviewCount,

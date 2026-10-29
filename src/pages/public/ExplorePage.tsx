@@ -47,7 +47,7 @@ export function ExplorePage() {
         )}
 
         <div className="flex min-w-0 flex-col gap-4">
-          <h1 className="text-h2 text-ink desktop:text-h1">Explore items</h1>
+          <h1 className="text-h2 text-ink tablet:text-h1">Explore items</h1>
           <SearchBox
             key={filters.q ?? ''}
             defaultValue={filters.q}

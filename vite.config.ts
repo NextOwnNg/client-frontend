@@ -27,7 +27,7 @@ export default defineConfig({
               // App code every public page loads and later screens share (cards, status, prices): one chunk,
               // so new routes that reuse a piece don't split it into many small, poorly compressed files
               name: 'shared-ui',
-              test: /src[\\/](components[\\/](ui[\\/](StatusBadge|ImageWithFade|Button)|domain[\\/](Deadline|Price|TrustModule))|lib[\\/](copy[\\/](status|labels|copy)|view-transition|time[\\/](time|server-clock)|money[\\/]money|cx|env|api[\\/](client|api-error|error-checks))|stores[\\/]session|hooks[\\/]useMediaQuery|features[\\/]listings[\\/](api|filters))\.tsx?$|lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](handshake|wifi-off|timer|circle-slash|image-off)\.mjs$/,
+              test: /src[\\/](components[\\/](ui[\\/](StatusBadge|ImageWithFade|Button)|domain[\\/](Deadline|Price|TrustModule|Avatar))|lib[\\/](copy[\\/](status|labels|copy)|view-transition|time[\\/](time|server-clock)|money[\\/]money|cx|env|api[\\/](client|api-error|error-checks))|stores[\\/]session|hooks[\\/]useMediaQuery|features[\\/]listings[\\/](api|filters))\.tsx?$|lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](handshake|wifi-off|timer|circle-slash|image-off)\.mjs$/,
               includeDependenciesRecursively: false,
             },
             {
@@ -45,7 +45,7 @@ export default defineConfig({
             {
               // The listing page's small icons, shared with member screens: one chunk instead of a file each
               name: 'detail-icons',
-              test: /lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](flag|life-buoy|package-x|bookmark|chevron-left|chevron-right)\.mjs$/,
+              test: /lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](flag|life-buoy|package-x|bookmark|chevron-left|chevron-right|arrow-left|search-x|expand|circle-alert|info)\.mjs$/,
               includeDependenciesRecursively: false,
             },
           ],

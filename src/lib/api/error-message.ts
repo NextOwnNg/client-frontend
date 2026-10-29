@@ -55,6 +55,8 @@ export function errorReason(error: unknown): string {
   const wait = waitSeconds(e)
   if (wait !== undefined) return `That’s a lot in a short time. Wait ${waitText(wait)}, then try again.`
   if (e.status !== undefined && e.status >= 500) return 'Something went wrong on our side. Try again in a moment.'
+  // Either person may have blocked the other; the sentence doesn't say which (ruling R7-4)
+  if (e.code === 'BLOCKED') return 'You can’t message or make offers with this person.'
   if (e.status === 403) return 'Your account can’t do this right now.'
   return 'Try again.'
 }

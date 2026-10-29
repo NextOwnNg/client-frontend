@@ -4,6 +4,7 @@ import { apiBaseUrl } from '@/lib/env'
 import { authDb } from '@/mocks/db/auth'
 import { listingsDb } from '@/mocks/db/listings'
 import { currentVersion, offersDb, turnOf, type StoredOffer } from '@/mocks/db/offers'
+import { trustDb } from '@/mocks/db/trust'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { network } from '@/mocks/handlers/network'
 import type { Me, NewOffer, OfferItemInput, OfferTerms } from '@/types/api'
@@ -15,6 +16,8 @@ const json = (status: number, code: string, message: string, extra: object = {})
 const authRequired = () => json(401, 'AUTH_REQUIRED', 'Sign in to continue')
 const notFound = () => json(404, 'NOT_FOUND', 'Offer not found')
 const forbidden = (message = 'This action isn’t available.') => json(403, 'FORBIDDEN', message)
+/** Either person blocked the other: offers between them stop, whoever blocked (QA-18, OFF-05). */
+const blocked = () => json(403, 'BLOCKED', 'You can’t make or answer offers with this person.')
 const invalid = (field_errors: Record<string, string>) =>
   json(422, 'VALIDATION_ERROR', 'Check the highlighted details', { field_errors })
 
@@ -107,6 +110,7 @@ export const offersHandlers: RequestHandler[] = [
         return json(404, 'NOT_FOUND', 'Listing not found')
       }
       if (listing.ownerId === me.id) return forbidden('You can’t make an offer on your own listing.')
+      if (trustDb.between(me.id, listing.ownerId)) return blocked()
       if (listing.detail.status !== 'ACTIVE') return json(409, 'ITEM_UNAVAILABLE', 'This item is no longer available')
 
       const existing = offersDb.openOfferOn(listing.detail.id, me.id)
@@ -136,6 +140,7 @@ export const offersHandlers: RequestHandler[] = [
       if ('response' in result) return result.response
       const { offer } = result
       if (turnOf(offer) !== me.id) return forbidden('It’s the other person’s turn to decide.')
+      if (trustDb.between(offer.offererId, offer.ownerId)) return blocked()
       const latest = currentVersion(offer)
       if (body.expectedVersionId !== latest.id) {
         return json(409, 'STALE_OFFER_VERSION', 'The offer has changed')
@@ -169,6 +174,7 @@ export const offersHandlers: RequestHandler[] = [
       if ('response' in result) return result.response
       const { offer } = result
       if (turnOf(offer) !== me.id) return forbidden('It’s the other person’s turn to decide.')
+      if (trustDb.between(offer.offererId, offer.ownerId)) return blocked()
       if (body.expectedVersionId !== currentVersion(offer).id) {
         return json(409, 'STALE_OFFER_VERSION', 'The offer has changed')
       }

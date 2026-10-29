@@ -58,7 +58,7 @@ export function ListingWizardPage() {
           tone="warning"
           title="Your account can’t list items right now"
           action={
-            <ButtonLink to="/support?topic=appeal" variant="secondary">
+            <ButtonLink to="/appeal" variant="secondary">
               Ask for a review
             </ButtonLink>
           }

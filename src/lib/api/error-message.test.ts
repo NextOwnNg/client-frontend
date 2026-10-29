@@ -61,6 +61,12 @@ describe('errorMessage', () => {
     expect(errorMessage(http(403, 'FORBIDDEN'), failed)).toBe(`${failed} Your account can’t do this right now.`)
   })
 
+  it('names a block without saying who blocked whom (ruling R7-4)', () => {
+    expect(errorMessage(http(403, 'BLOCKED'), failed)).toBe(
+      `${failed} You can’t message or make offers with this person.`,
+    )
+  })
+
   it('falls back for anything else, and works without the first sentence', () => {
     expect(errorMessage(http(409, 'SOMETHING_NEW'), failed)).toBe(`${failed} Try again.`)
     expect(errorMessage(offline)).toBe('Check your connection and try again.')
