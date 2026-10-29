@@ -66,4 +66,18 @@ export const runtimeConfig: RuntimeConfig = {
   quickSellOptionsHours: [24, 48, 72, 168],
   reservationDays: 7,
   photoLimits: { min: 1, max: 8 },
+  // MOCK contacts and channels: clearly fictional until operations confirms them (PRD D-06). The email uses the
+  // reserved .example domain and the links go to example.com, so nothing reaches a real inbox or account.
+  support: {
+    email: 'support@nextown.example',
+    phone: '+234 000 000 0000',
+    whatsapp: '2340000000000',
+    hours: 'Mon to Sat, 9am to 6pm WAT',
+  },
+  social: [
+    { network: 'instagram', handle: '@nextown', url: 'https://example.com/nextown/instagram' },
+    { network: 'x', handle: '@nextown', url: 'https://example.com/nextown/x' },
+    { network: 'tiktok', handle: '@nextown', url: 'https://example.com/nextown/tiktok' },
+    { network: 'facebook', handle: 'NextOwn', url: 'https://example.com/nextown/facebook' },
+  ],
 }

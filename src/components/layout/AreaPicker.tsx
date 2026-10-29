@@ -1,6 +1,7 @@
 import { ChevronDown, MapPin } from 'lucide-react'
 import { useAreaSheet } from '@/components/layout/use-area-sheet'
 import { useRuntimeConfig } from '@/features/config/api'
+import { areaSummary } from '@/features/listings/filters'
 import { useUiStore } from '@/stores/ui'
 
 /** Area pill in the header. Coarse area only; we never ask for or detect a home location. */
@@ -9,7 +10,7 @@ export function AreaPicker() {
   const { data: config } = useRuntimeConfig()
   const areaIds = useUiStore((s) => s.areaIds)
 
-  const label = config?.areas.find((a) => a.id === areaIds[0])?.name ?? 'All areas'
+  const label = areaSummary(areaIds, config, 'All areas')
 
   return (
     <>

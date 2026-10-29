@@ -28,14 +28,13 @@ export function AreaSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
       }
     >
       <p className="mb-4 text-compact text-muted">
-        Pick an area, or none to browse all of {city}. We never ask for your exact location.
+        Pick one or more areas, or none to browse all of {city}. We never ask for your exact location.
       </p>
       <CheckList
         label="Area"
         options={(config?.areas ?? []).map((a) => ({ value: a.id, label: a.name }))}
         value={areaIds}
         onChange={setAreaIds}
-        single
       />
     </Sheet>
   )

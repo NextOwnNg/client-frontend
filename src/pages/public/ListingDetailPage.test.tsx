@@ -134,7 +134,10 @@ describe('Listing detail', () => {
     await waitFor(() =>
       expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe('noindex, nofollow'),
     )
-    expect(screen.getByRole('link', { name: 'Explore items' })).toHaveAttribute('href', '/explore')
+    expect(within(screen.getByRole('main')).getByRole('link', { name: 'Explore items' })).toHaveAttribute(
+      'href',
+      '/explore',
+    )
   })
 
   it('shows Manage instead of Make an offer on your own listing', async () => {
@@ -155,10 +158,11 @@ describe('Listing detail', () => {
   })
 
   it('never shows a phone number or address', async () => {
-    const { container } = renderDetail('iphone-12-pro-128gb')
+    renderDetail('iphone-12-pro-128gb')
     await offerButton()
 
-    expect(container.textContent).not.toMatch(/\+234|\b0[789][01]\d{8}\b|street|address/i)
+    // The page's content, not NextOwn's own support contacts in the footer
+    expect(screen.getByRole('main').textContent).not.toMatch(/\+234|\b0[789][01]\d{8}\b|street|address/i)
     expect(screen.getAllByText('[Pilot Area] Central', { selector: 'span' }).length).toBeGreaterThan(0)
   })
 

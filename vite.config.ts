@@ -39,7 +39,7 @@ export default defineConfig({
             {
               // First-load icons that member screens use too: one chunk instead of a tiny file each
               name: 'shell-icons',
-              test: /lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](map-pin|phone|star|circle-check)\.mjs$/,
+              test: /lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](map-pin|phone|star|circle-check|clock)\.mjs$/,
               includeDependenciesRecursively: false,
             },
             {

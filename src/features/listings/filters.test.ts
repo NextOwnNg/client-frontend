@@ -59,10 +59,10 @@ describe('listing filters in the URL', () => {
     expect(filters.q).toBeUndefined()
   })
 
-  it('keeps one category and one area, the first valid one, from a link that lists several', () => {
+  it('keeps every category and area from a link that lists several', () => {
     expect(parse('category=gaming,phones&area=north,east').filters).toMatchObject({
-      categories: ['gaming'],
-      areas: ['north'],
+      categories: ['gaming', 'phones'],
+      areas: ['north', 'east'],
     })
   })
 

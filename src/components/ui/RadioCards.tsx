@@ -41,12 +41,13 @@ export function RadioCards<T extends string>({
             isDisabled={option.disabled}
             className={({ isSelected, isFocusVisible, isDisabled, isPressed }) =>
               cx(
-                'group relative flex min-h-14 cursor-pointer gap-3 rounded-control border bg-surface p-4 text-left outline-none',
+                'group relative flex min-h-14 gap-3 rounded-control border bg-surface p-4 text-left outline-none',
                 'transition-[border-color,background-color,transform] duration-120 ease-out',
                 isSelected ? 'border-action bg-mint/50 shadow-[inset_0_0_0_1px_var(--nx-teal)]' : 'border-border',
                 isFocusVisible && 'ring-2 ring-focus ring-offset-2',
                 isPressed && !isDisabled && 'scale-[0.99]',
-                isDisabled && 'cursor-not-allowed bg-cloud',
+                // One cursor only: with both classes, the pointer won and unavailable options looked clickable
+                isDisabled ? 'cursor-not-allowed bg-cloud' : 'cursor-pointer',
               )
             }
           >

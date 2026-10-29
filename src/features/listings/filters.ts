@@ -8,9 +8,9 @@ export type ModeFilter = 'CASH' | 'SWAP' | 'QUICK_SELL'
 /** Explore and Home search state (PRD FE-EXP-01). Prices are whole naira; the API takes naira too. */
 export type ListingFilters = {
   q?: string
-  /** At most one category id (picked one at a time); empty means every category. */
+  /** Category ids; several widen each other, and empty means every category. */
   categories: string[]
-  /** At most one area id (picked one at a time); empty means the whole pilot city. */
+  /** Area ids; several widen each other, and empty means the whole pilot city. */
   areas: string[]
   modes: ModeFilter[]
   priceMin?: number
@@ -80,13 +80,8 @@ export function parseFilters(
         .filter(Boolean),
     ),
   ]
-  // One category and one area at a time: a link listing several keeps the first valid one
-  const categories = ids(params.get('category'))
-    .filter((id) => !config || config.categories.some((c) => c.id === id))
-    .slice(0, 1)
-  const areas = ids(params.get('area'))
-    .filter((id) => !config || config.areas.some((a) => a.id === id))
-    .slice(0, 1)
+  const categories = ids(params.get('category')).filter((id) => !config || config.categories.some((c) => c.id === id))
+  const areas = ids(params.get('area')).filter((id) => !config || config.areas.some((a) => a.id === id))
 
   const filters: ListingFilters = {
     q,
@@ -197,4 +192,10 @@ export function canonicalSearch(filters: ListingFilters): string {
   if (filters.areas.length) params.set('area', filters.areas.join(','))
   const query = params.toString()
   return query ? `?${query}` : ''
+}
+
+/** The chosen areas in a few words: the one area's name, "2 areas", or `none` when every area is included. */
+export function areaSummary(areaIds: string[], config: RuntimeConfig | undefined, none: string): string {
+  if (areaIds.length > 1) return `${areaIds.length} areas`
+  return config?.areas.find((a) => a.id === areaIds[0])?.name ?? none
 }

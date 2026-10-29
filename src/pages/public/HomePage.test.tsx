@@ -83,6 +83,17 @@ describe('Home', () => {
     expect(screen.getByRole('link', { name: 'See all' })).toHaveAttribute('href', '/explore?area=north')
   })
 
+  it('names how many areas are chosen when there are several', async () => {
+    useUiStore.getState().setAreaIds(['north', 'central'])
+    renderWithProviders(routes, { initialPath: '/' })
+
+    expect(await screen.findByRole('heading', { name: 'Recently listed in 2 areas' })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'See all' })).toHaveAttribute(
+      'href',
+      '/explore?area=north%2Ccentral',
+    )
+  })
+
   it('offers next steps when the area has nothing listed yet', async () => {
     const user = userEvent.setup()
     useUiStore.getState().setAreaIds(['east'])

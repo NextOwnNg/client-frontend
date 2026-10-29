@@ -86,7 +86,7 @@ describe('Explore', () => {
     await waitFor(() => expect(resultTitles()).not.toContain('Tecno Camon CX'))
   })
 
-  it('filters by one category at a time from the rail, and All clears it', async () => {
+  it('combines categories from the rail, untoggles one at a time, and All clears them', async () => {
     const user = userEvent.setup()
     const { router } = renderExplore()
     const rail = await screen.findByRole('group', { name: 'Categories' })
@@ -95,9 +95,16 @@ describe('Explore', () => {
     await waitFor(() => expect(router.state.location.search).toBe('?category=gaming'))
     await user.click(within(rail).getByRole('button', { name: 'Phones' }))
 
-    await waitFor(() => expect(router.state.location.search).toBe('?category=phones'))
+    await waitFor(() => expect(router.state.location.search).toBe('?category=gaming%2Cphones'))
     expect(within(rail).getByRole('button', { name: 'Phones' })).toHaveAttribute('aria-pressed', 'true')
-    expect(within(rail).getByRole('button', { name: 'Gaming' })).toHaveAttribute('aria-pressed', 'false')
+    expect(within(rail).getByRole('button', { name: 'Gaming' })).toHaveAttribute('aria-pressed', 'true')
+    expect(within(rail).getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false')
+    // Phones and gaming listings together, nothing from other categories
+    await waitFor(() => expect(resultTitles()).toEqual(expect.arrayContaining(['Tecno Camon CX', 'PS5 Disc Edition'])))
+    expect(resultTitles()).not.toContain('Panasonic microwave, 20L')
+
+    await user.click(within(rail).getByRole('button', { name: 'Gaming' }))
+    await waitFor(() => expect(router.state.location.search).toBe('?category=phones'))
 
     await user.click(within(rail).getByRole('button', { name: 'All' }))
     await waitFor(() => expect(router.state.location.search).toBe(''))
@@ -158,7 +165,7 @@ describe('Explore', () => {
 })
 
 describe('Explore filter sheet', () => {
-  it('uses checkboxes for areas that pick one at a time', async () => {
+  it('uses checkboxes for areas, and several can be picked', async () => {
     const user = userEvent.setup()
     const { router } = renderExplore()
     await screen.findByText('14 items · newest first')
@@ -173,14 +180,15 @@ describe('Explore filter sheet', () => {
     await user.click(north)
     await user.click(east)
     expect(east).toBeChecked()
-    expect(north).not.toBeChecked()
+    expect(north).toBeChecked()
     await user.click(await within(sheet).findByRole('button', { name: /Show \d+ results/ }))
 
-    await waitFor(() => expect(router.state.location.search).toBe('?area=east'))
-    expect(useUiStore.getState().areaIds).toEqual(['east'])
+    await waitFor(() => expect(router.state.location.search).toBe('?area=north%2Ceast'))
+    expect(useUiStore.getState().areaIds).toEqual(['north', 'east'])
+    expect(screen.getByRole('button', { name: 'Browsing area: 2 areas. Change area' })).toBeInTheDocument()
   })
 
-  it('uses checkboxes for categories that pick one at a time, and untick to clear', async () => {
+  it('uses checkboxes for categories, several at once, and untick to clear', async () => {
     const user = userEvent.setup()
     const { router } = renderExplore()
     await screen.findByText('14 items · newest first')
@@ -194,13 +202,13 @@ describe('Explore filter sheet', () => {
     await user.click(phones)
     await user.click(gaming)
     expect(gaming).toBeChecked()
-    expect(phones).not.toBeChecked()
+    expect(phones).toBeChecked()
     await user.click(gaming)
     expect(gaming).not.toBeChecked()
-    await user.click(phones)
+    await user.click(gaming)
     await user.click(await within(sheet).findByRole('button', { name: /Show \d+ results/ }))
 
-    await waitFor(() => expect(router.state.location.search).toBe('?category=phones'))
+    await waitFor(() => expect(router.state.location.search).toBe('?category=phones%2Cgaming'))
   })
 
   it('previews the result count and applies on "Show N results"', async () => {

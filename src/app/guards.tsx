@@ -1,5 +1,14 @@
 import { LoaderCircle } from 'lucide-react'
-import { Navigate, Outlet, useLocation, useSearchParams } from 'react-router'
+import { useEffect } from 'react'
+import {
+  Navigate,
+  NavigationType,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useNavigationType,
+  useSearchParams,
+} from 'react-router'
 import { loginPath, onboardingPath, safeNext } from '@/lib/auth/next'
 import { useSessionStore } from '@/stores/session'
 
@@ -30,13 +39,28 @@ export function RequireAuth({ allowNew = false }: { allowNew?: boolean }) {
   return <Outlet />
 }
 
-/** Sign-in pages: someone already signed in carries straight on to where they were going. */
+/**
+ * Sign-in pages: someone already signed in carries straight on to where they were going. Arriving by going
+ * Back is different: the sign-in page is behind them, so Back keeps going past it. Sending them forward to
+ * `next` again made Back bounce into the page they had just left (such as the offer they started).
+ */
 export function RedirectIfAuthed() {
   const status = useSessionStore((s) => s.status)
   const onboarded = useSessionStore((s) => s.onboarded)
   const [params] = useSearchParams()
   const next = safeNext(params.get('next'))
+  const navigate = useNavigate()
+  const navigationType = useNavigationType()
+  const { key } = useLocation()
+  // POP is Back or Forward; "default" is the visit's first page, which has nothing behind it
+  const backedInto = navigationType === NavigationType.Pop && key !== 'default'
+  const member = status === 'member'
 
-  if (status !== 'member') return <Outlet />
+  useEffect(() => {
+    if (member && backedInto) void navigate(-1)
+  }, [member, backedInto, navigate])
+
+  if (!member) return <Outlet />
+  if (backedInto) return <SessionPending />
   return <Navigate to={onboarded ? next : onboardingPath(next)} replace />
 }

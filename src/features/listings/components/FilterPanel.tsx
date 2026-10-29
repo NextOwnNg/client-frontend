@@ -86,20 +86,18 @@ export function FilterPanel({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      {/* Areas and categories work the same way: tick one, or none for all */}
+      {/* Every list works the same way: tick as many as you like, or none for all */}
       <CheckList
         label="Area"
         options={(config?.areas ?? []).map((a) => ({ value: a.id, label: a.name }))}
         value={filters.areas}
         onChange={(areas) => onChange({ ...filters, areas })}
-        single
       />
       <CheckList
         label="Category"
         options={(config?.categories ?? []).map((c) => ({ value: c.id, label: c.name }))}
         value={filters.categories}
         onChange={(categories) => onChange({ ...filters, categories })}
-        single
       />
       <CheckList
         label="Trade type"

@@ -107,8 +107,8 @@ export function FiltersButton({
 const categoryOn = 'border-ink bg-ink text-paper pointer-fine:hover:bg-ink/90'
 
 /**
- * Category toggles, one at a time. "All" clears the choice and is on when none is picked.
- * The URL still carries the choice, so a filtered view stays shareable.
+ * Category toggles: several can be on, and they widen each other. "All" clears them and is on when none is
+ * picked. The URL carries the choice, so a filtered view stays shareable.
  */
 export function CategoryRail({
   filters,
@@ -120,8 +120,13 @@ export function CategoryRail({
   onChange: (next: ListingFilters) => void
 }) {
   const none = filters.categories.length === 0
-  // One category at a time: tapping another switches to it, tapping the current one goes back to All
-  const toggle = (id: string) => onChange({ ...filters, categories: filters.categories.includes(id) ? [] : [id] })
+  const toggle = (id: string) =>
+    onChange({
+      ...filters,
+      categories: filters.categories.includes(id)
+        ? filters.categories.filter((c) => c !== id)
+        : [...filters.categories, id],
+    })
 
   return (
     <ChipRow label="Categories">

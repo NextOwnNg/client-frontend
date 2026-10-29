@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Ban, Handshake, LoaderCircle, OctagonAlert, PackageX, SearchX, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router'
+import { useLocation, useNavigate, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { ButtonLink } from '@/components/ui/Button'
@@ -31,6 +31,7 @@ import {
   type OfferFields,
   type ComposerStep,
 } from '@/features/offers/use-offer-draft'
+import { useComposerTrail } from '@/features/offers/use-composer-trail'
 import { toApiError } from '@/lib/api/api-error'
 import { errorReason, fieldErrorsOf, isNotFound, isRefused, isSignedOut } from '@/lib/api/error-message'
 import { apiClient } from '@/lib/api/client'
@@ -191,6 +192,7 @@ function Composer({
   // A step that doesn't belong to the chosen kind of offer (or a review with nothing chosen) starts at the top
   const step: ComposerStep = requested && steps.some((s) => s.id === requested) && draft.mode ? requested : 'type'
   const index = steps.findIndex((s) => s.id === step)
+  const trail = useComposerTrail(listing.slug)
   const item = items.find((i) => i.id === draft.offeredItemId)
 
   const stepHref = (target: ComposerStep) => {
@@ -199,7 +201,7 @@ function Composer({
     else next.set('step', target)
     return `${location.pathname}?${next.toString()}`
   }
-  const goTo = (target: ComposerStep) => void navigate(stepHref(target))
+  const goTo = (target: ComposerStep) => void navigate(stepHref(target), { state: trail.stepState })
 
   const errorMessages = flattenErrors(formState.errors)
   // Each step shows its own fields' problems; the review lists everything, with a way back to each
@@ -290,15 +292,16 @@ function Composer({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 pb-36 desktop:pb-0">
       <Seo title="Make an offer" noindex />
-      <Link
-        to={`/listings/${listing.slug}`}
-        className="-ml-2 inline-flex min-h-11 items-center gap-1.5 self-start rounded-control px-2 text-compact font-semibold text-muted transition-colors duration-120 hover:bg-cloud hover:text-ink"
+      <button
+        type="button"
+        onClick={trail.backToItem}
+        className="-ml-2 inline-flex min-h-11 cursor-pointer items-center gap-1.5 self-start rounded-control px-2 text-compact font-semibold text-muted transition-colors duration-120 hover:bg-cloud hover:text-ink"
       >
         <X aria-hidden className="size-4" />
         Back to the item
-      </Link>
+      </button>
       {pin}
-      <StepMeter label="Offer steps" steps={steps} current={step} href={stepHref} />
+      <StepMeter label="Offer steps" steps={steps} current={step} href={stepHref} state={trail.stepState} />
       <h1 className="text-h2 text-ink tablet:text-h1">Make an offer</h1>
 
       <ErrorSummary title="Check these before you continue" items={summary} />

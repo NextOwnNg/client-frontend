@@ -1,6 +1,7 @@
 import { createBrowserRouter, type RouteObject } from 'react-router'
 import { RedirectIfAuthed, RequireAuth } from '@/app/guards'
 import { AppLayout } from '@/app/layouts/AppLayout'
+import type { AuthHandle } from '@/app/layouts/auth-handle'
 import { RootLayout } from '@/app/layouts/RootLayout'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { HomePage } from '@/pages/public/HomePage'
@@ -158,10 +159,18 @@ export const routes: RouteObject[] = [
           {
             Component: RedirectIfAuthed,
             children: [
-              { path: 'login', lazy: async () => ({ Component: (await import('@/pages/auth/LoginPage')).LoginPage }) },
+              {
+                path: 'login',
+                handle: { showcase: 'always' } satisfies AuthHandle,
+                lazy: async () => ({ Component: (await import('@/pages/auth/LoginPage')).LoginPage }),
+              },
             ],
           },
-          { path: 'verify', lazy: async () => ({ Component: (await import('@/pages/auth/VerifyPage')).VerifyPage }) },
+          {
+            path: 'verify',
+            handle: { showcase: 'desktop' } satisfies AuthHandle,
+            lazy: async () => ({ Component: (await import('@/pages/auth/VerifyPage')).VerifyPage }),
+          },
           {
             element: <RequireAuth allowNew />,
             children: [
