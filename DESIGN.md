@@ -33,9 +33,9 @@ typography:
     lineHeight: "2.125rem"
   h3:
     fontFamily: "Inter Variable, Inter Display, Inter, system-ui, Segoe UI, sans-serif"
-    fontSize: "1.3125rem"
+    fontSize: "1.125rem"
     fontWeight: 600
-    lineHeight: "1.75rem"
+    lineHeight: "1.5rem"
   body:
     fontFamily: "Inter Variable, Inter, system-ui, Segoe UI, sans-serif"
     fontSize: "1rem"
@@ -223,9 +223,9 @@ A restrained, high-confidence palette: Ink foundation, one Teal action colour, l
 
 ### Hierarchy
 - **Display** (700, 40/48px): the desktop home hero only.
-- **H1** (700, 32/40px): page titles from tablet width (768px) up.
+- **H1** (700, 32/40px, 36/44px from 1024px): page titles from tablet width (768px) up.
 - **H2** (700, 26/34px): section headings, and page titles on phones.
-- **H3** (600, 21/28px): sub-sections and large swap-only price text.
+- **H3** (600, 18/24px on phones, 21/28px from 768px): card and sub-section headings, sheet and dialog titles, and large swap-only price text. The H1 and H3 steps live in the token variables (`--nx-text-h1`, `--nx-text-h3`), so no page adds breakpoints for them.
 - **Body** (400, 16/24px): default copy, field text at every breakpoint (prevents iOS zoom), listing titles at 600.
 - **Compact** (400 to 600, 14/21px): secondary facts such as condition and defect lines, desktop nav links, banner detail.
 - **Caption** (500, 12/18px): badges, bottom-nav labels, the worked-sum heading, timestamps.
