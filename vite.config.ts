@@ -27,7 +27,7 @@ export default defineConfig({
               // App code every public page loads and later screens share (cards, status, prices): one chunk,
               // so new routes that reuse a piece don't split it into many small, poorly compressed files
               name: 'shared-ui',
-              test: /src[\\/](components[\\/](ui[\\/](StatusBadge|ImageWithFade|Button)|domain[\\/](Deadline|Price|TrustModule|Avatar))|lib[\\/](copy[\\/](status|labels|copy)|view-transition|time[\\/](time|server-clock)|money[\\/]money|cx|env|api[\\/](client|api-error|error-checks))|stores[\\/]session|hooks[\\/](useMediaQuery|useOnline)|components[\\/]brand[\\/]Logo|lib[\\/]network[\\/]save-data|features[\\/](listings[\\/](api|filters)|offers[\\/]use-composer-trail))\.tsx?$|lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](handshake|wifi-off|timer|circle-slash|image-off)\.mjs$/,
+              test: /src[\\/](components[\\/](ui[\\/](StatusBadge|ImageWithFade|Button)|domain[\\/](Deadline|Price|TrustModule|Avatar))|lib[\\/](copy[\\/](status|labels|copy)|view-transition|time[\\/](time|server-clock)|money[\\/]money|cx|env|api[\\/](client|api-error|error-checks))|stores[\\/]session|hooks[\\/](useMediaQuery|useOnline)|components[\\/]brand[\\/]Logo|lib[\\/]network[\\/]save-data|features[\\/](listings[\\/](api|filters)|offers[\\/]use-composer-trail|saved[\\/]api))\.tsx?$|lucide-react[\\/]dist[\\/]esm[\\/]icons[\\/](handshake|wifi-off|timer|circle-slash|image-off)\.mjs$/,
               includeDependenciesRecursively: false,
             },
             {

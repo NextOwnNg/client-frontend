@@ -3,6 +3,7 @@ import { RedirectIfAuthed, RequireAuth } from '@/app/guards'
 import { AppLayout } from '@/app/layouts/AppLayout'
 import type { AuthHandle } from '@/app/layouts/auth-handle'
 import { RootLayout } from '@/app/layouts/RootLayout'
+import { PageError, RootError } from '@/app/RouteError'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { HomePage } from '@/pages/public/HomePage'
 
@@ -37,119 +38,141 @@ const helpPages: { path: string; load: () => Promise<{ Component: React.Componen
 export const routes: RouteObject[] = [
   {
     Component: RootLayout,
+    // Last resort, outside any layout: also catches a layout whose own code fails to load
+    ErrorBoundary: RootError,
     children: [
       {
         Component: AppLayout,
         children: [
-          { index: true, Component: HomePage },
-          // Public routes after Home load as their own chunks, keeping the entry chunk inside budget (PRD §12)
           {
-            path: 'explore',
-            lazy: async () => ({ Component: (await import('@/pages/public/ExplorePage')).ExplorePage }),
-          },
-          {
-            path: 'listings/:slug',
-            lazy: async () => ({ Component: (await import('@/pages/public/ListingDetailPage')).ListingDetailPage }),
-          },
-          {
-            path: 'users/:id',
-            lazy: async () => ({ Component: (await import('@/pages/public/ProfilePage')).ProfilePage }),
-          },
-          { path: 'feed', lazy: async () => ({ Component: (await import('@/pages/public/FeedPage')).FeedPage }) },
-          ...helpPages.map(({ path, load }) => ({ path, lazy: load })),
-          {
-            Component: RequireAuth,
+            // A page that fails renders its error inside the shell, so header and navigation stay usable
+            ErrorBoundary: PageError,
             children: [
-              { path: 'me', lazy: async () => ({ Component: (await import('@/pages/member/MePage')).MePage }) },
+              { index: true, Component: HomePage },
+              // Public routes after Home load as their own chunks, keeping the entry chunk inside budget (PRD §12)
               {
-                path: 'me/listings',
-                lazy: async () => ({ Component: (await import('@/pages/member/MyListingsPage')).MyListingsPage }),
+                path: 'explore',
+                lazy: async () => ({ Component: (await import('@/pages/public/ExplorePage')).ExplorePage }),
               },
               {
-                path: 'listings/new',
-                lazy: async () => ({ Component: (await import('@/pages/member/ListingWizardPage')).ListingWizardPage }),
+                path: 'listings/:slug',
+                lazy: async () => ({ Component: (await import('@/pages/public/ListingDetailPage')).ListingDetailPage }),
               },
               {
-                path: 'listings/:id/edit',
-                lazy: async () => ({ Component: (await import('@/pages/member/ListingWizardPage')).ListingWizardPage }),
+                path: 'users/:id',
+                lazy: async () => ({ Component: (await import('@/pages/public/ProfilePage')).ProfilePage }),
               },
+              { path: 'feed', lazy: async () => ({ Component: (await import('@/pages/public/FeedPage')).FeedPage }) },
+              ...helpPages.map(({ path, load }) => ({ path, lazy: load })),
               {
-                path: 'settings',
-                lazy: async () => ({ Component: (await import('@/pages/member/SettingsPage')).SettingsPage }),
-              },
-              {
-                path: 'offers',
-                lazy: async () => ({ Component: (await import('@/pages/member/OffersPage')).OffersLayout }),
+                Component: RequireAuth,
                 children: [
+                  { path: 'me', lazy: async () => ({ Component: (await import('@/pages/member/MePage')).MePage }) },
                   {
-                    index: true,
-                    lazy: async () => ({ Component: (await import('@/pages/member/OffersPage')).OffersIndex }),
+                    path: 'me/listings',
+                    lazy: async () => ({ Component: (await import('@/pages/member/MyListingsPage')).MyListingsPage }),
                   },
                   {
-                    path: ':id',
-                    lazy: async () => ({ Component: (await import('@/pages/member/OfferThreadPage')).OfferThreadPage }),
-                  },
-                ],
-              },
-              {
-                path: 'transactions',
-                lazy: async () => ({ Component: (await import('@/pages/member/TransactionsPage')).TransactionsPage }),
-              },
-              {
-                path: 'transactions/:id/review',
-                lazy: async () => ({ Component: (await import('@/pages/member/ReviewPage')).ReviewPage }),
-              },
-              {
-                path: 'me/reviews',
-                lazy: async () => ({ Component: (await import('@/pages/member/MyReviewsPage')).MyReviewsPage }),
-              },
-              {
-                path: 'transactions/:id',
-                lazy: async () => ({ Component: (await import('@/pages/member/TransactionPage')).TransactionPage }),
-              },
-              {
-                path: 'offers/new',
-                lazy: async () => ({ Component: (await import('@/pages/member/OfferComposerPage')).OfferComposerPage }),
-              },
-              {
-                path: 'messages',
-                lazy: async () => ({ Component: (await import('@/pages/member/MessagesPage')).MessagesLayout }),
-                children: [
-                  {
-                    index: true,
-                    lazy: async () => ({ Component: (await import('@/pages/member/MessagesIndexPage')).MessagesIndex }),
-                  },
-                  {
-                    path: ':id',
+                    path: 'listings/new',
                     lazy: async () => ({
-                      Component: (await import('@/pages/member/ConversationPage')).ConversationPage,
+                      Component: (await import('@/pages/member/ListingWizardPage')).ListingWizardPage,
                     }),
                   },
+                  {
+                    path: 'listings/:id/edit',
+                    lazy: async () => ({
+                      Component: (await import('@/pages/member/ListingWizardPage')).ListingWizardPage,
+                    }),
+                  },
+                  {
+                    path: 'settings',
+                    lazy: async () => ({ Component: (await import('@/pages/member/SettingsPage')).SettingsPage }),
+                  },
+                  {
+                    path: 'offers',
+                    lazy: async () => ({ Component: (await import('@/pages/member/OffersPage')).OffersLayout }),
+                    children: [
+                      {
+                        index: true,
+                        lazy: async () => ({ Component: (await import('@/pages/member/OffersPage')).OffersIndex }),
+                      },
+                      {
+                        path: ':id',
+                        lazy: async () => ({
+                          Component: (await import('@/pages/member/OfferThreadPage')).OfferThreadPage,
+                        }),
+                      },
+                    ],
+                  },
+                  {
+                    path: 'transactions',
+                    lazy: async () => ({
+                      Component: (await import('@/pages/member/TransactionsPage')).TransactionsPage,
+                    }),
+                  },
+                  {
+                    path: 'transactions/:id/review',
+                    lazy: async () => ({ Component: (await import('@/pages/member/ReviewPage')).ReviewPage }),
+                  },
+                  {
+                    path: 'me/reviews',
+                    lazy: async () => ({ Component: (await import('@/pages/member/MyReviewsPage')).MyReviewsPage }),
+                  },
+                  {
+                    path: 'transactions/:id',
+                    lazy: async () => ({ Component: (await import('@/pages/member/TransactionPage')).TransactionPage }),
+                  },
+                  {
+                    path: 'offers/new',
+                    lazy: async () => ({
+                      Component: (await import('@/pages/member/OfferComposerPage')).OfferComposerPage,
+                    }),
+                  },
+                  {
+                    path: 'messages',
+                    lazy: async () => ({ Component: (await import('@/pages/member/MessagesPage')).MessagesLayout }),
+                    children: [
+                      {
+                        index: true,
+                        lazy: async () => ({
+                          Component: (await import('@/pages/member/MessagesIndexPage')).MessagesIndex,
+                        }),
+                      },
+                      {
+                        path: ':id',
+                        lazy: async () => ({
+                          Component: (await import('@/pages/member/ConversationPage')).ConversationPage,
+                        }),
+                      },
+                    ],
+                  },
+                  {
+                    path: 'notifications',
+                    lazy: async () => ({
+                      Component: (await import('@/pages/member/NotificationsPage')).NotificationsPage,
+                    }),
+                  },
+                  {
+                    path: 'saved',
+                    lazy: async () => ({ Component: (await import('@/pages/member/SavedPage')).SavedPage }),
+                  },
+                  {
+                    path: 'me/reports',
+                    lazy: async () => ({ Component: (await import('@/pages/member/MyReportsPage')).MyReportsPage }),
+                  },
+                  {
+                    path: 'appeal',
+                    lazy: async () => ({ Component: (await import('@/pages/member/AppealPage')).AppealPage }),
+                  },
+                  {
+                    path: 'report/:type/:id',
+                    lazy: async () => ({ Component: (await import('@/pages/member/ReportPage')).ReportPage }),
+                  },
                 ],
               },
-              {
-                path: 'notifications',
-                lazy: async () => ({ Component: (await import('@/pages/member/NotificationsPage')).NotificationsPage }),
-              },
-              {
-                path: 'saved',
-                lazy: async () => ({ Component: (await import('@/pages/member/SavedPage')).SavedPage }),
-              },
-              {
-                path: 'me/reports',
-                lazy: async () => ({ Component: (await import('@/pages/member/MyReportsPage')).MyReportsPage }),
-              },
-              {
-                path: 'appeal',
-                lazy: async () => ({ Component: (await import('@/pages/member/AppealPage')).AppealPage }),
-              },
-              {
-                path: 'report/:type/:id',
-                lazy: async () => ({ Component: (await import('@/pages/member/ReportPage')).ReportPage }),
-              },
+              ...devRoutes,
             ],
           },
-          ...devRoutes,
         ],
       },
       {
