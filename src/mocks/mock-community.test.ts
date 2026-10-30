@@ -80,6 +80,44 @@ describe('mock feed API', () => {
     expect(comments[0]).toMatchObject({ removed: true, body: '' })
   })
 
+  it('marks a reply with the comment it answers', async () => {
+    const comments = await get<FeedComment[]>('/feed/p-switch/comments')
+
+    expect(comments.find((c) => c.id === 'c-2')).toMatchObject({ parentId: 'c-1' })
+    expect(comments.find((c) => c.id === 'c-1')).toMatchObject({ parentId: null })
+  })
+
+  it('adds a reply to a comment and tells the person replied to', async () => {
+    const reply = (
+      await apiClient.post<FeedComment>('/feed/p-switch/comments', {
+        body: 'Is the dock included too?',
+        parentId: 'c-1',
+      })
+    ).data
+    expect(reply.parentId).toBe('c-1')
+
+    mockAuth.signInAs('u-amaka')
+    expect((await get<AppNotification[]>('/notifications'))[0]).toMatchObject({
+      kind: 'COMMENT',
+      title: 'Tolu A. replied to your comment',
+    })
+  })
+
+  it('keeps threads one level deep: a reply to a reply joins the same thread', async () => {
+    const reply = (await apiClient.post<FeedComment>('/feed/p-switch/comments', { body: 'Thanks!', parentId: 'c-2' }))
+      .data
+
+    expect(reply.parentId).toBe('c-1')
+  })
+
+  it('refuses a reply to a comment that isn’t on the post or was removed', async () => {
+    const elsewhere = await fail(apiClient.post('/feed/p-switch/comments', { body: 'Hi', parentId: 'c-4' }))
+    const removed = await fail(apiClient.post('/feed/p-switch/comments', { body: 'Hi', parentId: 'c-3' }))
+
+    expect(elsewhere.status).toBe(422)
+    expect(removed.status).toBe(422)
+  })
+
   it('adds a comment, notifies the author, and throttles bursts', async () => {
     const comment = (await apiClient.post<FeedComment>('/feed/p-switch/comments', { body: 'Still available?' })).data
     expect((await get<FeedComment[]>('/feed/p-switch/comments'))[0]!.id).toBe(comment.id)

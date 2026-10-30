@@ -51,7 +51,9 @@ export function useComments(postId: string, enabled: boolean) {
 export function useAddComment(postId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (body: string) => apiClient.post<FeedComment>(`/feed/${postId}/comments`, { body }).then((r) => r.data),
+    // `parentId` makes it a reply; the server files a reply to a reply under the same thread
+    mutationFn: (input: { body: string; parentId?: string }) =>
+      apiClient.post<FeedComment>(`/feed/${postId}/comments`, input).then((r) => r.data),
     onSuccess: (comment) => {
       queryClient.setQueryData<FeedComment[]>(feedKeys.comments(postId), (list) => [comment, ...(list ?? [])])
       // The card's comment count

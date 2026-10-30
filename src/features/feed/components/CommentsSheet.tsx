@@ -1,20 +1,23 @@
 import { Button } from '@heroui/react'
 import { Info } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { ButtonLink } from '@/components/ui/Button'
 import { Sheet } from '@/components/ui/Sheet'
 import { useComments } from '@/features/feed/api'
+import { commentThreads } from '@/features/feed/comment-threads'
 import { CommentComposer } from '@/features/feed/components/CommentComposer'
-import { CommentItem } from '@/features/feed/components/CommentItem'
+import { CommentItem, CommentReplies } from '@/features/feed/components/CommentItem'
 import { copy } from '@/lib/copy/copy'
 import { isAvailable } from '@/lib/copy/status'
 import { serverNow } from '@/lib/time/server-clock'
 import { useSessionStore } from '@/stores/session'
-import type { FeedPost } from '@/types/api'
+import type { FeedComment, FeedPost } from '@/types/api'
 
 /**
- * UX-06: a post's comments in a sheet. Newest first; the "not tracked" note stays pinned above the composer,
- * so a question never looks like a way to agree terms (FE-FED-03).
+ * UX-06: a post's comments in a sheet. Newest first, each with its replies threaded under it; the
+ * "not tracked" note stays pinned above the composer, so a question never looks like a way to agree
+ * terms (FE-FED-03).
  */
 export function CommentsSheet({ post, onClose }: { post: FeedPost | null; onClose: () => void }) {
   const viewerId = useSessionStore((s) => s.userId)
@@ -22,11 +25,20 @@ export function CommentsSheet({ post, onClose }: { post: FeedPost | null; onClos
   const { data, isPending, isError, refetch } = useComments(post?.id ?? '', Boolean(post))
   const now = serverNow()
   const listing = post?.listing
+  // Which comment the composer replies to, for this post only
+  const [reply, setReply] = useState<{ postId: string; comment: FeedComment } | null>(null)
+  const replyTo = reply && reply.postId === post?.id ? reply.comment : null
+  const onReply =
+    status === 'member' && post ? (comment: FeedComment) => setReply({ postId: post.id, comment }) : undefined
 
   return (
     <Sheet
       open={post !== null}
-      onOpenChange={(open) => !open && onClose()}
+      onOpenChange={(open) => {
+        if (open) return
+        setReply(null)
+        onClose()
+      }}
       title="Comments"
       footer={
         post && (
@@ -36,7 +48,7 @@ export function CommentsSheet({ post, onClose }: { post: FeedPost | null; onClos
               {copy.commentsNote}
             </p>
             {status === 'member' ? (
-              <CommentComposer key={post.id} post={post} />
+              <CommentComposer key={post.id} post={post} replyTo={replyTo} onReplyEnd={() => setReply(null)} />
             ) : (
               <ButtonLink to={`/login?next=${encodeURIComponent(`/feed?post=${post.id}`)}`} fullWidth>
                 Sign in to comment
@@ -77,8 +89,30 @@ export function CommentsSheet({ post, onClose }: { post: FeedPost | null; onClos
         <p className="text-compact text-muted">No comments yet. Ask the first question.</p>
       ) : (
         <ul aria-label="Comments, newest first" className="flex flex-col gap-4">
-          {data.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} now={now} viewerId={viewerId} />
+          {commentThreads(data).map(({ comment, replies }) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              now={now}
+              viewerId={viewerId}
+              // A removed comment's thread stays readable but takes no new replies
+              onReply={comment.removed ? undefined : onReply}
+              replies={
+                replies.length > 0 && (
+                  <CommentReplies to={comment}>
+                    {replies.map((r) => (
+                      <CommentItem
+                        key={r.id}
+                        comment={r}
+                        now={now}
+                        viewerId={viewerId}
+                        onReply={r.removed || comment.removed ? undefined : onReply}
+                      />
+                    ))}
+                  </CommentReplies>
+                )
+              }
+            />
           ))}
         </ul>
       )}

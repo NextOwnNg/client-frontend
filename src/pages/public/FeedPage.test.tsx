@@ -20,6 +20,11 @@ async function openFeed(path = '/feed') {
 }
 
 const post = async (title: string) => screen.findByRole('article', { name: title })
+/** A list's own items, without the replies nested inside them. */
+const topLevel = (list: HTMLElement) =>
+  within(list)
+    .getAllByRole('listitem')
+    .filter((li) => li.parentElement === list)
 const posts = () => within(screen.getByRole('list', { name: 'Posts' })).getAllByRole('article')
 
 describe('Feed (FE-FED-01..07, UX-05)', () => {
@@ -105,10 +110,59 @@ describe('Comments (FE-FED-03, UX-06)', () => {
 
     const sheet = await screen.findByRole('dialog', { name: 'Comments' })
     expect(within(sheet).getByText(copy.commentsNote)).toBeInTheDocument()
-    const list = await within(sheet).findByRole('list', { name: 'Comments, newest first' })
-    const items = within(list).getAllByRole('listitem')
+    const items = topLevel(await within(sheet).findByRole('list', { name: 'Comments, newest first' }))
+    expect(items).toHaveLength(2)
     expect(items[0]).toHaveTextContent('This comment was removed by moderators.')
-    expect(items[2]).toHaveTextContent('Does it come with both Joy-Cons')
+    expect(items[1]).toHaveTextContent('Does it come with both Joy-Cons')
+  })
+
+  it('shows a reply under the comment it answers, not as a comment of its own', async () => {
+    await openFeed('/feed?post=p-switch')
+    const sheet = await screen.findByRole('dialog', { name: 'Comments' })
+
+    const question = topLevel(await within(sheet).findByRole('list', { name: 'Comments, newest first' }))[1]!
+    const replies = within(question).getByRole('list', { name: 'Replies to Amaka N.' })
+    expect(within(replies).getAllByRole('listitem')).toHaveLength(1)
+    expect(replies).toHaveTextContent('Yes, both Joy-Cons, the grip and the original charger.')
+    // Guests sign in to take part, so there is nothing to reply with
+    expect(within(sheet).queryByRole('button', { name: /^Reply to/ })).not.toBeInTheDocument()
+  })
+
+  it('replies to a comment from the composer, and can go back to a new comment', async () => {
+    const user = userEvent.setup()
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    await openFeed('/feed?post=p-switch')
+    const sheet = await screen.findByRole('dialog', { name: 'Comments' })
+
+    await user.click(await within(sheet).findByRole('button', { name: 'Reply to Amaka N.' }))
+    expect(within(sheet).getByText(/^Replying to/)).toHaveTextContent('Replying to Amaka N.')
+    const box = within(sheet).getByLabelText('Write a reply to Amaka N.')
+    expect(box).toHaveFocus()
+    await user.click(within(sheet).getByRole('button', { name: 'Cancel reply' }))
+    expect(within(sheet).getByLabelText('Add a comment')).toBeInTheDocument()
+
+    await user.click(within(sheet).getByRole('button', { name: 'Reply to Amaka N.' }))
+    await user.type(within(sheet).getByLabelText('Write a reply to Amaka N.'), 'Is the dock included too?')
+    await user.click(within(sheet).getByRole('button', { name: 'Post' }))
+
+    const replies = within(sheet).getByRole('list', { name: 'Replies to Amaka N.' })
+    await waitFor(() => expect(within(replies).getAllByRole('listitem').at(-1)).toHaveTextContent('Is the dock'))
+    expect(within(sheet).getByLabelText('Add a comment')).toHaveValue('')
+  })
+
+  it('adds a reply to a reply to the same thread', async () => {
+    const user = userEvent.setup()
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    await openFeed('/feed?post=p-switch')
+    const sheet = await screen.findByRole('dialog', { name: 'Comments' })
+
+    await user.click(await within(sheet).findByRole('button', { name: 'Reply to Zainab M.' }))
+    await user.type(within(sheet).getByLabelText('Write a reply to Zainab M.'), 'Great, thanks!')
+    await user.click(within(sheet).getByRole('button', { name: 'Post' }))
+
+    const replies = within(sheet).getByRole('list', { name: 'Replies to Amaka N.' })
+    await waitFor(() => expect(within(replies).getAllByRole('listitem')).toHaveLength(2))
+    expect(topLevel(within(sheet).getByRole('list', { name: 'Comments, newest first' }))).toHaveLength(2)
   })
 
   it('asks a guest to sign in instead of showing the composer', async () => {
