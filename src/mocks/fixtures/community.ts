@@ -22,6 +22,8 @@ export type StoredComment = {
   body: string
   removed: boolean
   createdAt: string
+  /** Set on replies; always a top-level comment. Missing in feeds saved before threads. */
+  parentId?: string
 }
 
 export type StoredConversation = {
@@ -57,13 +59,21 @@ const post = (id: string, authorId: string, listingId: string, hoursAgo: number,
   removed: removed || undefined,
 })
 
-const comment = (id: string, postId: string, authorId: string, hoursAgo: number, body: string, removed = false) => ({
+const comment = (
+  id: string,
+  postId: string,
+  authorId: string,
+  hoursAgo: number,
+  body: string,
+  { removed = false, parentId }: { removed?: boolean; parentId?: string } = {},
+): StoredComment => ({
   id,
   postId,
   authorId,
   body,
   removed,
   createdAt: ago(hoursAgo),
+  parentId,
 })
 
 export function seedFeed(): { posts: StoredPost[]; comments: StoredComment[] } {
@@ -96,10 +106,14 @@ export function seedFeed(): { posts: StoredPost[]; comments: StoredComment[] } {
     ],
     comments: [
       comment('c-1', 'p-switch', 'u-amaka', 1.5, 'Does it come with both Joy-Cons and the charger?'),
-      comment('c-2', 'p-switch', 'u-zainab', 1.2, 'Yes, both Joy-Cons, the grip and the original charger.'),
-      comment('c-3', 'p-switch', 'u-ibrahim', 0.8, 'Removed', true),
+      comment('c-2', 'p-switch', 'u-zainab', 1.2, 'Yes, both Joy-Cons, the grip and the original charger.', {
+        parentId: 'c-1',
+      }),
+      comment('c-3', 'p-switch', 'u-ibrahim', 0.8, 'Removed', { removed: true }),
       comment('c-4', 'p-iphone', 'u-chidi', 10, 'Any scratches on the screen?'),
-      comment('c-5', 'p-iphone', 'u-tolu', 9, 'None. It’s had a screen protector since day one.'),
+      comment('c-5', 'p-iphone', 'u-tolu', 9, 'None. It’s had a screen protector since day one.', {
+        parentId: 'c-4',
+      }),
       comment('c-6', 'p-ps5', 'u-zainab', 6, 'Which games are included?'),
     ],
   }

@@ -16,8 +16,8 @@ const links = [
 
 /**
  * Sign-in and first-time setup: one calm column without the app's navigation, so nothing competes with the task.
- * A centred panel from 768px (UX-09). Sign in and the code step add an example trade beside the form from 1024px,
- * and sign in shows a short version of it above the form on phones.
+ * A centred panel from 768px (UX-09). Sign in and the code step add an example trade beside the form from 1024px;
+ * sign in also shows it above the form on smaller screens, with the same words.
  */
 export function AuthLayout() {
   const showcase = useMatches()
@@ -35,7 +35,9 @@ export function AuthLayout() {
       <RouteProgress />
       <header className="mx-auto flex h-14 w-full max-w-content items-center gap-3 px-4 tablet:px-6 desktop:h-16">
         <Link to="/" aria-label="NextOwn home" className="-ml-1 rounded-control p-1">
-          <Logo height={22} />
+          {/* Same sizes as the app header */}
+          <Logo height={26} className="desktop:hidden" />
+          <Logo height={32} className="hidden desktop:block" />
         </Link>
         <Link
           to="/explore"
@@ -51,20 +53,22 @@ export function AuthLayout() {
         className={cx(
           'mx-auto w-full flex-1 px-4 pt-4 pb-12 tablet:pt-10',
           showcase
-            ? 'max-w-[30rem] desktop:grid desktop:max-w-content desktop:grid-cols-[minmax(0,1fr)_30rem] desktop:items-center desktop:gap-12 desktop:px-6'
+            ? 'flex max-w-[30rem] flex-col gap-6 desktop:grid desktop:max-w-content desktop:grid-cols-[minmax(0,1fr)_30rem] desktop:items-center desktop:gap-12 desktop:px-6'
             : 'max-w-[30rem]',
         )}
       >
-        {/* The form comes first for screen readers and keyboards; the panel sits to its left on wide screens */}
-        <div className="flex flex-col gap-4 desktop:col-start-2 desktop:row-start-1">
-          {showcase === 'always' && <AuthShowcase variant="card" />}
-          <div className="tablet:rounded-feature tablet:border tablet:border-border tablet:bg-surface tablet:p-8 tablet:shadow-card">
-            <Outlet />
-          </div>
+        {/* The form comes first for screen readers and keyboards; the panel shows above it on phones, left of it on wide screens */}
+        <div className="tablet:rounded-feature tablet:border tablet:border-border tablet:bg-surface tablet:p-8 tablet:shadow-card desktop:col-start-2 desktop:row-start-1">
+          <Outlet />
         </div>
         {showcase && (
-          <div className="desktop:col-start-1 desktop:row-start-1 desktop:self-stretch">
-            <AuthShowcase variant="panel" />
+          <div
+            className={cx(
+              'order-first desktop:order-none desktop:col-start-1 desktop:row-start-1 desktop:self-stretch',
+              showcase === 'desktop' && 'hidden desktop:block',
+            )}
+          >
+            <AuthShowcase />
           </div>
         )}
       </main>

@@ -41,8 +41,10 @@ function load() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return
     const saved = JSON.parse(raw) as { posts: StoredPost[]; comments: StoredComment[] }
+    // Feeds saved before threads: thread the seeded replies so they don't show as separate comments
+    const seededParents = new Map(comments.map((c) => [c.id, c.parentId]))
     posts = saved.posts
-    comments = saved.comments
+    comments = saved.comments.map((c) => ({ ...c, parentId: c.parentId ?? seededParents.get(c.id) }))
   } catch {
     // Corrupted entry: start from the seeded feed
   }
@@ -72,6 +74,7 @@ const commentView = (c: StoredComment): FeedComment => ({
   body: c.removed ? '' : c.body,
   removed: c.removed,
   createdAt: c.createdAt,
+  parentId: c.parentId ?? null,
 })
 
 export const feedDb = {
@@ -114,7 +117,14 @@ export const feedDb = {
       .map(commentView)
   },
 
-  addComment(post: StoredPost, authorId: string, body: string): FeedComment {
+  /** A reply needs a comment on the same post, in a thread that moderators haven't removed. */
+  canReplyTo(postId: string, parentId: string): boolean {
+    const parent = comments.find((c) => c.id === parentId && c.postId === postId)
+    const root = parent?.parentId ? comments.find((c) => c.id === parent.parentId) : parent
+    return Boolean(parent && !parent.removed && root && !root.removed)
+  },
+
+  addComment(post: StoredPost, authorId: string, body: string, replyTo?: StoredComment): FeedComment {
     const comment: StoredComment = {
       id: newId('c'),
       postId: post.id,
@@ -122,17 +132,23 @@ export const feedDb = {
       body,
       removed: false,
       createdAt: new Date().toISOString(),
+      // A reply to a reply joins the same thread, so threads stay one level deep
+      parentId: replyTo && (replyTo.parentId ?? replyTo.id),
     }
     comments.push(comment)
-    if (post.authorId !== authorId) {
-      const title = listingsDb.byIdOrSlug(post.listingId)?.detail.title ?? 'your post'
+    const title = listingsDb.byIdOrSlug(post.listingId)?.detail.title ?? 'your post'
+    const name = authDb.seller(authorId).displayName
+    if (replyTo && replyTo.authorId !== authorId) {
       notificationsDb.notify(
-        post.authorId,
+        replyTo.authorId,
         'COMMENT',
-        `${authDb.seller(authorId).displayName} commented on your post`,
+        `${name} replied to your comment`,
         `/feed?post=${post.id}`,
         title,
       )
+    }
+    if (post.authorId !== authorId && post.authorId !== replyTo?.authorId) {
+      notificationsDb.notify(post.authorId, 'COMMENT', `${name} commented on your post`, `/feed?post=${post.id}`, title)
     }
     save()
     return commentView(comment)

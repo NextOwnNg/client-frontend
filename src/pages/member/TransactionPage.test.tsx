@@ -136,6 +136,12 @@ describe('Transaction page: confirming (FE-TRX-05..07)', () => {
     expect(button('Print or save')).toBeInTheDocument()
   })
 
+  it('carries the NextOwn logo on the printed record, where the site header is hidden', async () => {
+    await openDeal()
+
+    expect(within(screen.getByRole('article')).getByRole('img', { name: 'NextOwn' })).toBeInTheDocument()
+  })
+
   it('checks the latest status when a confirmation’s answer is lost (QA-21)', async () => {
     await openDeal()
     mockTransactions.saveThenFailNext()

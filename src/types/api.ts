@@ -346,6 +346,8 @@ export type FeedComment = {
   body: string
   removed: boolean
   createdAt: string
+  /** The top-level comment this one replies to; null for a top-level comment. Threads are one level deep. */
+  parentId: string | null
 }
 
 /** What the member has saved, for toggles (FE-SAV-01). */

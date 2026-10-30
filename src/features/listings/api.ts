@@ -7,6 +7,7 @@ import {
   type QueryClient,
 } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api/client'
+import { savesData } from '@/lib/network/save-data'
 import { toApiParams, type ListingFilters } from '@/features/listings/filters'
 import type { ListingDetail, ListingSuggestion, ListingSummary, Paginated } from '@/types/api'
 
@@ -101,10 +102,6 @@ export function useListing(slug: string) {
     placeholderData: () => findSummary(queryClient, slug) as ListingDetail | undefined,
   })
 }
-
-/** The person asked their browser to save data (PRD §8 Save-Data): nothing is loaded ahead of a tap. */
-export const savesData = () =>
-  (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true
 
 /** Start loading a listing on hover or touch so the detail opens with data (PRD §12), unless saving data. */
 export function usePrefetchListing() {

@@ -112,7 +112,7 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 | :--- | :--- | :--- |
 | `GET /feed?cursor` | none | `Paginated<FeedPost>`. Each post's listing is joined live. Posts by people the viewer blocked are left out. |
 | `GET /feed/:id`, `POST /feed` | `{ listingId, caption }` | `FeedPost`. 409 `ALREADY_SHARED`. |
-| `GET /feed/:id/comments`, `POST /feed/:id/comments` | `{ body }` | `FeedComment[]` newest first, and 201 `FeedComment`. A removed comment has an empty body. Returns 429 `RATE_LIMITED`. |
+| `GET /feed/:id/comments`, `POST /feed/:id/comments` | `{ body, parentId? }` | `FeedComment[]` newest first, and 201 `FeedComment`. Each comment carries `parentId`: null for a top-level comment, or the top-level comment it replies to. Threads are one level deep: a `parentId` naming a reply is stored against that reply's top-level comment. Returns 422 with a `parentId` field error when the parent isn't on this post or its thread was removed. A reply notifies the parent's author ("… replied to your comment") and the post's author. A comment hidden by a block takes its replies with it. A removed comment has an empty body and keeps its replies. Returns 429 `RATE_LIMITED`. |
 | `GET /saved/ids`; `GET /saved/listings`, `/saved/posts`; `PUT`, `DELETE /saved/:kind/:id` | none | `SavedIds`, `ListingSummary[]` and `FeedPost[]`. Saving is idempotent. |
 | `GET /conversations`, `POST /conversations` | `{ offerId }` or `{ transactionId }` | `Conversation[]`, and `{ id }`, which finds or creates the conversation |
 | `GET /conversations/:id` | none | `ConversationDetail` with `blocked: none \| by-me \| by-them`, and offer cards built from the offer's versions |

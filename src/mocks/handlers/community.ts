@@ -92,7 +92,10 @@ const feedHandlers: RequestHandler[] = [
     if (failure) return failure
     if (!feedDb.get(String(params.id))) return notFound('Post not found')
     const hidden = trustDb.hiddenFor(authDb.current()?.id)
-    return HttpResponse.json<FeedComment[]>(feedDb.comments(String(params.id)).filter((c) => !hidden.has(c.author.id)))
+    const visible = feedDb.comments(String(params.id)).filter((c) => !hidden.has(c.author.id))
+    // A hidden comment takes its replies with it, so no thread hangs off a missing comment
+    const ids = new Set(visible.map((c) => c.id))
+    return HttpResponse.json<FeedComment[]>(visible.filter((c) => c.parentId === null || ids.has(c.parentId)))
   }),
 
   http.post(`${API}/feed/:id/comments`, async ({ params, request }) => {
@@ -104,10 +107,16 @@ const feedHandlers: RequestHandler[] = [
     if (feedDb.takeRateLimit()) {
       return json(429, 'RATE_LIMITED', 'Too many comments', { retry_after_seconds: 60 })
     }
-    const comment = text((await body(request)).body)
+    const input = await body(request)
+    const comment = text(input.body)
     if (!comment) return invalid({ body: 'Write a comment first.' })
     if (comment.length > COMMENT_MAX) return invalid({ body: `Keep it under ${COMMENT_MAX} characters.` })
-    return HttpResponse.json(feedDb.addComment(post, auth.me.id, comment), { status: 201 })
+    const parentId = text(input.parentId)
+    const replyTo = parentId ? feedDb.comment(parentId) : undefined
+    if (parentId && (!replyTo || !feedDb.canReplyTo(post.id, parentId))) {
+      return invalid({ parentId: 'That comment is no longer available to reply to.' })
+    }
+    return HttpResponse.json(feedDb.addComment(post, auth.me.id, comment, replyTo), { status: 201 })
   }),
 ]
 

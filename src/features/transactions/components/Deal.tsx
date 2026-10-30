@@ -2,6 +2,7 @@ import { Button, toast } from '@heroui/react'
 import { ArrowLeft, CircleCheck } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { Logo } from '@/components/brand/Logo'
 import { Seo } from '@/components/seo/Seo'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { ProgressLine } from '@/components/ui/ProgressLine'
@@ -87,6 +88,11 @@ export function Deal({ tx, viewerId, onRefetch }: { tx: Transaction; viewerId: s
         <ArrowLeft aria-hidden className="size-4" />
         Transactions
       </Link>
+
+      {/* Letterhead for the printed record: printing hides the site header and its logo */}
+      <div className="hidden border-b border-border pb-4 print:block">
+        <Logo height={32} />
+      </div>
 
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
