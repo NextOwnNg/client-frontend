@@ -80,9 +80,9 @@ export function Header() {
       <div className="mx-auto flex h-14 w-full max-w-content items-center gap-3 px-4 tablet:px-6 desktop:h-16">
         <Link to="/" aria-label="NextOwn home" className="-ml-1 shrink-0 rounded-control p-1">
           {/* Full lockup from 380px (brand minimum 92px wide); the mark alone on the narrowest phones */}
-          <LogoMark size={28} label="" className="min-[380px]:hidden" />
-          <Logo height={22} className="hidden min-[380px]:block desktop:hidden" />
-          <Logo height={26} className="hidden desktop:block" />
+          <LogoMark size={32} label="" className="min-[380px]:hidden" />
+          <Logo height={26} className="hidden min-[380px]:block desktop:hidden" />
+          <Logo height={32} className="hidden desktop:block" />
         </Link>
 
         <nav aria-label="Primary" className="ml-6 hidden items-center gap-1 desktop:flex">

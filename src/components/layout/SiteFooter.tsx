@@ -59,7 +59,9 @@ export function SiteFooter() {
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto grid w-full max-w-content grid-cols-2 gap-x-6 gap-y-8 px-4 py-10 tablet:grid-cols-3 tablet:px-6 desktop:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))_minmax(0,1.3fr)]">
         <div className="col-span-2 flex flex-col gap-3 tablet:col-span-3 desktop:col-span-1">
-          <Logo height={24} />
+          {/* Same sizes as the header */}
+          <Logo height={26} className="desktop:hidden" />
+          <Logo height={32} className="hidden desktop:block" />
           <p className="max-w-xs text-compact text-muted">{copy.brandLine}</p>
           {social.length > 0 && (
             <ul aria-label="NextOwn on social media" className="-ml-2.5 flex gap-1">

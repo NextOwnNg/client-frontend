@@ -91,7 +91,7 @@ export function Deal({ tx, viewerId, onRefetch }: { tx: Transaction; viewerId: s
 
       {/* Letterhead for the printed record: printing hides the site header and its logo */}
       <div className="hidden border-b border-border pb-4 print:block">
-        <Logo height={28} />
+        <Logo height={32} />
       </div>
 
       <header className="flex flex-col gap-2">

@@ -35,7 +35,9 @@ export function AuthLayout() {
       <RouteProgress />
       <header className="mx-auto flex h-14 w-full max-w-content items-center gap-3 px-4 tablet:px-6 desktop:h-16">
         <Link to="/" aria-label="NextOwn home" className="-ml-1 rounded-control p-1">
-          <Logo height={22} />
+          {/* Same sizes as the app header */}
+          <Logo height={26} className="desktop:hidden" />
+          <Logo height={32} className="hidden desktop:block" />
         </Link>
         <Link
           to="/explore"
