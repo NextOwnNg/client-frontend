@@ -18,25 +18,21 @@ function PhotoCard({
   label,
   tilt,
   delay,
-  compact,
 }: {
   photo: (typeof photos)['give']
   label: string
   tilt: string
   delay: number
-  compact?: boolean
 }) {
   return (
     <div className="min-w-0 flex-1 animate-rise" style={{ animationDelay: `${delay}ms` }}>
-      <figure
-        className={cx('rounded-card border border-border bg-surface shadow-card', compact ? 'p-1.5' : 'p-2', tilt)}
-      >
+      <figure className={cx('rounded-card border border-border bg-surface p-1.5 shadow-card tablet:p-2', tilt)}>
         <img
           src={photo.src}
           alt={photo.alt}
           decoding="async"
-          className={cx('w-full rounded-control object-contain', compact && 'h-16')}
-          style={compact ? undefined : { aspectRatio: photo.ratio }}
+          className="w-full rounded-control object-contain"
+          style={{ aspectRatio: photo.ratio }}
         />
         <figcaption className="px-1 pt-1.5 text-caption font-semibold text-muted">{label}</figcaption>
       </figure>
@@ -44,55 +40,33 @@ function PhotoCard({
   )
 }
 
-function Photos({ compact }: { compact?: boolean }) {
-  return (
-    <div className={cx('flex items-center', compact ? 'gap-2' : 'gap-3')}>
-      <PhotoCard photo={photos.give} label="You give" tilt="-rotate-2" delay={0} compact={compact} />
-      <span
-        aria-hidden
-        className={cx(
-          'flex shrink-0 animate-rise items-center justify-center rounded-full bg-action text-action-foreground shadow-card',
-          compact ? 'size-8' : 'size-10',
-        )}
-        style={{ animationDelay: '80ms' }}
-      >
-        <ArrowLeftRight className={compact ? 'size-4' : 'size-5'} />
-      </span>
-      <PhotoCard photo={photos.get} label="You get" tilt="rotate-2" delay={120} compact={compact} />
-    </div>
-  )
-}
-
 /**
  * Beside the sign-in form: what NextOwn does, shown with one example trade instead of a decorative background.
- * The full panel from 1024px; a short card above the form on phones. Photos are skipped under Save-Data.
+ * The same words and example on every screen, scaled down on phones. Photos are skipped under Save-Data.
  */
-export function AuthShowcase({ variant }: { variant: 'panel' | 'card' }) {
+export function AuthShowcase() {
   const photosOn = !savesData()
-
-  if (variant === 'card') {
-    return (
-      <figure aria-label="Example trade" className="flex flex-col gap-2 rounded-card bg-mint/60 p-3 desktop:hidden">
-        {photosOn && <Photos compact />}
-        <figcaption className="px-1 text-compact text-ink">
-          Swap a Switch, add ₦150,000, take home a MacBook.
-        </figcaption>
-      </figure>
-    )
-  }
 
   return (
     <section
       aria-label="How trading on NextOwn works"
-      className="hidden flex-col justify-center gap-8 rounded-feature bg-mint/60 p-10 desktop:flex"
+      className="flex flex-col justify-center gap-6 rounded-card bg-mint/60 p-5 tablet:p-8 desktop:h-full desktop:gap-8 desktop:rounded-feature desktop:p-10"
     >
       <div className="flex flex-col gap-2">
-        <p className="text-h2 text-balance text-ink">{copy.primaryModes}</p>
-        <p className="max-w-md text-body text-muted">{copy.supportingLine}</p>
+        <p className="text-h3 text-balance text-ink desktop:text-h2">{copy.primaryModes}</p>
+        <p className="max-w-md text-compact text-muted tablet:text-body">{copy.supportingLine}</p>
       </div>
       {photosOn && (
-        <div className="max-w-md px-2">
-          <Photos />
+        <div className="flex max-w-md items-center gap-2 px-1 tablet:gap-3 tablet:px-2">
+          <PhotoCard photo={photos.give} label="You give" tilt="-rotate-2" delay={0} />
+          <span
+            aria-hidden
+            className="flex size-8 shrink-0 animate-rise items-center justify-center rounded-full bg-action text-action-foreground shadow-card tablet:size-10"
+            style={{ animationDelay: '80ms' }}
+          >
+            <ArrowLeftRight className="size-4 tablet:size-5" />
+          </span>
+          <PhotoCard photo={photos.get} label="You get" tilt="rotate-2" delay={120} />
         </div>
       )}
       <figure className="flex max-w-md flex-col gap-2">
