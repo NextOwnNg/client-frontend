@@ -242,7 +242,6 @@ export const mockMessages = {
     save()
     return true
   },
-  /** Toggles the other person blocking the member. */
   toggleBlockedByOther(id?: string) {
     const conv = target(id)
     const me = authDb.current()?.id

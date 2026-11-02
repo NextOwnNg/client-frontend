@@ -19,7 +19,7 @@ type TrustModuleProps = {
   rating?: number
 }
 
-/** Facts, not badges: phone confirmation explained in place, and ratings always with their count. */
+/** Phone confirmation explained in place; ratings always shown with their count. */
 export function TrustModule({ phoneConfirmed, reviewCount, rating }: TrustModuleProps) {
   const [open, setOpen] = useState(false)
   const explainerId = useId()

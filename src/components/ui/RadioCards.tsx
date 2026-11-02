@@ -46,7 +46,6 @@ export function RadioCards<T extends string>({
                 isSelected ? 'border-action bg-mint/50 shadow-[inset_0_0_0_1px_var(--nx-teal)]' : 'border-border',
                 isFocusVisible && 'ring-2 ring-focus ring-offset-2',
                 isPressed && !isDisabled && 'scale-[0.99]',
-                // One cursor only: with both classes, the pointer won and unavailable options looked clickable
                 isDisabled ? 'cursor-not-allowed bg-cloud' : 'cursor-pointer',
               )
             }

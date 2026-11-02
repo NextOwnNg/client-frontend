@@ -22,7 +22,7 @@ export type StoredComment = {
   body: string
   removed: boolean
   createdAt: string
-  /** Set on replies; always a top-level comment. Missing in feeds saved before threads. */
+  /** Set on replies; always a top-level comment. */
   parentId?: string
 }
 

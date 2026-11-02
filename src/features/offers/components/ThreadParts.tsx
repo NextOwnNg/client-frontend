@@ -49,7 +49,7 @@ export function TermsDiff({ changes, caption }: { changes: TermsChange[]; captio
 }
 
 /**
- * Every version as it was sent, oldest first, along the teal margin rule (FE-OFF-07). History is read-only;
+ * Every version as it was sent, oldest first (FE-OFF-07). History is read-only;
  * new versions slide in when they arrive, and the latest is marked.
  */
 export function VersionTimeline({ offer, viewerId }: { offer: Offer; viewerId: string }) {

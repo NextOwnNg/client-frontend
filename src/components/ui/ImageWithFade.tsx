@@ -17,7 +17,7 @@ type ImageWithFadeProps = {
 }
 
 /**
- * Real item photos: a Mint frame holds the layout, the photo fades in over 200ms once decoded,
+ * A Mint frame holds the layout, the photo fades in over 200ms once decoded,
  * and a failed image never collapses the card or blocks its actions.
  */
 export function ImageWithFade({

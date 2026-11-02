@@ -9,7 +9,7 @@ type BackButtonProps = {
   className?: string
 }
 
-// Hover (mouse only, so taps don't leave a stuck state): Cloud wash, Teal text, and the arrow nudges back
+// Hover styles apply to mouse pointers only, so taps don't leave a stuck state
 const style =
   'group inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-control px-2 -ml-2 text-compact font-semibold text-ink outline-none transition-[background-color,color,transform] duration-120 ease-out active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-focus pointer-fine:hover:bg-cloud pointer-fine:hover:text-action'
 const arrow = 'size-5 transition-transform duration-200 ease-out pointer-fine:group-hover:-translate-x-[3px]'

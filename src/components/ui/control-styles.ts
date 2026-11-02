@@ -1,5 +1,4 @@
-// Hover (mouse only): the chip lifts 1px onto a soft shadow and its edge turns Teal; pressing settles it back.
-// transform + shadow only, 120ms, so a pass across a row of chips never feels laggy.
+// Hover is mouse-only and animates transform and shadow only, so sweeping across a row stays smooth
 export const chipBase =
   'inline-flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-compact font-medium whitespace-nowrap outline-none transition-[background-color,border-color,color,transform,box-shadow] duration-120 ease-out pointer-fine:hover:-translate-y-px pointer-fine:hover:shadow-card active:translate-y-0 active:scale-[0.97] active:shadow-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2'
 export const chipOff =

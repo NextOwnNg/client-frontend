@@ -12,7 +12,7 @@ import { cx } from '@/lib/cx'
 const grid = 'grid grid-cols-1 gap-3 tablet:grid-cols-2 tablet:gap-4 desktop:grid-cols-3'
 
 /**
- * Explore results (UX-02): rows on phones (the direction's horizontal row), tiles from 768px.
+ * Explore results (UX-02): rows on phones, tiles from 768px.
  * Every state leaves a next step: clear filters, retry, or load more.
  */
 export function Results({ filters, onClearFilters }: { filters: ListingFilters; onClearFilters: () => void }) {

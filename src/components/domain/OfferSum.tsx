@@ -20,8 +20,7 @@ type OfferSumProps = {
 }
 
 /**
- * The signature move: a trade written out like an exercise-book sum. Items and cash in the working,
- * the result under a double rule, and the payer sentence as the answer (direction contract).
+ * A trade written out as a sum: items and cash above, a double rule, then the payer sentence.
  */
 export function OfferSum({
   give,
@@ -60,7 +59,7 @@ export function OfferSum({
               className={
                 item.kind === 'cash'
                   ? 'shrink-0 text-body font-semibold text-ink'
-                  : // Centred on the item name's first line: on the shared baseline the smaller label looked low
+                  : // Aligned to the item name's first line
                     'shrink-0 self-start text-caption leading-6 text-muted'
               }
             >

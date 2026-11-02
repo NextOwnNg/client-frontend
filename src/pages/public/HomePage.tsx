@@ -13,7 +13,7 @@ import { copy } from '@/lib/copy/copy'
 import { siteOrigin } from '@/lib/seo/origin'
 import { useUiStore } from '@/stores/ui'
 
-// Home is part of every first load; the button follows in its own small file
+// Home is in the entry chunk, so the button loads separately
 const BackToTop = lazy(() => import('@/components/layout/BackToTop').then((m) => ({ default: m.BackToTop })))
 
 /** UX-01 Home: the promise, a search, the ways to trade, one worked example, and what's listed nearby. */

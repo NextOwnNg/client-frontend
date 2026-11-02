@@ -1,7 +1,7 @@
 import { OfferSum } from '@/components/domain/OfferSum'
 import { payerSentence } from '@/components/domain/payer-sentence'
 
-/** The signature, shown once as a worked example so a first-time visitor sees how a mixed trade reads. */
+/** A worked example of a mixed trade for first-time visitors. */
 export function ExampleSum() {
   return (
     <figure className="flex flex-col gap-2">

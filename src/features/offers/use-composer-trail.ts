@@ -20,8 +20,7 @@ export function useComposerTrail(listingSlug: string) {
     stepState: { fromListing: trail.fromListing, depth: depth + 1 } satisfies ComposerTrail,
     /**
      * Back to the item. From the listing, go back past every step to that same entry, so its Back still leads
-     * where the visitor was before. From anywhere else, open the listing and tell its Back to skip the steps
-     * too; a plain link here made Back bounce between the listing and the offer.
+     * where the visitor was before. From anywhere else, open the listing and tell its Back to skip the steps too.
      */
     backToItem: () =>
       trail.fromListing

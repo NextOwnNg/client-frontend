@@ -184,7 +184,6 @@ export function ActiveChips({
           aria-label={`Remove filter: ${chip.label}`}
           onClick={() => onChange(chip.remove())}
           className={cx(
-            // Hover reads as "remove": Teal ring, and the × turns Ink and grows slightly
             'group inline-flex h-8 max-w-full cursor-pointer items-center gap-1 rounded-full bg-cloud pr-1.5 pl-3 text-compact text-ink ring-1 ring-border transition-[box-shadow,background-color,transform] duration-120 ease-out outline-none focus-visible:ring-2 focus-visible:ring-focus active:scale-[0.97] pointer-fine:hover:bg-surface pointer-fine:hover:ring-action/60',
             // 32px chips keep a 44px hit area through their padding box on touch
             'relative after:absolute after:inset-x-0 after:-inset-y-1.5',

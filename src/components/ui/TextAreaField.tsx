@@ -8,7 +8,6 @@ type TextAreaFieldProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'
   error?: string | null
 }
 
-/** Multi-line text with the same label, hint and error wiring as `TextField`. */
 export function TextAreaField({ label, hint, error, className, rows = 4, ...props }: TextAreaFieldProps) {
   return (
     <Field label={label} hint={hint} error={error}>

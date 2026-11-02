@@ -13,7 +13,7 @@ const steps = [
   },
 ]
 
-/** Three steps on the margin rule, each ticked: how a trade moves from listing to confirmation. */
+/** How a trade moves from listing to confirmation, in three steps. */
 export function HowItWorks() {
   return (
     <section

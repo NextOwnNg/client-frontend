@@ -24,8 +24,8 @@ type OfferActionsProps = {
 }
 
 /**
- * The decision point. Available: Make an offer + Save. Own listing: Manage. Unavailable: an honest message and
- * a disabled button. Every tap rechecks the listing first, so a stale page never sends anyone forward.
+ * Available: Make an offer + Save. Own listing: Manage. Unavailable: a message and a disabled button.
+ * Every tap rechecks the listing first, so a stale page never sends anyone forward.
  */
 export function OfferActions({ listing, recheck, layout }: OfferActionsProps) {
   const userId = useSessionStore((s) => s.userId)

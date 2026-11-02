@@ -2,10 +2,10 @@ import { ArrowUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { cx } from '@/lib/cx'
 
-/** How far down, in screen heights, before the button is worth showing. */
+/** Scroll depth, in viewport heights, at which the button appears. */
 const SCREENS_DOWN = 1.5
 
-/** A floating way back up long lists. Sits above the bottom navigation on phones and the page's own bottom bars. */
+/** Floating Back to top button for long lists; sits above the bottom navigation on phones. */
 export function BackToTop() {
   const [shown, setShown] = useState(false)
 
@@ -26,8 +26,7 @@ export function BackToTop() {
   const toTop = () => {
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
-    // Keyboard and screen reader users carry on from the top too, not from the button they left behind
-    // (main isn't otherwise focusable, and a ring around the whole page would only confuse)
+    // Move focus too, so keyboard and screen reader users continue from the top
     const main = document.getElementById('main')
     if (!main) return
     main.tabIndex = -1

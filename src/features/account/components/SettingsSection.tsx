@@ -1,6 +1,5 @@
 import { useId, type ReactNode } from 'react'
 
-/** One titled group on the settings page. */
 export function SettingsSection({ title, children }: { title: string; children: ReactNode }) {
   const id = useId()
   return (

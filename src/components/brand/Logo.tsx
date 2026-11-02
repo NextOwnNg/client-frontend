@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { WORDMARK_PATH } from '@/components/brand/wordmark-path'
 
 /**
- * NextOwn logo (Route 3): two overlapping rounded squares, one possession becoming the next.
+ * NextOwn logo: two overlapping rounded squares.
  * Geometry is taken from the approved lockup files in public/brand.
  *
  * Variants

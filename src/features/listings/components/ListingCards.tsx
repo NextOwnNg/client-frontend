@@ -54,7 +54,7 @@ function CardLink({
 }
 
 /**
- * The Explore row from the chosen sketch: photo, the Teal margin rule, then the facts on a 24px rhythm.
+ * Explore row: photo, a Teal left rule, then the facts on a 24px rhythm.
  * Unavailable listings stay visible but read as unavailable at a glance.
  */
 export function ListingRow({ listing, priority }: { listing: ListingSummary; priority?: boolean }) {
@@ -105,7 +105,7 @@ export function ListingRow({ listing, priority }: { listing: ListingSummary; pri
   )
 }
 
-/** Grid card for wider screens: same facts, photo on top. */
+/** Grid card for wider screens, photo on top. */
 export function ListingTile({ listing, priority }: { listing: ListingSummary; priority?: boolean }) {
   const available = isAvailable(listing.status)
   const status = listingStatus(listing.status)

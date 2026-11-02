@@ -12,7 +12,7 @@ const stateText: Record<ProgressStep['state'], string> = {
 }
 
 /**
- * The single corridor (direction contract): a Teal margin rule running through every step.
+ * Step progress along a Teal rule.
  * Done steps draw their tick; nothing ticks until the server says the step is done.
  */
 export function ProgressLine({ steps, label }: { steps: ProgressStep[]; label: string }) {

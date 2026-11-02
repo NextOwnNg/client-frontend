@@ -14,7 +14,7 @@ export const useUiStore = create<UiState>()(
   persist((set) => ({ areaIds: [], setAreaIds: (areaIds) => set({ areaIds }) }), {
     name: 'nextown-ui',
     version: 2,
-    // v0 stored one `areaId`; later versions store the list as it is
+    // Version 0 stored a single `areaId`
     migrate: (persisted, version) => {
       const state = (persisted ?? {}) as { areaId?: string | null; areaIds?: unknown }
       if (version === 0) return { areaIds: state.areaId ? [state.areaId] : [] }

@@ -1,4 +1,3 @@
-/** A feed post's shape while it loads. */
 export function PostSkeleton() {
   return (
     <div className="flex flex-col gap-3 rounded-card border border-border bg-surface p-4">
