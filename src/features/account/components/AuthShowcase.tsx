@@ -12,7 +12,6 @@ const photos = {
   get: { src: '/brand/auth/macbook.webp', alt: 'An open MacBook Air M1', ratio: '480 / 320' },
 }
 
-/** One item photo on a white card, tilted slightly as if laid on a table. Settles in once. */
 function PhotoCard({
   photo,
   label,
@@ -40,10 +39,7 @@ function PhotoCard({
   )
 }
 
-/**
- * Beside the sign-in form: what NextOwn does, shown with one example trade instead of a decorative background.
- * The same words and example on every screen, scaled down on phones. Photos are skipped under Save-Data.
- */
+
 export function AuthShowcase() {
   const photosOn = !savesData()
 
@@ -69,7 +65,7 @@ export function AuthShowcase() {
           <PhotoCard photo={photos.get} label="You get" tilt="rotate-2" delay={120} />
         </div>
       )}
-      <figure className="flex max-w-md flex-col gap-2">
+      <figure className="hidden md:flex max-w-md flex-col gap-2">
         <OfferSum
           heading="Example: a swap with cash added"
           give={[

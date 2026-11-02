@@ -14,11 +14,7 @@ const links = [
   { to: '/support', label: 'Safety and help' },
 ]
 
-/**
- * Sign-in and first-time setup: one calm column without the app's navigation, so nothing competes with the task.
- * A centred panel from 768px (UX-09). Sign in and the code step add an example trade beside the form from 1024px;
- * sign in also shows it above the form on smaller screens, with the same words.
- */
+
 export function AuthLayout() {
   const showcase = useMatches()
     .map((m) => (m.handle as AuthHandle | undefined)?.showcase)
@@ -57,7 +53,6 @@ export function AuthLayout() {
             : 'max-w-[30rem]',
         )}
       >
-        {/* The form comes first for screen readers and keyboards; the panel shows above it on phones, left of it on wide screens */}
         <div className="tablet:rounded-feature tablet:border tablet:border-border tablet:bg-surface tablet:p-8 tablet:shadow-card desktop:col-start-2 desktop:row-start-1">
           <Outlet />
         </div>
