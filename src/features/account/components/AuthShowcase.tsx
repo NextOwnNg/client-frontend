@@ -65,7 +65,7 @@ export function AuthShowcase() {
           <PhotoCard photo={photos.get} label="You get" tilt="rotate-2" delay={120} />
         </div>
       )}
-      <figure className="hidden md:flex max-w-md flex-col gap-2">
+      <figure className="hidden tablet:flex max-w-md flex-col gap-2">
         <OfferSum
           heading="Example: a swap with cash added"
           give={[

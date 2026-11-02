@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useState } from 'react'
+import { BackToTop } from '@/components/layout/BackToTop'
 import { Seo } from '@/components/seo/Seo'
 import {
   ActiveChips,
@@ -78,6 +79,7 @@ export function ExplorePage() {
           <Results filters={filters} onClearFilters={clear} />
         </div>
       </div>
+      <BackToTop />
 
       {!desktop && sheetMounted && (
         <Suspense fallback={null}>

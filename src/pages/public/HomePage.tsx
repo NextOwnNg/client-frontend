@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { useAreaSheet } from '@/components/layout/use-area-sheet'
 import { Seo } from '@/components/seo/Seo'
 import { useRuntimeConfig } from '@/features/config/api'
@@ -11,6 +12,9 @@ import { RecentListings } from '@/features/listings/components/RecentListings'
 import { copy } from '@/lib/copy/copy'
 import { siteOrigin } from '@/lib/seo/origin'
 import { useUiStore } from '@/stores/ui'
+
+// Home is part of every first load; the button follows in its own small file
+const BackToTop = lazy(() => import('@/components/layout/BackToTop').then((m) => ({ default: m.BackToTop })))
 
 /** UX-01 Home: the promise, a search, the ways to trade, one worked example, and what's listed nearby. */
 export function HomePage() {
@@ -50,6 +54,9 @@ export function HomePage() {
         <HowItWorks />
       </div>
       {areaSheet.sheet}
+      <Suspense fallback={null}>
+        <BackToTop />
+      </Suspense>
     </>
   )
 }
