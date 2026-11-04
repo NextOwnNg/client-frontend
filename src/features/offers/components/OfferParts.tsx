@@ -8,7 +8,7 @@ import { cx } from '@/lib/cx'
 import { formatNaira } from '@/lib/money/money'
 import type { ItemCondition, ListingSummary } from '@/types/api'
 
-/** A square photo, or a calm placeholder when there is none (low data: the action never waits on it). */
+/** A square photo, or a placeholder when there is none. */
 export function ItemThumb({ url, size = 'md' }: { url?: string; size?: 'sm' | 'md' }) {
   return (
     <span

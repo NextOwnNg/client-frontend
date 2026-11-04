@@ -1,5 +1,6 @@
 import { CalendarDays, Flag, PackageOpen, UserX } from 'lucide-react'
 import { Link, useParams } from 'react-router'
+import { BackToTop } from '@/components/layout/BackToTop'
 import { Avatar } from '@/components/domain/Avatar'
 import { AreaLabel, TrustModule } from '@/components/domain/TrustModule'
 import { Seo } from '@/components/seo/Seo'
@@ -57,6 +58,7 @@ export function ProfilePage() {
         <SafetyActions person={profile} />
       </div>
       <ActiveListings userId={profile.id} name={profile.displayName} />
+      <BackToTop />
     </div>
   )
 }

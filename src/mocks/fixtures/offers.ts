@@ -138,7 +138,6 @@ export function seedOffers(): { offers: StoredOffer[]; items: StoredItem[] } {
         transactionId: 't-o-ipad-completed',
         versions: versions(['u-tolu', 290, cash(85_000, 'Can pick up at the bus park.')]),
       }),
-      // Closed: declined
       offer({
         id: 'o-tecno-declined',
         listingId: 'l7',

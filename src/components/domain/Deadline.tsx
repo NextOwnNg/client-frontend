@@ -11,7 +11,7 @@ type DeadlineProps = {
 }
 
 /**
- * Quick Sell deadline. The bar's length is the real share of time left (Labanotation raise);
+ * Quick Sell deadline. The bar's length is the share of time left;
  * it never animates or ticks by the second.
  */
 export function Deadline({ endsAt, startedAt, variant, className }: DeadlineProps) {

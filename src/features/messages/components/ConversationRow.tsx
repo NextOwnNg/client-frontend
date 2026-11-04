@@ -13,7 +13,6 @@ function preview(conv: Conversation, viewerId: string | null) {
   return last.senderId === viewerId ? `You: ${text}` : text
 }
 
-/** One conversation in the inbox: the other person, the item, the latest message and any unread count. */
 export function ConversationRow({ conv, active, now }: { conv: Conversation; active: boolean; now: number }) {
   const viewerId = useSessionStore((s) => s.userId)
   const unread = conv.unreadCount > 0

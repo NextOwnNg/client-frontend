@@ -41,8 +41,7 @@ export function RequireAuth({ allowNew = false }: { allowNew?: boolean }) {
 
 /**
  * Sign-in pages: someone already signed in carries straight on to where they were going. Arriving by going
- * Back is different: the sign-in page is behind them, so Back keeps going past it. Sending them forward to
- * `next` again made Back bounce into the page they had just left (such as the offer they started).
+ * Back is different: the sign-in page is behind them, so Back keeps going past it.
  */
 export function RedirectIfAuthed() {
   const status = useSessionStore((s) => s.status)

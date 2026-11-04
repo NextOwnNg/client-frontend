@@ -4,7 +4,7 @@ import { endsWith, reportReceived } from '@/features/trust/copy'
 import { copy } from '@/lib/copy/copy'
 import type { ReportReceipt } from '@/types/api'
 
-/** The case reference, what happens next, and the limits of support. No celebration: someone had a problem. */
+/** The case reference, what happens next, and the limits of support. */
 export function ReportDone({
   receipt,
   blockedName,

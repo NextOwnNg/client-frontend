@@ -9,7 +9,7 @@ import type { Offer } from '@/types/api'
 
 /**
  * One negotiation in the inbox (FE-OFF-06): the item, the current terms from the reader's side, and whose
- * move it is. "Your turn" is the strongest thing on the card; the expiry is calm text, never a timer.
+ * move it is. The expiry is plain text, never a timer.
  */
 export function OfferCard({
   offer,

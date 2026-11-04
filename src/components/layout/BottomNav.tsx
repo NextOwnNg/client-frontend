@@ -2,7 +2,7 @@ import { matchPath, NavLink, useLocation } from 'react-router'
 import { mainNavItems } from '@/components/layout/nav-items'
 import { cx } from '@/lib/cx'
 
-/** Thumb-reachable navigation under 1024px. List is the one Teal action; the active item gets a sliding bar. */
+/** Bottom navigation under 1024px. The active item gets a sliding bar. */
 export function BottomNav() {
   const { pathname } = useLocation()
   const active = mainNavItems.findIndex((item) => matchPath({ path: item.to, end: item.end ?? false }, pathname))

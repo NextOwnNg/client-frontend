@@ -41,7 +41,7 @@ function load() {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return
     const saved = JSON.parse(raw) as { posts: StoredPost[]; comments: StoredComment[] }
-    // Feeds saved before threads: thread the seeded replies so they don't show as separate comments
+    // Older saved feeds have no parentId on seeded replies; take it from the seed
     const seededParents = new Map(comments.map((c) => [c.id, c.parentId]))
     posts = saved.posts
     comments = saved.comments.map((c) => ({ ...c, parentId: c.parentId ?? seededParents.get(c.id) }))

@@ -204,7 +204,6 @@ export function payerShort(terms: OfferTerms, viewer: Viewer) {
     : `They pay you ${formatNaira(terms.cashKobo)}`
 }
 
-/** The other person in the negotiation. */
 export const counterpartOf = (offer: Pick<Offer, 'viewerRole' | 'offerer' | 'owner'>) =>
   offer.viewerRole === 'offerer' ? offer.owner : offer.offerer
 

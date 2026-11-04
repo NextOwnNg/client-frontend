@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from 'react-router'
+import { BackToTop } from '@/components/layout/BackToTop'
 import { Seo } from '@/components/seo/Seo'
 import { SavedListings } from '@/features/saved/components/SavedListings'
 import { SavedPosts } from '@/features/saved/components/SavedPosts'
@@ -39,6 +40,7 @@ export function SavedPage() {
         </ul>
       </nav>
       {current === 'listings' ? <SavedListings /> : <SavedPosts />}
+      <BackToTop />
     </div>
   )
 }

@@ -49,7 +49,6 @@ function CompactFooter() {
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto flex w-full max-w-content flex-col gap-4 px-4 py-8 tablet:px-6 desktop:flex-row desktop:items-center desktop:justify-between">
         <div className="flex flex-col gap-2">
-          {/* Same sizes as the header */}
           <Logo height={26} className="desktop:hidden" />
           <Logo height={32} className="hidden desktop:block" />
           <p className="text-compact text-muted">{copy.brandLine}</p>

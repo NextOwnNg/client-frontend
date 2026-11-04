@@ -2,7 +2,7 @@ import { conditionLabel } from '@/lib/copy/status'
 import type { ListingDetail } from '@/types/api'
 import { sectionHeading } from '@/features/listings/components/listing-styles'
 
-/** Disclosed defects sit above the offer button (FE-LDT-01), written out like the rest of the working. */
+/** Disclosed defects, shown above the offer button (FE-LDT-01). */
 export function ConditionAndDefects({ listing }: { listing: ListingDetail }) {
   return (
     <section aria-labelledby="condition-heading" className="relative flex flex-col gap-2 pl-4">

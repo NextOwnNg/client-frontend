@@ -2,7 +2,7 @@ import { PlainButton } from '@/components/ui/Button'
 import { CloudOff, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-/** Calm empty state that always offers a next step. */
+/** Empty state with a next step. */
 export function EmptyState({
   icon: Icon,
   title,

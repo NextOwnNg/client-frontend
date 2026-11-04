@@ -42,7 +42,6 @@ export function sidesOf(agreement: AgreementSnapshot, role: Viewer) {
 
 export const otherRole = (role: Viewer): Viewer => (role === 'offerer' ? 'owner' : 'offerer')
 
-/** Has this person confirmed their side? */
 export const confirmedAt = (tx: Pick<Transaction, 'confirmations'>, role: Viewer) => tx.confirmations[role]
 
 /**

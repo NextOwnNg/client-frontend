@@ -19,7 +19,7 @@ export const useDevSettings = create<DevSettings>()(
     }),
     {
       name: 'nextown-dev-settings',
-      // v0 had a guest/member persona switch; the toolbar now signs in through the mock API instead
+      // Version 0 also stored a persona; only the latency carries over
       version: 1,
       migrate: (persisted) => ({ latencyMs: (persisted as { latencyMs?: number } | null)?.latencyMs ?? 400 }),
       partialize: ({ latencyMs }) => ({ latencyMs }),
