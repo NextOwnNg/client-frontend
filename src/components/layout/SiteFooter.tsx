@@ -1,4 +1,4 @@
-import { Clock, Mail, Phone } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { BrandIcon, brandNames } from '@/components/brand/BrandIcon'
@@ -125,12 +125,6 @@ export function SiteFooter() {
                   <Phone aria-hidden className="size-4 shrink-0" />
                   {support.phone}
                 </a>
-              </li>
-            )}
-            {support?.hours && (
-              <li className="flex items-start gap-2 py-1 text-compact text-muted">
-                <Clock aria-hidden className="mt-0.5 size-4 shrink-0" />
-                {support.hours}
               </li>
             )}
           </ul>

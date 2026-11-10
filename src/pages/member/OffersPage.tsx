@@ -3,6 +3,7 @@ import { Link, Outlet, useMatch, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
+import { fromProfileState, ProfileBackLink, useOpenedFromProfile } from '@/features/account/components/ProfileBackLink'
 import { useOffers } from '@/features/offers/api'
 import { OfferCard } from '@/features/offers/components/OfferCard'
 import { offerTab, type OfferTab } from '@/features/offers/offer-terms'
@@ -56,11 +57,14 @@ export function OffersLayout() {
   const count = (tab: OfferTab) => data?.filter((o) => offerTab(o) === tab).length ?? 0
   const items = data?.filter((o) => offerTab(o) === current.id) ?? []
   const Heading = open ? 'h2' : 'h1'
+  // Switching tabs keeps the "opened from Profile" state, so the back link stays
+  const openedFromProfile = useOpenedFromProfile()
 
   return (
     <div className="mx-auto w-full max-w-content desktop:grid desktop:grid-cols-[22rem_minmax(0,1fr)] desktop:items-start desktop:gap-8">
       {!open && <Seo title="Offers" noindex />}
       <div className={cx('flex flex-col gap-5', open && 'hidden desktop:flex')}>
+        <ProfileBackLink onlyFromProfile className="-mb-3" />
         <Heading className="text-h2 text-ink tablet:text-h1 desktop:text-h2">Offers</Heading>
 
         <nav
@@ -72,6 +76,7 @@ export function OffersLayout() {
               <li key={tab.id}>
                 <Link
                   to={`/offers?tab=${tab.id}`}
+                  state={openedFromProfile ? fromProfileState : undefined}
                   replace={!open}
                   aria-current={tab.id === current.id ? 'page' : undefined}
                   className={cx(

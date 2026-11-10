@@ -4,6 +4,7 @@ import { Seo } from '@/components/seo/Seo'
 import { SavedListings } from '@/features/saved/components/SavedListings'
 import { SavedPosts } from '@/features/saved/components/SavedPosts'
 import { cx } from '@/lib/cx'
+import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
 type Tab = 'listings' | 'posts'
 const tabs: { id: Tab; label: string }[] = [
@@ -19,6 +20,7 @@ export function SavedPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
       <Seo title="Saved" noindex />
+      <ProfileBackLink className="-mb-3" />
       <h1 className="text-h2 text-ink tablet:text-h1">Saved</h1>
       <nav aria-label="Saved items">
         <ul className="flex gap-1 border-b border-border">

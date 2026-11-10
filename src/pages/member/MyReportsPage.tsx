@@ -7,6 +7,7 @@ import { useMyReports } from '@/features/trust/api'
 import { reasonLabel, reportStatuses, targetNoun } from '@/features/trust/copy'
 import { copy } from '@/lib/copy/copy'
 import { formatWAT } from '@/lib/time/time'
+import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
 /** FE-TRU-03: `/me/reports`. Each case's reference and status, and what the status means. Never moderator notes. */
 export function MyReportsPage() {
@@ -15,6 +16,7 @@ export function MyReportsPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <Seo title="My reports" noindex />
+      <ProfileBackLink className="-mb-4" />
       <div className="flex flex-col gap-1">
         <h1 className="text-h2 text-ink tablet:text-h1">My reports</h1>
         <p className="text-body text-muted">
