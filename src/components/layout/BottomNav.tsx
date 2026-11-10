@@ -43,13 +43,18 @@ export function BottomNav() {
                 item.label === 'List' ? (
                   <>
                     <span className="flex size-9 items-center justify-center rounded-control bg-action text-action-foreground shadow-card">
-                      <item.icon aria-hidden className="size-5" strokeWidth={2.5} />
+                      <item.icon aria-hidden className="size-5" weight="bold" />
                     </span>
                     <span className={isActive ? 'font-semibold' : undefined}>{item.label}</span>
                   </>
                 ) : (
                   <>
-                    <item.icon aria-hidden className="size-6" strokeWidth={isActive ? 2.25 : 1.75} />
+                    <item.icon
+                      aria-hidden
+                      weight={isActive ? 'fill' : 'duotone'}
+                      // Duotone's soft layer is tinted with the brand colour, so idle icons keep some colour
+                      className="size-6 [&_[opacity]]:fill-action [&_[opacity]]:opacity-25"
+                    />
                     <span className={isActive ? 'font-semibold' : undefined}>{item.label}</span>
                   </>
                 )
