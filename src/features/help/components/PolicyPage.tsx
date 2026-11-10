@@ -8,14 +8,10 @@ import { siteOrigin } from '@/lib/seo/origin'
 const inlineLink =
   'inline-flex min-h-11 items-center gap-1 text-compact font-semibold text-action underline-offset-4 hover:underline'
 
-/**
- * One layout for help and policy pages (Read mode): a readable measure, an "On this page" list that sits
- * beside the text from 1024px, and anchors that land below the sticky header.
- */
+
 export function PolicyPage({ doc, path, back }: { doc: PolicyDoc; path: string; back?: ReactNode }) {
   const { hash } = useLocation()
 
-  // Arriving at `/community-rules#prohibited` scrolls to that section once it has rendered
   useEffect(() => {
     if (!hash) return
     const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView?.())

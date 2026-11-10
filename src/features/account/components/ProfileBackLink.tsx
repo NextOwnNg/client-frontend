@@ -2,7 +2,6 @@ import { ArrowLeft } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import { cx } from '@/lib/cx'
 
-/** Router state the Profile hub puts on its links, so shared pages know they were opened from it. */
 export const fromProfileState = { fromProfile: true } as const
 
 export function useOpenedFromProfile() {
@@ -11,12 +10,10 @@ export function useOpenedFromProfile() {
 }
 
 type ProfileBackLinkProps = {
-  /** For pages with their own place in the nav (Offers, Safety and help): show only when opened from Profile. */
   onlyFromProfile?: boolean
   className?: string
 }
 
-/** Returns to the Profile hub from the pages it lists. */
 export function ProfileBackLink({ onlyFromProfile = false, className }: ProfileBackLinkProps) {
   const openedFromProfile = useOpenedFromProfile()
   if (onlyFromProfile && !openedFromProfile) return null

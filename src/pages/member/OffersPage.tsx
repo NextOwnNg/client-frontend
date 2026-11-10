@@ -42,10 +42,7 @@ const tabs: { id: OfferTab; label: string; empty: { title: string; body: string;
   },
 ]
 
-/**
- * UX-19: `/offers` and `/offers/:id`. Phones show the inbox or one thread; from 1024px the inbox stays on the
- * left with the open thread beside it (ruling R4-7). The tab lives in the URL.
- */
+
 export function OffersLayout() {
   const [params] = useSearchParams()
   const thread = useMatch('/offers/:id')
@@ -57,7 +54,7 @@ export function OffersLayout() {
   const count = (tab: OfferTab) => data?.filter((o) => offerTab(o) === tab).length ?? 0
   const items = data?.filter((o) => offerTab(o) === current.id) ?? []
   const Heading = open ? 'h2' : 'h1'
-  // Switching tabs keeps the "opened from Profile" state, so the back link stays
+
   const openedFromProfile = useOpenedFromProfile()
 
   return (
@@ -137,7 +134,6 @@ export function OffersLayout() {
   )
 }
 
-/** The right-hand pane on desktop before an offer is chosen. */
 export function OffersIndex() {
   return (
     <div className="hidden min-h-96 flex-col items-center justify-center gap-3 rounded-card border border-dashed border-border p-8 text-center desktop:flex">

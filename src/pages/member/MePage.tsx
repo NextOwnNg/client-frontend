@@ -39,7 +39,6 @@ const groups: { label: string; links: HubLink[] }[] = [
   },
 ]
 
-/** UX-25 own profile hub (FE-PRF-02). The restricted banner comes from the app shell. */
 export function MePage() {
   const profile = useMeProfile()
 

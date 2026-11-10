@@ -2,11 +2,9 @@ import { matchPath, NavLink, useLocation } from 'react-router'
 import { mainNavItems } from '@/components/layout/nav-items'
 import { cx } from '@/lib/cx'
 
-/** Bottom navigation under 1024px. The active item gets a sliding bar. */
 export function BottomNav() {
   const { pathname } = useLocation()
   const active = mainNavItems.findIndex((item) => matchPath({ path: item.to, end: item.end ?? false }, pathname))
-  // List is the Teal button and carries its own emphasis; no bar under it
   const showBar = active >= 0 && mainNavItems[active]?.label !== 'List'
 
   return (
@@ -15,7 +13,6 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm desktop:hidden"
     >
       <ul className="relative mx-auto grid h-16 max-w-xl grid-cols-5">
-        {/* One bar that slides between items (CSS transform, so it stays smooth while a page loads) */}
         <li
           aria-hidden
           className={cx(
