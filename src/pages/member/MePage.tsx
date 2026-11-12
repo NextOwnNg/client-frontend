@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
+import { fromProfileState } from '@/features/account/components/ProfileBackLink'
 import { useMeProfile } from '@/features/account/use-me-profile'
 import { ProfileCard } from '@/pages/public/ProfilePage'
 
@@ -38,7 +39,6 @@ const groups: { label: string; links: HubLink[] }[] = [
   },
 ]
 
-/** UX-25 own profile hub (FE-PRF-02). The restricted banner comes from the app shell. */
 export function MePage() {
   const profile = useMeProfile()
 
@@ -71,6 +71,7 @@ export function MePage() {
                 <li key={to}>
                   <Link
                     to={to}
+                    state={fromProfileState}
                     className="group flex min-h-16 items-center gap-3 px-4 py-3 transition-colors duration-120 outline-none focus-visible:bg-cloud pointer-fine:hover:bg-cloud"
                   >
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-mint text-action">

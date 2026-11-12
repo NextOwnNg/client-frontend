@@ -2,11 +2,9 @@ import { matchPath, NavLink, useLocation } from 'react-router'
 import { mainNavItems } from '@/components/layout/nav-items'
 import { cx } from '@/lib/cx'
 
-/** Bottom navigation under 1024px. The active item gets a sliding bar. */
 export function BottomNav() {
   const { pathname } = useLocation()
   const active = mainNavItems.findIndex((item) => matchPath({ path: item.to, end: item.end ?? false }, pathname))
-  // List is the Teal button and carries its own emphasis; no bar under it
   const showBar = active >= 0 && mainNavItems[active]?.label !== 'List'
 
   return (
@@ -15,7 +13,6 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-sm desktop:hidden"
     >
       <ul className="relative mx-auto grid h-16 max-w-xl grid-cols-5">
-        {/* One bar that slides between items (CSS transform, so it stays smooth while a page loads) */}
         <li
           aria-hidden
           className={cx(
@@ -43,13 +40,18 @@ export function BottomNav() {
                 item.label === 'List' ? (
                   <>
                     <span className="flex size-9 items-center justify-center rounded-control bg-action text-action-foreground shadow-card">
-                      <item.icon aria-hidden className="size-5" strokeWidth={2.5} />
+                      <item.icon aria-hidden className="size-5" weight="bold" />
                     </span>
                     <span className={isActive ? 'font-semibold' : undefined}>{item.label}</span>
                   </>
                 ) : (
                   <>
-                    <item.icon aria-hidden className="size-6" strokeWidth={isActive ? 2.25 : 1.75} />
+                    <item.icon
+                      aria-hidden
+                      weight={isActive ? 'fill' : 'duotone'}
+                      // Duotone's soft layer is tinted with the brand colour, so idle icons keep some colour
+                      className="size-6 [&_[opacity]]:fill-action [&_[opacity]]:opacity-25"
+                    />
                     <span className={isActive ? 'font-semibold' : undefined}>{item.label}</span>
                   </>
                 )

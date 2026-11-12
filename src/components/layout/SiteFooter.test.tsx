@@ -13,7 +13,7 @@ const footer = async () => {
 }
 
 describe('Site footer', () => {
-  it('lists support contacts and hours from config', async () => {
+  it('lists support contacts from config, without support hours', async () => {
     const contact = within(await footer()).getByRole('navigation', { name: 'Contact support' })
 
     expect(await within(contact).findByRole('link', { name: 'support@nextown.example' })).toHaveAttribute(
@@ -28,7 +28,7 @@ describe('Site footer', () => {
       'href',
       'tel:+2340000000000',
     )
-    expect(within(contact).getByText('Mon to Sat, 9am to 6pm WAT')).toBeInTheDocument()
+    expect(within(contact).queryByText('Mon to Sat, 9am to 6pm WAT')).not.toBeInTheDocument()
     expect(within(contact).getByText(/use Report there: it gets a case reference/)).toBeInTheDocument()
   })
 

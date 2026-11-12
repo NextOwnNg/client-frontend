@@ -1,12 +1,11 @@
-import { Compass, Handshake, Newspaper, Plus, UserRound, type LucideIcon } from 'lucide-react'
+import { CompassIcon, HandshakeIcon, NewspaperIcon, PlusIcon, UserCircleIcon, type Icon } from '@phosphor-icons/react'
 
-type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean }
+type NavItem = { to: string; label: string; icon: Icon; end?: boolean }
 
-/** Primary destinations (UX §3.1): five at most. */
 export const mainNavItems: NavItem[] = [
-  { to: '/explore', label: 'Explore', icon: Compass },
-  { to: '/feed', label: 'Feed', icon: Newspaper },
-  { to: '/listings/new', label: 'List', icon: Plus },
-  { to: '/offers', label: 'Offers', icon: Handshake },
-  { to: '/me', label: 'Profile', icon: UserRound },
+  { to: '/explore', label: 'Explore', icon: CompassIcon },
+  { to: '/feed', label: 'Feed', icon: NewspaperIcon },
+  { to: '/listings/new', label: 'List', icon: PlusIcon },
+  { to: '/offers', label: 'Offers', icon: HandshakeIcon },
+  { to: '/me', label: 'Profile', icon: UserCircleIcon },
 ]

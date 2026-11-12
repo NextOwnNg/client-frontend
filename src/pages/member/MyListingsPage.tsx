@@ -8,6 +8,7 @@ import { useMyListings } from '@/features/selling/api'
 import { OwnListingRow } from '@/features/selling/components/OwnListingRow'
 import { tabOf, type ListingTab } from '@/features/selling/listing-input'
 import { cx } from '@/lib/cx'
+import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
 const tabs: { id: ListingTab; label: string; empty: { title: string; body: string; icon: typeof Plus } }[] = [
   {
@@ -61,6 +62,7 @@ export function MyListingsPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
       <Seo title="My listings" noindex />
+      <ProfileBackLink className="-mb-3" />
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-h2 text-ink tablet:text-h1">My listings</h1>
         <ButtonLink to="/listings/new" size="sm" className="shrink-0">

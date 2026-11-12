@@ -1,5 +1,5 @@
 import { ChevronRight, FileClock } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import type { PolicyDoc, PolicyLink, PolicySection } from '@/features/help/content/types'
@@ -8,14 +8,10 @@ import { siteOrigin } from '@/lib/seo/origin'
 const inlineLink =
   'inline-flex min-h-11 items-center gap-1 text-compact font-semibold text-action underline-offset-4 hover:underline'
 
-/**
- * One layout for help and policy pages (Read mode): a readable measure, an "On this page" list that sits
- * beside the text from 1024px, and anchors that land below the sticky header.
- */
-export function PolicyPage({ doc, path }: { doc: PolicyDoc; path: string }) {
+
+export function PolicyPage({ doc, path, back }: { doc: PolicyDoc; path: string; back?: ReactNode }) {
   const { hash } = useLocation()
 
-  // Arriving at `/community-rules#prohibited` scrolls to that section once it has rendered
   useEffect(() => {
     if (!hash) return
     const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView?.())
@@ -29,6 +25,7 @@ export function PolicyPage({ doc, path }: { doc: PolicyDoc; path: string }) {
     >
       <Seo title={doc.title} description={doc.lead} canonical={`${siteOrigin()}${path}`} />
       <header className="flex flex-col gap-3 desktop:col-span-2">
+        {back}
         <h1 id="policy-title" className="text-h2 text-balance text-ink tablet:text-h1">
           {doc.title}
         </h1>

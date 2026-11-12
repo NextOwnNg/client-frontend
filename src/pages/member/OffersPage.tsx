@@ -3,6 +3,7 @@ import { Link, Outlet, useMatch, useSearchParams } from 'react-router'
 import { Seo } from '@/components/seo/Seo'
 import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
+import { fromProfileState, ProfileBackLink, useOpenedFromProfile } from '@/features/account/components/ProfileBackLink'
 import { useOffers } from '@/features/offers/api'
 import { OfferCard } from '@/features/offers/components/OfferCard'
 import { offerTab, type OfferTab } from '@/features/offers/offer-terms'
@@ -41,10 +42,7 @@ const tabs: { id: OfferTab; label: string; empty: { title: string; body: string;
   },
 ]
 
-/**
- * UX-19: `/offers` and `/offers/:id`. Phones show the inbox or one thread; from 1024px the inbox stays on the
- * left with the open thread beside it (ruling R4-7). The tab lives in the URL.
- */
+
 export function OffersLayout() {
   const [params] = useSearchParams()
   const thread = useMatch('/offers/:id')
@@ -57,10 +55,13 @@ export function OffersLayout() {
   const items = data?.filter((o) => offerTab(o) === current.id) ?? []
   const Heading = open ? 'h2' : 'h1'
 
+  const openedFromProfile = useOpenedFromProfile()
+
   return (
     <div className="mx-auto w-full max-w-content desktop:grid desktop:grid-cols-[22rem_minmax(0,1fr)] desktop:items-start desktop:gap-8">
       {!open && <Seo title="Offers" noindex />}
       <div className={cx('flex flex-col gap-5', open && 'hidden desktop:flex')}>
+        <ProfileBackLink onlyFromProfile className="-mb-3" />
         <Heading className="text-h2 text-ink tablet:text-h1 desktop:text-h2">Offers</Heading>
 
         <nav
@@ -72,6 +73,7 @@ export function OffersLayout() {
               <li key={tab.id}>
                 <Link
                   to={`/offers?tab=${tab.id}`}
+                  state={openedFromProfile ? fromProfileState : undefined}
                   replace={!open}
                   aria-current={tab.id === current.id ? 'page' : undefined}
                   className={cx(
@@ -132,7 +134,6 @@ export function OffersLayout() {
   )
 }
 
-/** The right-hand pane on desktop before an offer is chosen. */
 export function OffersIndex() {
   return (
     <div className="hidden min-h-96 flex-col items-center justify-center gap-3 rounded-card border border-dashed border-border p-8 text-center desktop:flex">

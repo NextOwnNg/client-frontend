@@ -9,6 +9,7 @@ import { PhotoSection } from '@/features/account/components/PhotoSection'
 import { MessagesSection } from '@/features/account/components/MessagesSection'
 import { AccountSection } from '@/features/account/components/AccountSection'
 import { BlockedSection } from '@/features/trust/components/BlockedSection'
+import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
 /** UX-26 / FE-SET-01: grouped settings. Destructive actions confirm first; profile edits survive an expired session. */
 export function SettingsPage() {
@@ -18,6 +19,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <Seo title="Account settings" noindex />
+      <ProfileBackLink className="-mb-4" />
       <h1 className="text-h2 text-ink tablet:text-h1">Account settings</h1>
       {!me ? (
         <div aria-busy="true" aria-label="Loading settings" className="h-64 animate-pulse rounded-card bg-cloud" />

@@ -1,4 +1,4 @@
-import { Clock, Mail, Phone } from 'lucide-react'
+import { Mail, Phone } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { BrandIcon, brandNames } from '@/components/brand/BrandIcon'
@@ -45,10 +45,7 @@ function Column({ title, children, className }: { title: string; children: React
   )
 }
 
-/**
- * The full footer: what to do, where to get help, how to reach support and the official channels. Contacts and
- * channels come from runtime config (PRD §3.2); a part that isn't set simply isn't shown.
- */
+
 export function SiteFooter() {
   const { data: config } = useRuntimeConfig()
   const support = config?.support
@@ -95,7 +92,6 @@ export function SiteFooter() {
           </Column>
         ))}
 
-        {/* Full width on phones, so the email address fits on one line */}
         <Column title="Contact support" className="col-span-2 tablet:col-span-1">
           <ul className="flex flex-col">
             {support?.email && (
@@ -125,12 +121,6 @@ export function SiteFooter() {
                   <Phone aria-hidden className="size-4 shrink-0" />
                   {support.phone}
                 </a>
-              </li>
-            )}
-            {support?.hours && (
-              <li className="flex items-start gap-2 py-1 text-compact text-muted">
-                <Clock aria-hidden className="mt-0.5 size-4 shrink-0" />
-                {support.hours}
               </li>
             )}
           </ul>

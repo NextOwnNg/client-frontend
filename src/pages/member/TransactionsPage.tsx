@@ -11,6 +11,7 @@ import { transactionStatus } from '@/lib/copy/transaction-status'
 import { cx } from '@/lib/cx'
 import { formatWAT } from '@/lib/time/time'
 import type { Transaction } from '@/types/api'
+import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
 const tabs: { id: TransactionTab; label: string; empty: { title: string; body: string; icon: typeof Handshake } }[] = [
   {
@@ -71,6 +72,7 @@ export function TransactionsPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
       <Seo title="Transactions" noindex />
+      <ProfileBackLink className="-mb-3" />
       <h1 className="text-h2 text-ink tablet:text-h1">Transactions</h1>
 
       <nav aria-label="Deal status">

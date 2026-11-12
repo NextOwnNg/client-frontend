@@ -7,6 +7,7 @@ import { useMyReviews } from '@/features/transactions/api'
 import { Stars } from '@/features/transactions/components/Agreement'
 import { formatWAT } from '@/lib/time/time'
 import type { ReviewWithContext } from '@/types/api'
+import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
 /** UX-24 history: reviews other people left about the member, and the ones the member left. */
 export function MyReviewsPage() {
@@ -15,6 +16,7 @@ export function MyReviewsPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <Seo title="Reviews" noindex />
+      <ProfileBackLink className="-mb-4" />
       <h1 className="text-h2 text-ink tablet:text-h1">Reviews</h1>
       {isPending ? (
         <div aria-busy="true" aria-label="Loading reviews" className="h-48 animate-pulse rounded-card bg-cloud" />
