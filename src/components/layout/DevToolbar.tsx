@@ -3,8 +3,7 @@ import { FlaskConical, X } from 'lucide-react'
 import { useState } from 'react'
 import { useMatch } from 'react-router'
 import { meKey, useMe } from '@/features/account/api'
-import { formatPhoneDisplay } from '@/lib/phone/phone'
-import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID, SAMPLE_MEMBER_PHONE } from '@/mocks/db/auth'
+import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_EMAIL, SAMPLE_MEMBER_ID, SAMPLE_PASSWORD } from '@/mocks/db/auth'
 import { mockFeed } from '@/mocks/db/feed'
 import { mockMessages } from '@/mocks/db/messages'
 import { listingsDb, mockListings } from '@/mocks/db/listings'
@@ -126,8 +125,9 @@ export function DevToolbar() {
         <p className="font-semibold">Account</p>
         <p className="mt-1 font-medium">{me ? `Signed in as ${me.displayName ?? 'a new member'}` : 'Signed out'}</p>
         <p className="mt-1 text-white/70">
-          Any number works with code <span className="tabular font-semibold text-paper">{SAMPLE_CODE}</span>; the sample
-          member is <span className="tabular whitespace-nowrap">{formatPhoneDisplay(SAMPLE_MEMBER_PHONE)}</span>.
+          Sample member: <span className="font-semibold break-all text-paper">{SAMPLE_MEMBER_EMAIL}</span> with password{' '}
+          <span className="font-semibold text-paper">{SAMPLE_PASSWORD}</span>. Emailed codes are always{' '}
+          <span className="tabular font-semibold text-paper">{SAMPLE_CODE}</span>.
         </p>
         <div className="mt-2 flex gap-2">
           {me ? (

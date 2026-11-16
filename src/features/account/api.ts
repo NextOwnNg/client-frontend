@@ -29,23 +29,65 @@ export const accountKeys = {
   listings: (id: string) => ['users', id, 'listings'] as const,
 }
 
-export function useRequestCode() {
+/** A code was emailed; another can be asked for after this many seconds. */
+export type CodeSent = { resendAfterSeconds: number }
+
+/** Signed in: the cookie is set, so the member goes into the cache and the session store straight away. */
+function useSignedIn() {
+  const queryClient = useQueryClient()
+  return (user: Me) => {
+    queryClient.setQueryData(meKey, user)
+    // Synchronously, so the very next route (onboarding or `next`) already sees a member
+    applyMe(user)
+  }
+}
+
+export function useSignIn() {
+  const signedIn = useSignedIn()
   return useMutation({
-    mutationFn: (phone: string) =>
-      apiClient.post<{ resendAfterSeconds: number }>('/auth/otp/request', { phone }).then((r) => r.data),
+    mutationFn: (body: { email: string; password: string }) =>
+      apiClient.post<{ user: Me }>('/auth/login', body).then((r) => r.data),
+    onSuccess: ({ user }) => signedIn(user),
   })
 }
 
-export function useVerifyCode() {
-  const queryClient = useQueryClient()
+/** Starts an account: the server emails a code, and the account exists once the code is confirmed. */
+export function useSignUp() {
   return useMutation({
-    mutationFn: (body: { phone: string; code: string }) =>
-      apiClient.post<{ user: Me; isNew: boolean }>('/auth/otp/verify', body).then((r) => r.data),
-    onSuccess: ({ user }) => {
-      queryClient.setQueryData(meKey, user)
-      // Synchronously, so the very next route (onboarding or `next`) already sees a member
-      applyMe(user)
-    },
+    mutationFn: (body: { email: string; password: string }) =>
+      apiClient.post<CodeSent>('/auth/signup', body).then((r) => r.data),
+  })
+}
+
+/** Emails a new sign-up code, for "Send a new code" and for an unconfirmed email trying to sign in. */
+export function useResendEmailCode() {
+  return useMutation({
+    mutationFn: (email: string) => apiClient.post<CodeSent>('/auth/email/resend', { email }).then((r) => r.data),
+  })
+}
+
+export function useVerifyEmail() {
+  const signedIn = useSignedIn()
+  return useMutation({
+    mutationFn: (body: { email: string; code: string }) =>
+      apiClient.post<{ user: Me; isNew: boolean }>('/auth/email/verify', body).then((r) => r.data),
+    onSuccess: ({ user }) => signedIn(user),
+  })
+}
+
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (email: string) => apiClient.post<CodeSent>('/auth/password/forgot', { email }).then((r) => r.data),
+  })
+}
+
+/** Sets a new password with the emailed code, and signs the person in. */
+export function useResetPassword() {
+  const signedIn = useSignedIn()
+  return useMutation({
+    mutationFn: (body: { email: string; code: string; password: string }) =>
+      apiClient.post<{ user: Me }>('/auth/password/reset', body).then((r) => r.data),
+    onSuccess: ({ user }) => signedIn(user),
   })
 }
 

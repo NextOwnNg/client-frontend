@@ -11,7 +11,7 @@ describe('Profile hub', () => {
     renderWithProviders(routes, { initialPath: '/me' })
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Tolu A.' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Phone confirmed' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Email confirmed' })).toBeInTheDocument()
 
     const links: [string, string][] = [
       ['My listings', '/me/listings'],

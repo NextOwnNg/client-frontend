@@ -40,7 +40,7 @@ function sellerFor(ownerId: string): PublicSeller {
     return {
       id: ownerId,
       displayName: 'Member',
-      phoneConfirmed: true,
+      emailConfirmed: true,
       reviewCount: 0,
       areaName: runtimeConfig.cityName,
     }

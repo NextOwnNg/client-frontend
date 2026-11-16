@@ -27,7 +27,7 @@ export type PublicSeller = {
   id: string
   displayName: string
   avatarUrl?: string
-  phoneConfirmed: boolean
+  emailConfirmed: boolean
   reviewCount: number
   rating?: number
   areaName: string
@@ -79,7 +79,10 @@ export type Me = {
   displayName: string | null
   areaId: string | null
   interests: string[]
-  phoneLast4: string
+  /** The sign-in email, confirmed with a code at sign-up. Never shown to other people. */
+  email: string
+  /** Null until onboarding collects the phone. It's a contact detail only: never verified, never shown to others. */
+  phoneLast4: string | null
   onboarded: boolean
   restricted: boolean
   restriction?: { reason: string }
@@ -97,6 +100,8 @@ export type Appeal = { caseRef: string; status: 'RECEIVED' | 'IN_REVIEW' | 'DECI
 
 /** `PATCH /me`. `acceptTerms` records the terms and 18+ acknowledgment that completes onboarding (ACC-04). */
 export type MeUpdate = Partial<Pick<Me, 'displayName' | 'areaId' | 'interests' | 'marketingOptIn'>> & {
+  /** A Nigerian mobile in international form (+234…). Required before onboarding can complete. */
+  phone?: string
   acceptTerms?: { version: string; adult: boolean }
   /** An uploaded photo's media id, or null to remove the profile photo. */
   avatarId?: string | null

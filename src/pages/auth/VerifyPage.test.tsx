@@ -3,36 +3,48 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
-import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_PHONE } from '@/mocks/db/auth'
+import { mockAuth, SAMPLE_CODE } from '@/mocks/db/auth'
 import { apiClient } from '@/lib/api/client'
 import { server } from '@/test/msw/server'
 import { renderWithProviders } from '@/test/utils'
+import type { VerifyState } from '@/pages/auth/LoginPage'
 
 const API = import.meta.env.VITE_API_BASE_URL
-const NEW_PHONE = '+2348031234567'
+const NEW_EMAIL = 'ada@example.com'
 
-async function renderVerify({ phone = NEW_PHONE, next = '/settings', resendInMs = 60_000 } = {}) {
-  await apiClient.post('/auth/otp/request', { phone })
+type Options = { next?: string; resendInMs?: number; from?: VerifyState['from'] }
+
+async function renderVerify({ next = '/settings', resendInMs = 60_000, from = 'signup' }: Options = {}) {
+  await apiClient.post('/auth/signup', { email: NEW_EMAIL, password: 'correct horse' })
+  const state: VerifyState = { email: NEW_EMAIL, resendAt: Date.now() + resendInMs, from }
   return renderWithProviders(routes, {
-    initialPath: {
-      pathname: '/verify',
-      search: `?next=${encodeURIComponent(next)}`,
-      state: { phone, resendAt: Date.now() + resendInMs },
-    },
+    initialPath: { pathname: '/verify', search: `?next=${encodeURIComponent(next)}`, state },
   })
 }
 
 const codeInput = () => screen.findByRole('textbox', { name: '6-digit code' })
-const confirm = () => userEvent.click(screen.getByRole('button', { name: 'Confirm phone' }))
+const confirm = () => userEvent.click(screen.getByRole('button', { name: 'Confirm email' }))
 const path = (router: { state: { location: { pathname: string; search: string } } }) =>
   router.state.location.pathname + router.state.location.search
 
-describe('Confirm phone code', () => {
-  it('shows where the code went, with a way to change the number', async () => {
+describe('Confirm email code', () => {
+  it('shows where the code went, with a way to use a different email', async () => {
     await renderVerify()
 
-    expect(await screen.findByText('+234 803 123 4567')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Change number' })).toHaveAttribute('href', '/login?next=%2Fsettings')
+    expect(await screen.findByText(NEW_EMAIL)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Use a different email' })).toHaveAttribute(
+      'href',
+      '/signup?next=%2Fsettings',
+    )
+  })
+
+  it('sends someone who came from sign-in back there to change the email', async () => {
+    await renderVerify({ from: 'login' })
+
+    expect(await screen.findByRole('link', { name: 'Use a different email' })).toHaveAttribute(
+      'href',
+      '/login?next=%2Fsettings',
+    )
   })
 
   it('does not submit by itself once six digits are typed', async () => {
@@ -41,7 +53,6 @@ describe('Confirm phone code', () => {
     await userEvent.type(await codeInput(), SAMPLE_CODE)
 
     expect(path(router)).toBe('/verify?next=%2Fsettings')
-    expect(screen.queryByText('Phone confirmed')).not.toBeInTheDocument()
   })
 
   it.each(['123 456', '123-456'])('cleans a pasted code like %j', async (pasted) => {
@@ -60,9 +71,7 @@ describe('Confirm phone code', () => {
     await userEvent.type(await codeInput(), '000000')
     await confirm()
 
-    expect(
-      await screen.findByText("That code doesn't match. Check the text message and try again."),
-    ).toBeInTheDocument()
+    expect(await screen.findByText("That code doesn't match. Check the email and try again.")).toBeInTheDocument()
   })
 
   it('says when the code has expired and lets a new one be sent straight away', async () => {
@@ -80,7 +89,7 @@ describe('Confirm phone code', () => {
 
   it('asks for a wait after too many tries', async () => {
     server.use(
-      http.post(`${API}/auth/otp/verify`, () =>
+      http.post(`${API}/auth/email/verify`, () =>
         HttpResponse.json({ code: 'RATE_LIMITED' }, { status: 429, headers: { 'Retry-After': '600' } }),
       ),
     )
@@ -117,28 +126,20 @@ describe('Confirm phone code', () => {
     expect(screen.getByRole('button', { name: /Send a new code/ })).toBeDisabled()
   })
 
-  it('takes a new account to onboarding, carrying next', async () => {
+  it('takes the new account to profile setup, carrying next', async () => {
     const { router } = await renderVerify()
 
     await userEvent.type(await codeInput(), SAMPLE_CODE)
     await confirm()
 
     await waitFor(() => expect(path(router)).toBe('/onboarding?next=%2Fsettings'))
+    expect(await screen.findByText('Email confirmed. This does not verify identity or ownership.')).toBeInTheDocument()
   })
 
-  it('takes an existing member straight to next', async () => {
-    const { router } = await renderVerify({ phone: SAMPLE_MEMBER_PHONE, next: '/me' })
-
-    await userEvent.type(await codeInput(), SAMPLE_CODE)
-    await confirm()
-
-    await waitFor(() => expect(path(router)).toBe('/me'))
-  })
-
-  it('sends someone without a phone in progress back to sign in', async () => {
+  it('sends someone without an email in progress back to create an account', async () => {
     const { router } = renderWithProviders(routes, { initialPath: '/verify?next=%2Fsettings' })
 
-    await waitFor(() => expect(path(router)).toBe('/login?next=%2Fsettings'))
+    await waitFor(() => expect(path(router)).toBe('/signup?next=%2Fsettings'))
     await act(async () => {})
   })
 })

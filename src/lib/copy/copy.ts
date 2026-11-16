@@ -4,7 +4,7 @@ export const copy = {
   brandLine: 'Turn what you own into what you want.',
   supportingLine: 'Sell what you no longer need, swap for something better, or add cash to make the exchange work.',
   primaryModes: 'Sell it. Swap it. Add cash if you need to.',
-  phoneBadgeExplainer: 'Phone confirmed. This does not verify identity or ownership.',
+  emailBadgeExplainer: 'Email confirmed. This does not verify identity or ownership.',
   quickSellNote: 'Quick Sell puts your deadline in view. It does not guarantee a buyer.',
   beforeSend: 'Review what each person gives and receives. Offers can be countered or rejected.',
   offerAccepted: 'Both items are reserved. Arrange an inspection and handover with the other person.',

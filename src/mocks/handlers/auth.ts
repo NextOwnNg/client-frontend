@@ -33,6 +33,26 @@ const withAppeal = (me: Me): Me => {
 const isNigerianMobile = (phone: unknown): phone is string =>
   typeof phone === 'string' && /^\+234[789]\d{9}$/.test(phone)
 
+const normaliseEmail = (email: unknown) => (typeof email === 'string' ? email.trim().toLowerCase() : '')
+const isEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+const isNewPassword = (password: unknown): password is string =>
+  typeof password === 'string' && password.length >= 8 && password.length <= 128
+
+const emailRule = 'Enter an email address, like ada@example.com.'
+const passwordRule = 'Use at least 8 characters.'
+
+const codeSent = () => HttpResponse.json({ resendAfterSeconds: authLimits.resendAfterSeconds }, { status: 202 })
+const slowDown = (retryAfter: number, message = 'Too many requests') =>
+  error(429, 'RATE_LIMITED', message, { retryAfter })
+
+/** A failed code check, the same way for every code (sign-up and password reset). */
+function codeProblem(result: { reason: 'invalid' | 'expired' | 'locked' | 'unconfirmed'; retryAfterSeconds?: number }) {
+  if (result.reason === 'locked') return slowDown(result.retryAfterSeconds ?? 600, 'Too many attempts')
+  return result.reason === 'invalid'
+    ? error(422, 'OTP_INVALID', 'The code does not match')
+    : error(422, 'OTP_EXPIRED', 'The code has expired')
+}
+
 /** Server-side checks for `PATCH /me`; the client validates too, but this is the authority (PRD §5). */
 function validateUpdate(body: MeUpdate): Record<string, string> {
   const errors: Record<string, string> = {}
@@ -40,47 +60,98 @@ function validateUpdate(body: MeUpdate): Record<string, string> {
     const name = body.displayName?.trim() ?? ''
     if (name.length < 2 || name.length > 40) errors.displayName = 'Use 2 to 40 characters.'
   }
+  if (body.phone !== undefined && !isNigerianMobile(body.phone)) {
+    errors.phone = 'Enter a Nigerian mobile number, like 0803 123 4567.'
+  }
   if (body.areaId != null && !runtimeConfig.areas.some((a) => a.id === body.areaId)) {
     errors.areaId = 'Choose an area from the list.'
   }
   if (body.acceptTerms) {
     if (!body.acceptTerms.version) errors.terms = 'Agree to the terms to continue.'
     if (body.acceptTerms.adult !== true) errors.adult = 'Confirm that you are 18 or older.'
+    // Onboarding can't finish without a contact phone
+    if (body.phone === undefined && !authDb.hasPhone()) errors.phone = 'Enter your phone number.'
   }
   return errors
 }
 
 export const authHandlers: RequestHandler[] = [
-  http.post(`${API}/auth/otp/request`, async ({ request }) => {
+  http.post(`${API}/auth/signup`, async ({ request }) => {
     const failure = await network()
     if (failure) return failure
 
-    const { phone } = (await request.json()) as { phone?: unknown }
-    if (!isNigerianMobile(phone)) return invalid({ phone: 'Enter a Nigerian mobile number, like 0803 123 4567.' })
+    const body = (await request.json()) as { email?: unknown; password?: unknown }
+    const email = normaliseEmail(body.email)
+    const errors: Record<string, string> = {}
+    if (!isEmail(email)) errors.email = emailRule
+    if (!isNewPassword(body.password)) errors.password = passwordRule
+    if (Object.keys(errors).length) return invalid(errors)
 
-    // The same answer whether or not the number has an account (FE-AUT-03)
-    const result = authDb.requestCode(phone)
-    if (!result.ok) {
-      return error(429, 'RATE_LIMITED', 'Too many requests', { retryAfter: result.retryAfterSeconds })
-    }
-    return HttpResponse.json({ resendAfterSeconds: authLimits.resendAfterSeconds }, { status: 202 })
+    // The same answer whether or not the email has an account (FE-AUT-03)
+    const result = authDb.signUp(email, body.password as string)
+    return result.ok ? codeSent() : slowDown(result.retryAfterSeconds)
   }),
 
-  http.post(`${API}/auth/otp/verify`, async ({ request }) => {
+  http.post(`${API}/auth/email/resend`, async ({ request }) => {
     const failure = await network()
     if (failure) return failure
 
-    const { phone, code } = (await request.json()) as { phone?: unknown; code?: unknown }
-    if (!isNigerianMobile(phone) || typeof code !== 'string') return invalid({ code: 'Enter the 6-digit code.' })
+    const email = normaliseEmail(((await request.json()) as { email?: unknown }).email)
+    if (!isEmail(email)) return invalid({ email: emailRule })
+    const result = authDb.resendSignUpCode(email)
+    return result.ok ? codeSent() : slowDown(result.retryAfterSeconds)
+  }),
 
-    const result = authDb.verify(phone, code)
-    if (result.ok) return HttpResponse.json({ user: result.user, isNew: result.isNew })
-    if (result.reason === 'locked') {
-      return error(429, 'RATE_LIMITED', 'Too many attempts', { retryAfter: result.retryAfterSeconds })
-    }
-    return result.reason === 'expired'
-      ? error(422, 'OTP_EXPIRED', 'The code has expired')
-      : error(422, 'OTP_INVALID', 'The code does not match')
+  http.post(`${API}/auth/email/verify`, async ({ request }) => {
+    const failure = await network()
+    if (failure) return failure
+
+    const body = (await request.json()) as { email?: unknown; code?: unknown }
+    const email = normaliseEmail(body.email)
+    if (!isEmail(email) || typeof body.code !== 'string') return invalid({ code: 'Enter the 6-digit code.' })
+
+    const result = authDb.verifyEmail(email, body.code)
+    return result.ok ? HttpResponse.json({ user: result.user, isNew: result.isNew }) : codeProblem(result)
+  }),
+
+  http.post(`${API}/auth/login`, async ({ request }) => {
+    const failure = await network()
+    if (failure) return failure
+
+    const body = (await request.json()) as { email?: unknown; password?: unknown }
+    const email = normaliseEmail(body.email)
+    if (!isEmail(email)) return invalid({ email: emailRule })
+    if (typeof body.password !== 'string' || !body.password) return invalid({ password: 'Enter your password.' })
+
+    const result = authDb.signIn(email, body.password)
+    if (result.ok) return HttpResponse.json({ user: result.user })
+    if (result.reason === 'locked') return slowDown(result.retryAfterSeconds, 'Too many attempts')
+    // Only after the right password, so it says nothing about whether an email has an account
+    if (result.reason === 'unconfirmed') return error(403, 'EMAIL_UNVERIFIED', 'Confirm your email first')
+    return error(401, 'INVALID_CREDENTIALS', 'The email or password is wrong')
+  }),
+
+  http.post(`${API}/auth/password/forgot`, async ({ request }) => {
+    const failure = await network()
+    if (failure) return failure
+
+    const email = normaliseEmail(((await request.json()) as { email?: unknown }).email)
+    if (!isEmail(email)) return invalid({ email: emailRule })
+    const result = authDb.forgotPassword(email)
+    return result.ok ? codeSent() : slowDown(result.retryAfterSeconds)
+  }),
+
+  http.post(`${API}/auth/password/reset`, async ({ request }) => {
+    const failure = await network()
+    if (failure) return failure
+
+    const body = (await request.json()) as { email?: unknown; code?: unknown; password?: unknown }
+    const email = normaliseEmail(body.email)
+    if (!isNewPassword(body.password)) return invalid({ password: passwordRule })
+    if (!isEmail(email) || typeof body.code !== 'string') return invalid({ code: 'Enter the 6-digit code.' })
+
+    const result = authDb.resetPassword(email, body.code, body.password)
+    return result.ok ? HttpResponse.json({ user: result.user }) : codeProblem(result)
   }),
 
   http.post(`${API}/auth/logout`, async () => {

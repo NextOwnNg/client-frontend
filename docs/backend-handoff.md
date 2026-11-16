@@ -11,7 +11,8 @@ The mock follows the PRD contract (§7, §9). Switching to the real API should o
 
 ## Conventions
 
-- **Session:** an HttpOnly cookie set by `POST /auth/otp/verify`. The client sends `withCredentials` and never reads a token.
+- **Session:** an HttpOnly cookie set by `POST /auth/login`, `POST /auth/email/verify` or `POST /auth/password/reset`. The client sends `withCredentials` and never reads a token.
+- **Sign-in:** email and password. One-time codes go by email only: to confirm a new account's email, and to reset a password. Phone numbers are a required contact detail collected during onboarding, and they are never verified.
 - **Money:** integer kobo (`cashKobo`, `askingKobo`). Times are ISO 8601 UTC strings. The client shows them in West Africa Time.
 - **Errors:** every failure returns `{ code, message, field_errors?, details?, retry_after_seconds? }`.
   - The client reads errors only through `src/lib/api/error-message.ts`, so new codes degrade to a sensible sentence.
@@ -48,6 +49,8 @@ The mock follows the PRD contract (§7, §9). Switching to the real API should o
 | `ALREADY_SHARED`, `ALREADY_REVIEWED`, `REVIEW_NOT_ELIGIBLE` | 409 | Shows the message |
 | `APPEAL_EXISTS`, `NOT_RESTRICTED` | 409 | Appeal page: re-reads `/me` and shows the appeal's status |
 | `RATE_LIMITED` | 429 | Shows "Wait N minutes", from `retry_after_seconds` or the `Retry-After` header |
+| `INVALID_CREDENTIALS` | 401 | Sign in: "That email and password don't match." The same answer for an unknown email and a wrong password. |
+| `EMAIL_UNVERIFIED` | 403 | Sign in, only after a correct password: the client calls `POST /auth/email/resend` and opens the code step |
 | `OTP_INVALID`, `OTP_EXPIRED` | 422 | Shown on the code field |
 | `UNSUPPORTED_FORMAT`, `FILE_TOO_LARGE` | 415, 413 | Shown on the photo tile |
 | `SERVER_ERROR` | 5xx | Shows "Something went wrong on our side", and reads are retried |
@@ -60,11 +63,15 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 
 | Method and path | Request | Response |
 | :--- | :--- | :--- |
-| `POST /auth/otp/request` | `{ phone: "+2348030000001" }` | 202 `{ resendAfterSeconds: 60 }`. 429 with `Retry-After`. The response must not reveal whether the number has an account (FE-AUT-03). |
-| `POST /auth/otp/verify` | `{ phone, code }` | 200 `{ user: Me, isNew }` and sets the cookie. 422 `OTP_INVALID` or `OTP_EXPIRED`, and 429 when locked. |
+| `POST /auth/signup` | `{ email, password }`. The client lowercases and trims the email. The password is 8 to 128 characters. | 202 `{ resendAfterSeconds: 60 }` and emails a 6-digit code. 422 with `field_errors.email` or `field_errors.password`. 429 with `Retry-After`. The response must not reveal whether the email has an account (FE-AUT-03): for an existing account, answer the same way and email its owner instead. |
+| `POST /auth/email/resend` | `{ email }` | 202 `{ resendAfterSeconds }`, the same for any email. 429 with `Retry-After`. |
+| `POST /auth/email/verify` | `{ email, code }` | 200 `{ user: Me, isNew }` and sets the cookie. 422 `OTP_INVALID` or `OTP_EXPIRED`, and 429 when locked after 5 wrong tries. |
+| `POST /auth/login` | `{ email, password }` | 200 `{ user: Me }` and sets the cookie. 401 `INVALID_CREDENTIALS`. 403 `EMAIL_UNVERIFIED` (only after a correct password). 429 after repeated failures. |
+| `POST /auth/password/forgot` | `{ email }` | 202 `{ resendAfterSeconds }`, the same for any email (FE-AUT-03). Emails a 6-digit code if the email has a confirmed account. 429 with `Retry-After`. |
+| `POST /auth/password/reset` | `{ email, code, password }` | 200 `{ user: Me }`, sets the cookie and signs the person in. 422 `OTP_INVALID`, `OTP_EXPIRED` or `field_errors.password`. 429 when locked. |
 | `POST /auth/logout` | none | 204 |
-| `GET /me` | none | `Me`, including `appeal?`, `avatarUrl?` and `restricted`. A guest gets 401, which the client treats as "guest". |
-| `PATCH /me` | `MeUpdate`: `displayName`, `areaId`, `interests`, `marketingOptIn`, `acceptTerms { version, adult }` and `avatarId: string \| null` | `Me` |
+| `GET /me` | none | `Me`, including `email`, `phoneLast4` (null until onboarding), `appeal?`, `avatarUrl?` and `restricted`. A guest gets 401, which the client treats as "guest". |
+| `PATCH /me` | `MeUpdate`: `displayName`, `phone` (`+234…`, unverified), `areaId`, `interests`, `marketingOptIn`, `acceptTerms { version, adult }` and `avatarId: string \| null`. Onboarding sends `phone` with `acceptTerms`; without a phone on the account, `acceptTerms` is refused with `field_errors.phone`. | `Me` |
 | `POST /me/delete-request` | none | 202 `{ reference, requestedAt }`. Repeating it returns the same request. |
 | `POST /me/appeal` | `{ message }` (20 to 2000 characters) | 201 `Appeal { caseRef, status, createdAt }`. 409 `NOT_RESTRICTED`, or `APPEAL_EXISTS` with `details.appeal`. |
 | `GET /config` | none | `RuntimeConfig`: city, areas, categories with their fields, offer lifetime, Quick Sell options, reservation days and photo limits |
@@ -76,7 +83,7 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 | `GET /listings` | Query: `q`, `category`, `area`, `mode` (a list: `CASH`, `SWAP`, `QUICK_SELL`), `condition` (a list), `price_min` and `price_max` in naira, `sort=recent`, `cursor` | `Paginated<ListingSummary>`. Active listings only. |
 | `GET /listings/suggest?q=` | none | Up to 6 `ListingSuggestion` |
 | `GET /listings/:slugOrId` | none | `ListingDetail`. A removed listing is stripped to generic fields. For a member, it includes `viewer: { blockedSeller }`. |
-| `GET /users/:id` | none | `PublicProfile`, with no phone number and no exact location |
+| `GET /users/:id` | none | `PublicProfile`, with no email, no phone number and no exact location. The trust flag is `emailConfirmed` (it was `phoneConfirmed`). |
 | `GET /users/:id/listings` | none | `Paginated<ListingSummary>`, active listings only |
 | `GET /me/listings`, `GET /me/listings/:id` | none | `OwnListing[]` and `OwnListing`, in every status |
 | `POST /listings` | `Partial<ListingInput>` | 201 `OwnListing` (a draft) |
@@ -158,7 +165,7 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 
 These still need someone to run them on real devices. The automated parts already pass: axe (0 violations on 27 routes at 390 px) and the keyboard tests in the suite.
 
-- **Sign in:** the OTP field reads as one field, "Confirm phone" submits, and nothing submits on its own.
+- **Sign in:** the show/hide password button reads its state. On the code step, the code field reads as one field, "Confirm email" submits, and nothing submits on its own.
 - **Explore:** filters open in a sheet that traps focus and returns it on close, and the results count is announced.
 - **Listing:** the gallery is operable with swipe and with the next and previous buttons, and the photo position is read ("Photo 2 of 3"). Defects are read before Make an offer.
 - **Offer composer:** each step's heading is announced, the error summary links to each field, and the "who pays whom" sentence is read in full.

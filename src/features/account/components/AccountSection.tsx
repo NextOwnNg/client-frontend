@@ -35,8 +35,8 @@ export function AccountSection({ me }: { me: Me }) {
         {me.deletionRequestedAt ? (
           <Banner tone="info" title="We’ve received your deletion request">
             Sent {formatWAT(me.deletionRequestedAt, { withTime: false })}
-            {deletion.data && <> · Reference {deletion.data.reference}</>}. Our team will text you about your data and
-            anything still open, like offers or deals.
+            {deletion.data && <> · Reference {deletion.data.reference}</>}. Our team will contact you about your data
+            and anything still open, like offers or deals.
           </Banner>
         ) : (
           <>
@@ -59,7 +59,7 @@ export function AccountSection({ me }: { me: Me }) {
         open={confirming}
         onOpenChange={setConfirming}
         title="Request account deletion?"
-        body="We’ll review your request and text you about your data and anything still open, like offers or deals. Once your account is deleted, it can’t be restored."
+        body="We’ll review your request and contact you about your data and anything still open, like offers or deals. Once your account is deleted, it can’t be restored."
         confirmLabel="Send request"
         tone="danger"
         onConfirm={async () => {

@@ -44,12 +44,12 @@ describe('apiClient', () => {
 
   it('reads Retry-After on rate limiting', async () => {
     server.use(
-      http.post(url('/auth/otp/request'), () =>
+      http.post(url('/auth/login'), () =>
         HttpResponse.json({ code: 'RATE_LIMITED' }, { status: 429, headers: { 'Retry-After': '60' } }),
       ),
     )
 
-    const error = await apiClient.post('/auth/otp/request').catch((e: unknown) => e)
+    const error = await apiClient.post('/auth/login').catch((e: unknown) => e)
 
     expect(error).toMatchObject({ code: 'RATE_LIMITED', retryAfterSeconds: 60 })
   })

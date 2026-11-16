@@ -50,7 +50,7 @@ export function BottomNav() {
                       aria-hidden
                       weight={isActive ? 'fill' : 'duotone'}
                       // Duotone's soft layer is tinted with the brand colour, so idle icons keep some colour
-                      className="size-6 [&_[opacity]]:fill-action [&_[opacity]]:opacity-25"
+                      className="size-6 **:[[opacity]]:fill-action **:[[opacity]]:opacity-25"
                     />
                     <span className={isActive ? 'font-semibold' : undefined}>{item.label}</span>
                   </>

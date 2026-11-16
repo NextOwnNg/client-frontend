@@ -23,7 +23,7 @@ export function SessionExpiredSheet({ open, onClose }: { open: boolean; onClose:
         </div>
       }
     >
-      <p className="text-body text-ink">Confirm your phone number again to carry on. We’ll bring you back here.</p>
+      <p className="text-body text-ink">Sign in again to carry on. We’ll bring you back here.</p>
       <p className="mt-3 text-compact text-muted">Anything you typed on this page is kept.</p>
     </Sheet>
   )

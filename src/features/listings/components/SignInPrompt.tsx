@@ -1,6 +1,7 @@
 import { Button } from '@heroui/react'
 import { ButtonLink } from '@/components/ui/Button'
 import { Sheet } from '@/components/ui/Sheet'
+import { loginPath, signupPath } from '@/lib/auth/next'
 import type { ListingDetail } from '@/types/api'
 
 export type Intent = 'offer' | 'save'
@@ -25,8 +26,11 @@ export function SignInPrompt({
       title={intent === 'save' ? 'Sign in to save items' : 'Sign in to make an offer'}
       footer={
         <div className="flex w-full flex-col gap-2">
-          <ButtonLink to={`/login?next=${encodeURIComponent(next)}`} fullWidth>
-            Continue with your phone number
+          <ButtonLink to={loginPath(next)} fullWidth>
+            Sign in
+          </ButtonLink>
+          <ButtonLink to={signupPath(next)} variant="secondary" fullWidth>
+            Create an account
           </ButtonLink>
           <Button variant="tertiary" fullWidth onPress={onClose}>
             Not now
@@ -36,10 +40,12 @@ export function SignInPrompt({
     >
       <p className="text-body text-ink">
         {intent === 'save'
-          ? 'Confirm your phone number to keep a list of items you like. We’ll bring you back here.'
-          : 'Confirm your phone number to send a structured offer. We’ll bring you back to this item.'}
+          ? 'Sign in to keep a list of items you like. We’ll bring you back here.'
+          : 'Sign in to send a structured offer. We’ll bring you back to this item.'}
       </p>
-      <p className="mt-3 text-compact text-muted">We never show your number on your listings or offers.</p>
+      <p className="mt-3 text-compact text-muted">
+        We never show your email or phone number on your listings or offers.
+      </p>
     </Sheet>
   )
 }

@@ -5,7 +5,8 @@ import { describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
 import { isApiError } from '@/lib/api/api-error'
 import { apiClient } from '@/lib/api/client'
-import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { mockAuth, SAMPLE_MEMBER_EMAIL, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { signInWithForm } from '@/test/auth'
 import { server } from '@/test/msw/server'
 import { renderWithProviders } from '@/test/utils'
 import type { Me } from '@/types/api'
@@ -63,6 +64,7 @@ describe('Account settings', () => {
   it('shows the phone masked and read-only', async () => {
     await renderSettings()
 
+    expect(screen.getByText(SAMPLE_MEMBER_EMAIL)).toBeInTheDocument()
     expect(screen.getByText('+234 ••• ••• 0001')).toBeInTheDocument()
     expect(screen.queryByRole('textbox', { name: /phone/i })).not.toBeInTheDocument()
   })
@@ -113,10 +115,7 @@ describe('Account settings', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await userEvent.click(await screen.findByRole('link', { name: 'Sign in again' }))
 
-    await userEvent.type(await screen.findByRole('textbox', { name: 'Phone number' }), '0803 000 0001')
-    await userEvent.click(screen.getByRole('button', { name: 'Send code' }))
-    await userEvent.type(await screen.findByRole('textbox', { name: '6-digit code' }), SAMPLE_CODE)
-    await userEvent.click(screen.getByRole('button', { name: 'Confirm phone' }))
+    await signInWithForm()
 
     await screen.findByRole('heading', { level: 1, name: 'Account settings' })
     expect(nameInput()).toHaveValue('Tolu Adeyemi')

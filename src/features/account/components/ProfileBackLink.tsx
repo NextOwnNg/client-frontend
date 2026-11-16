@@ -28,7 +28,7 @@ export function ProfileBackLink({ onlyFromProfile = false, className }: ProfileB
     >
       <ArrowLeft
         aria-hidden
-        className="size-4 transition-transform duration-200 ease-out pointer-fine:group-hover:-translate-x-[3px]"
+        className="size-4 transition-transform duration-200 ease-out pointer-fine:group-hover:-translate-x-0.75"
       />
       Back to profile
     </Link>

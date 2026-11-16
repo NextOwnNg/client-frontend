@@ -17,7 +17,7 @@ export function MessagesSection({ me }: { me: Me }) {
         checked={update.isPending ? (update.variables.marketingOptIn ?? me.marketingOptIn) : me.marketingOptIn}
         onChange={(marketingOptIn) => update.mutate({ marketingOptIn })}
       >
-        Text me occasional tips and news from NextOwn
+        Send me occasional tips and news from NextOwn
       </Checkbox>
       {update.isError && (
         <p role="alert" className="text-compact text-danger">
