@@ -29,7 +29,7 @@ export function SellerCard({ listing }: { listing: ListingDetail }) {
           <ChevronRight aria-hidden className="size-4" />
         </Link>
       </div>
-      <TrustModule phoneConfirmed={seller.phoneConfirmed} reviewCount={seller.reviewCount} rating={seller.rating} />
+      <TrustModule emailConfirmed={seller.emailConfirmed} reviewCount={seller.reviewCount} rating={seller.rating} />
     </section>
   )
 }

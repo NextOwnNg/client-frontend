@@ -2,7 +2,8 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
-import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { signInWithForm } from '@/test/auth'
 import { renderWithProviders } from '@/test/utils'
 
 // iPad 9th gen · 64GB: Zainab's, takes cash and swaps
@@ -68,13 +69,8 @@ describe('Back after signing in to make an offer', () => {
 
     // A guest: Make an offer asks them to sign in, then carries on to the offer
     await user.click(screen.getByRole('button', { name: 'Make an offer' }))
-    await user.click(
-      within(await screen.findByRole('dialog')).getByRole('link', { name: 'Continue with your phone number' }),
-    )
-    await user.type(await screen.findByRole('textbox', { name: 'Phone number' }), '08030000001')
-    await user.click(screen.getByRole('button', { name: 'Send code' }))
-    await user.type(await screen.findByRole('textbox', { name: '6-digit code' }), SAMPLE_CODE)
-    await user.click(screen.getByRole('button', { name: 'Confirm phone' }))
+    await user.click(within(await screen.findByRole('dialog')).getByRole('link', { name: 'Sign in' }))
+    await signInWithForm(user)
     await screen.findByRole('heading', { level: 1, name: 'Make an offer' })
 
     await user.click(screen.getByRole('button', { name: 'Back to the item' }))

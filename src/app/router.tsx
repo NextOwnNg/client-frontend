@@ -187,12 +187,30 @@ export const routes: RouteObject[] = [
                 handle: { showcase: 'always' } satisfies AuthHandle,
                 lazy: async () => ({ Component: (await import('@/pages/auth/LoginPage')).LoginPage }),
               },
+              {
+                path: 'signup',
+                handle: { showcase: 'always' } satisfies AuthHandle,
+                lazy: async () => ({ Component: (await import('@/pages/auth/SignupPage')).SignupPage }),
+              },
+              {
+                path: 'forgot-password',
+                handle: { showcase: 'desktop' } satisfies AuthHandle,
+                lazy: async () => ({
+                  Component: (await import('@/pages/auth/ForgotPasswordPage')).ForgotPasswordPage,
+                }),
+              },
             ],
           },
+          // The code steps sign the person in themselves, so they sit outside the signed-in redirect
           {
             path: 'verify',
             handle: { showcase: 'desktop' } satisfies AuthHandle,
             lazy: async () => ({ Component: (await import('@/pages/auth/VerifyPage')).VerifyPage }),
+          },
+          {
+            path: 'reset-password',
+            handle: { showcase: 'desktop' } satisfies AuthHandle,
+            lazy: async () => ({ Component: (await import('@/pages/auth/ResetPasswordPage')).ResetPasswordPage }),
           },
           {
             element: <RequireAuth allowNew />,

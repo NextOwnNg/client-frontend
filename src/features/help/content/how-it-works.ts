@@ -42,11 +42,11 @@ export const howItWorksDoc: PolicyDoc = {
       paragraphs: [copy.handoverNotice],
     },
     {
-      id: 'phone-confirmed',
-      title: 'What “Phone confirmed” means',
+      id: 'email-confirmed',
+      title: 'What “Email confirmed” means',
       paragraphs: [
-        copy.phoneBadgeExplainer,
-        'Everyone signs in with a one-time code sent to their phone. The number itself is never shown on profiles, listings or offers.',
+        copy.emailBadgeExplainer,
+        'Everyone confirms their email with a one-time code when they create an account. Email addresses and phone numbers are never shown on profiles, listings or offers.',
       ],
     },
     {

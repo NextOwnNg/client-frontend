@@ -17,7 +17,7 @@ afterEach(() => setSaveData(undefined))
 describe('Sign-in showcase', () => {
   it('shows one example trade, with the same words on every screen, after the form in reading order', async () => {
     renderWithProviders(routes, { initialPath: '/login' })
-    const heading = await screen.findByRole('heading', { level: 1, name: 'Sign in or create an account' })
+    const heading = await screen.findByRole('heading', { level: 1, name: 'Sign in' })
 
     const panels = screen.getAllByRole('region', { name: 'How trading on NextOwn works' })
     expect(panels).toHaveLength(1)

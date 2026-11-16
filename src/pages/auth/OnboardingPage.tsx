@@ -8,9 +8,12 @@ import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { CheckList } from '@/components/ui/ChoiceList'
+import { PhoneField } from '@/components/ui/PhoneField'
 import { TextField } from '@/components/ui/TextField'
 import { useUpdateMe } from '@/features/account/api'
+import { phoneSchema } from '@/features/account/auth-schema'
 import { InterestPicker } from '@/features/account/components/InterestPicker'
+import { authCopy } from '@/features/account/copy'
 import { TERMS_VERSION } from '@/features/account/policy'
 import { displayNameSchema } from '@/features/account/profile-schema'
 import { RestrictedBanner } from '@/features/account/RestrictedBanner'
@@ -27,6 +30,7 @@ const UNLISTED = 'unlisted'
 
 const onboardingSchema = z.object({
   displayName: displayNameSchema,
+  phone: phoneSchema,
   areaId: z.string().nullable(),
   interests: z.array(z.string()),
   terms: z.boolean().refine(Boolean, 'Agree to the Terms and Privacy Policy to continue.'),
@@ -34,10 +38,12 @@ const onboardingSchema = z.object({
   marketing: z.boolean(),
 })
 
-type OnboardingForm = z.infer<typeof onboardingSchema>
+type OnboardingInput = z.input<typeof onboardingSchema>
+type OnboardingForm = z.output<typeof onboardingSchema>
 
-const emptyForm: OnboardingForm = {
+const emptyForm: OnboardingInput = {
   displayName: '',
+  phone: null,
   areaId: null,
   interests: [],
   terms: false,
@@ -56,8 +62,8 @@ export function OnboardingPage() {
   const confirmed = (useLocation().state as { confirmed?: boolean } | null)?.confirmed
   const userId = useSessionStore((s) => s.userId)
   const onboarded = useSessionStore((s) => s.onboarded)
-  const [draft, saveDraft, clearDraft] = useFormDraft<OnboardingForm>(`onboarding:${userId}`, emptyForm)
-  const { control, handleSubmit, trigger, setError, watch } = useForm<OnboardingForm>({
+  const [draft, saveDraft, clearDraft] = useFormDraft<OnboardingInput>(`onboarding:${userId}`, emptyForm)
+  const { control, handleSubmit, trigger, setError, watch } = useForm<OnboardingInput, unknown, OnboardingForm>({
     resolver: zodResolver(onboardingSchema),
     defaultValues: draft,
   })
@@ -69,7 +75,7 @@ export function OnboardingPage() {
 
   // The answers are a draft as they're typed, so a reload or an expired session loses nothing
   useEffect(() => {
-    const subscription = watch((values) => saveDraft(values as OnboardingForm))
+    const subscription = watch((values) => saveDraft(values as OnboardingInput))
     return () => subscription.unsubscribe()
   }, [watch, saveDraft])
 
@@ -86,7 +92,7 @@ export function OnboardingPage() {
 
   // Step 1 checks only its own fields; the rest are checked when the whole form is sent
   async function submitStepOne() {
-    if (await trigger('displayName')) goToStep(2)
+    if (await trigger(['displayName', 'phone'])) goToStep(2)
   }
 
   const submitStepTwo = handleSubmit(
@@ -95,6 +101,7 @@ export function OnboardingPage() {
       try {
         await update.mutateAsync({
           displayName: values.displayName,
+          phone: values.phone,
           areaId: area,
           interests: values.interests,
           marketingOptIn: values.marketing,
@@ -104,15 +111,17 @@ export function OnboardingPage() {
         if (area) setAreaIds([area])
         toast.success('You’re all set.')
       } catch (error) {
-        const message = fieldError(error, 'displayName')
-        if (message) {
-          setError('displayName', { message })
-          goToStep(1)
-        }
+        // The name and phone have their fields on step 1, so a problem with either goes back there
+        const stepOne = (['displayName', 'phone'] as const).filter((field) => {
+          const message = fieldError(error, field)
+          if (message) setError(field, { message })
+          return Boolean(message)
+        })
+        if (stepOne.length) goToStep(1)
       }
     },
     // A name that became invalid (for example, edited in another tab) sends the person back to fix it
-    (errors) => errors.displayName && goToStep(1),
+    (errors) => (errors.displayName || errors.phone) && goToStep(1),
   )
 
   return (
@@ -120,7 +129,7 @@ export function OnboardingPage() {
       <Seo title="Set up your profile" noindex />
       <StepMeter step={step} />
       <h1 className="mt-3 text-h2 text-ink tablet:text-h1">Set up your profile</h1>
-      {confirmed && step === 1 && <Banner tone="success" title={copy.phoneBadgeExplainer} className="mt-4" />}
+      {confirmed && step === 1 && <Banner tone="success" title={copy.emailBadgeExplainer} className="mt-4" />}
       <RestrictedBanner className="mt-4" />
 
       {step === 1 ? (
@@ -146,6 +155,18 @@ export function OnboardingPage() {
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field, fieldState }) => (
+              <PhoneField
+                value={field.value ? field.value.replace(/^\+234/, '') : ''}
+                onChange={field.onChange}
+                error={fieldState.error?.message}
+                hint={authCopy.whyPhone}
               />
             )}
           />
@@ -178,12 +199,15 @@ export function OnboardingPage() {
         </form>
       ) : (
         <form noValidate onSubmit={(e) => void submitStepTwo(e)} className="mt-6 flex flex-col gap-6">
-          {/* The name has its own field on step 1; an ended session gets the sign-in prompt */}
-          {update.error && !fieldError(update.error, 'displayName') && !isSignedOut(update.error) && (
-            <Banner tone="danger" title="We couldn't save your profile">
-              {errorMessage(update.error)} Your answers are kept.
-            </Banner>
-          )}
+          {/* The name and phone have their own fields on step 1; an ended session gets the sign-in prompt */}
+          {update.error &&
+            !fieldError(update.error, 'displayName') &&
+            !fieldError(update.error, 'phone') &&
+            !isSignedOut(update.error) && (
+              <Banner tone="danger" title="We couldn't save your profile">
+                {errorMessage(update.error)} Your answers are kept.
+              </Banner>
+            )}
           <div className="flex flex-col gap-2">
             <p id={interestsLabel} className="text-compact font-semibold text-ink">
               What are you interested in? <span className="font-normal text-muted">Optional</span>
@@ -243,7 +267,7 @@ export function OnboardingPage() {
               name="marketing"
               render={({ field }) => (
                 <Checkbox checked={field.value} onChange={field.onChange}>
-                  Text me occasional tips and news from NextOwn
+                  Send me occasional tips and news from NextOwn
                 </Checkbox>
               )}
             />

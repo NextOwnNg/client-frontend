@@ -88,7 +88,7 @@ export function FeedPage() {
                 onGuestSave={() =>
                   setGuest({
                     title: 'Sign in to save posts',
-                    body: 'Confirm your phone number to keep posts and items you like. We’ll bring you back to the feed.',
+                    body: 'Sign in to keep posts and items you like. We’ll bring you back to the feed.',
                     next: '/feed',
                   })
                 }

@@ -257,9 +257,9 @@ export function ComponentsPage() {
 
       <Section title="Trust" note="Facts, not badges. Ratings always carry their count.">
         <div className="grid gap-6 tablet:grid-cols-3">
-          <TrustModule phoneConfirmed reviewCount={12} rating={4.8} />
-          <TrustModule phoneConfirmed reviewCount={1} rating={5} />
-          <TrustModule phoneConfirmed reviewCount={0} />
+          <TrustModule emailConfirmed reviewCount={12} rating={4.8} />
+          <TrustModule emailConfirmed reviewCount={1} rating={5} />
+          <TrustModule emailConfirmed reviewCount={0} />
         </div>
       </Section>
 

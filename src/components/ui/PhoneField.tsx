@@ -31,7 +31,7 @@ export function PhoneField({
   value,
   onChange,
   error,
-  hint = "We'll text you a 6-digit code. Your number is never shown on your profile.",
+  hint = 'Never shown on your profile, listings or offers.',
 }: PhoneFieldProps) {
   const [text, setText] = useState(() => formatPhoneInput(value))
   const input = useRef<HTMLInputElement | null>(null)

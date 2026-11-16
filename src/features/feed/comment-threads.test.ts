@@ -8,7 +8,7 @@ const comment = (id: string, minute: number, parentId: string | null = null): Fe
   author: {
     id: 'u-amaka',
     displayName: 'Amaka N.',
-    phoneConfirmed: true,
+    emailConfirmed: true,
     reviewCount: 0,
     areaName: '[Pilot Area] East',
   },

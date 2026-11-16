@@ -268,7 +268,7 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
     : {
         id: me.id,
         displayName: me.displayName ?? 'You',
-        phoneConfirmed: true,
+        emailConfirmed: true,
         reviewCount: 0,
         areaName: config.cityName,
       }

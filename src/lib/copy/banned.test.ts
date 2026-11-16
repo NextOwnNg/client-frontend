@@ -17,7 +17,7 @@ function sourceFiles(dir: string): string[] {
 describe('banned phrases (PRD §10.2)', () => {
   it('detects banned claims case-insensitively', () => {
     expect(findBannedPhrases('Your payment is ESCROW protected')).toEqual(['Escrow protected', 'Escrow'])
-    expect(findBannedPhrases('Phone confirmed')).toEqual([])
+    expect(findBannedPhrases('Email confirmed')).toEqual([])
   })
 
   it('never appear in user-facing source', () => {

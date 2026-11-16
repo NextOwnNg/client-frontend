@@ -1,9 +1,10 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
 import { apiClient } from '@/lib/api/client'
-import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { signInWithForm } from '@/test/auth'
 import { renderWithProviders } from '@/test/utils'
 import type { SavedIds } from '@/types/api'
 
@@ -27,19 +28,12 @@ describe('signing in from where you were (QA-01)', () => {
   const path = (router: { state: { location: { pathname: string; search: string } } }) =>
     router.state.location.pathname + router.state.location.search
 
-  async function signInThroughTheFlow(phoneDigits: string) {
-    await userEvent.type(await screen.findByRole('textbox', { name: 'Phone number' }), phoneDigits)
-    await userEvent.click(screen.getByRole('button', { name: 'Send code' }))
-    await userEvent.type(await screen.findByRole('textbox', { name: '6-digit code' }), SAMPLE_CODE)
-    await userEvent.click(screen.getByRole('button', { name: 'Confirm phone' }))
-  }
-
   it('returns a guest who tapped Save to the same listing, and saves once', async () => {
     const { router } = renderWithProviders(routes, { initialPath: '/listings/ps5-disc-edition' })
 
     await userEvent.click(await screen.findByRole('button', { name: 'Save' }))
-    await userEvent.click(await screen.findByRole('link', { name: 'Continue with your phone number' }))
-    await signInThroughTheFlow('0803 000 0001')
+    await userEvent.click(within(await screen.findByRole('dialog')).getByRole('link', { name: 'Sign in' }))
+    await signInWithForm()
 
     await waitFor(() => expect(path(router)).toBe('/listings/ps5-disc-edition'))
     expect(await screen.findByRole('heading', { level: 1, name: 'PS5 Disc Edition' })).toBeInTheDocument()
@@ -52,8 +46,8 @@ describe('signing in from where you were (QA-01)', () => {
     const { router } = renderWithProviders(routes, { initialPath: '/listings/ps5-disc-edition' })
 
     await userEvent.click(await screen.findByRole('button', { name: 'Make an offer' }))
-    await userEvent.click(await screen.findByRole('link', { name: 'Continue with your phone number' }))
-    await signInThroughTheFlow('0803 000 0001')
+    await userEvent.click(within(await screen.findByRole('dialog')).getByRole('link', { name: 'Sign in' }))
+    await signInWithForm()
 
     await waitFor(() => expect(router.state.location.pathname).toBe('/offers/new'))
     expect(router.state.location.search).toMatch(/^\?listing=/)

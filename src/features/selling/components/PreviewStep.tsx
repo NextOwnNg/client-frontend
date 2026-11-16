@@ -81,7 +81,7 @@ export function PreviewStep({ input, listing, seller, config, stepHref, action, 
         </h2>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-compact text-muted">
           <li>Buyers see {area}, never your address or phone number.</li>
-          <li>{copy.phoneBadgeExplainer}</li>
+          <li>{copy.emailBadgeExplainer}</li>
           <li>You can edit or close this listing at any time from My listings.</li>
           <li>It must follow the community rules and can’t be a prohibited item.</li>
         </ul>
@@ -106,7 +106,7 @@ export function PublishResult({ listing }: { listing: OwnListing }) {
       <p className="text-body text-muted">
         {live
           ? 'People can now find it on Explore and make offers. We’ll let you know when one arrives.'
-          : 'We check new listings against the community rules, usually within a few hours, and text you when it’s live. You can still edit or close it.'}
+          : 'We check new listings against the community rules, usually within a few hours, and let you know when it’s live. You can still edit or close it.'}
       </p>
       <div className="mt-2 flex w-full flex-col gap-2 tablet:w-auto tablet:flex-row">
         {live ? (

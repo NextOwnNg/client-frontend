@@ -19,8 +19,8 @@ describe('Public profile', () => {
     expect(screen.getByText('[Pilot Area] North')).toBeInTheDocument()
     expect(screen.getByText(/^Member since/)).toBeInTheDocument()
 
-    await userEvent.click(screen.getByRole('button', { name: 'Phone confirmed' }))
-    expect(screen.getByText(copy.phoneBadgeExplainer)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Email confirmed' }))
+    expect(screen.getByText(copy.emailBadgeExplainer)).toBeInTheDocument()
 
     const list = await screen.findByRole('list', { name: 'Active listings' })
     expect(list).toHaveTextContent('MacBook Air M1')

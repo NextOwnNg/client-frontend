@@ -84,7 +84,7 @@ export function ProfileCard({ profile }: { profile: PublicProfile }) {
       </p>
       <div className="border-t border-border pt-3">
         <TrustModule
-          phoneConfirmed={profile.phoneConfirmed}
+          emailConfirmed={profile.emailConfirmed}
           reviewCount={profile.reviewCount}
           rating={profile.rating}
         />

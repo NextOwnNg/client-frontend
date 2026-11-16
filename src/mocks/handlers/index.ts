@@ -38,7 +38,7 @@ function toPublicDetail(listing: ListingDetail): ListingDetail {
     accessories: undefined,
     desiredSwap: undefined,
     categoryFields: [],
-    seller: { id: '', displayName: '', phoneConfirmed: false, reviewCount: 0, areaName: listing.areaName },
+    seller: { id: '', displayName: '', emailConfirmed: false, reviewCount: 0, areaName: listing.areaName },
   }
 }
 

@@ -29,7 +29,7 @@ describe('errorMessage', () => {
 
   it('says what was wrong with the input for codes that are about the input', () => {
     expect(errorMessage(http(422, 'OTP_INVALID'), failed)).toBe(
-      "That code doesn't match. Check the text message and try again.",
+      "That code doesn't match. Check the email and try again.",
     )
     expect(errorMessage(http(415, 'UNSUPPORTED_FORMAT'), failed)).toBe('This file type isn’t supported.')
   })

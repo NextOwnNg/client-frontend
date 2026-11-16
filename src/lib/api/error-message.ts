@@ -10,7 +10,8 @@ export { isMissingOrPrivate, isNotFound, isRefused, isRetryable, isSignedOut } f
 
 /** Codes that mean something was wrong with what the person entered: the message is the whole story. */
 const inputMessages: Partial<Record<ApiErrorCode, string>> = {
-  OTP_INVALID: "That code doesn't match. Check the text message and try again.",
+  INVALID_CREDENTIALS: 'That email and password don’t match. Check them and try again.',
+  OTP_INVALID: "That code doesn't match. Check the email and try again.",
   OTP_EXPIRED: 'That code has expired. Send a new code and use the latest one.',
   UNSUPPORTED_FORMAT: 'This file type isn’t supported.',
   FILE_TOO_LARGE: 'This photo is over 10 MB.',

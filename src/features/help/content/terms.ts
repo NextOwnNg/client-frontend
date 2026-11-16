@@ -22,7 +22,7 @@ export const termsDoc: PolicyDoc = {
       paragraphs: [
         'NextOwn helps people nearby list items, make offers and record what they agree. The trade itself is between the two people.',
         copy.handoverNotice,
-        copy.phoneBadgeExplainer,
+        copy.emailBadgeExplainer,
       ],
     },
     {
@@ -47,7 +47,7 @@ export const termsDoc: PolicyDoc = {
       id: 'account',
       title: 'Your account',
       paragraphs: [
-        'Keep your phone and one-time codes to yourself. You can ask to delete your account from Settings; records of completed deals may be kept where the law requires.',
+        'Keep your password and one-time codes to yourself. You can ask to delete your account from Settings; records of completed deals may be kept where the law requires.',
       ],
     },
     {

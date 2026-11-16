@@ -1,4 +1,4 @@
-import { MapPin, Phone, Star } from 'lucide-react'
+import { Mail, MapPin, Star } from 'lucide-react'
 import { useId, useState } from 'react'
 import { copy } from '@/lib/copy/copy'
 import { cx } from '@/lib/cx'
@@ -14,20 +14,20 @@ export function AreaLabel({ name, className }: { name: string; className?: strin
 }
 
 type TrustModuleProps = {
-  phoneConfirmed: boolean
+  emailConfirmed: boolean
   reviewCount: number
   rating?: number
 }
 
-/** Phone confirmation explained in place; ratings always shown with their count. */
-export function TrustModule({ phoneConfirmed, reviewCount, rating }: TrustModuleProps) {
+/** Email confirmation explained in place; ratings always shown with their count. */
+export function TrustModule({ emailConfirmed, reviewCount, rating }: TrustModuleProps) {
   const [open, setOpen] = useState(false)
   const explainerId = useId()
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {phoneConfirmed && (
+        {emailConfirmed && (
           <button
             type="button"
             aria-expanded={open}
@@ -35,8 +35,8 @@ export function TrustModule({ phoneConfirmed, reviewCount, rating }: TrustModule
             onClick={() => setOpen((v) => !v)}
             className="inline-flex min-h-11 items-center gap-1.5 text-compact font-medium text-ink underline decoration-border underline-offset-4 hover:decoration-action"
           >
-            <Phone aria-hidden className="size-4 text-action" />
-            Phone confirmed
+            <Mail aria-hidden className="size-4 text-action" />
+            Email confirmed
           </button>
         )}
         <span className="tabular inline-flex items-center gap-1.5 text-compact text-ink">
@@ -55,7 +55,7 @@ export function TrustModule({ phoneConfirmed, reviewCount, rating }: TrustModule
       </div>
       {open && (
         <p id={explainerId} className="rounded-control bg-cloud p-3 text-compact text-muted">
-          {copy.phoneBadgeExplainer}
+          {copy.emailBadgeExplainer}
         </p>
       )}
     </div>

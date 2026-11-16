@@ -26,7 +26,7 @@ describe('Listing detail', () => {
 
     expect(screen.getByText('₦385,000')).toBeInTheDocument()
     expect(screen.getByText('Small scratch on the left edge of the frame')).toBeInTheDocument()
-    expect(screen.getByText('Phone confirmed')).toBeInTheDocument()
+    expect(screen.getByText('Email confirmed')).toBeInTheDocument()
     expect(title.compareDocumentPosition(defects) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(defects.compareDocumentPosition(cta) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByText('Cash offers')).toBeInTheDocument()
@@ -83,9 +83,10 @@ describe('Listing detail', () => {
 
     const prompt = await screen.findByRole('dialog', { name: 'Sign in to make an offer' })
     const next = encodeURIComponent('/offers/new?listing=l1')
-    expect(within(prompt).getByRole('link', { name: 'Continue with your phone number' })).toHaveAttribute(
+    expect(within(prompt).getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', `/login?next=${next}`)
+    expect(within(prompt).getByRole('link', { name: 'Create an account' })).toHaveAttribute(
       'href',
-      `/login?next=${next}`,
+      `/signup?next=${next}`,
     )
   })
 

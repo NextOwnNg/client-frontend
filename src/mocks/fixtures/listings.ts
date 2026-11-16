@@ -10,7 +10,7 @@ export const sellers: PublicSeller[] = [
   {
     id: 'u-tolu',
     displayName: 'Tolu A.',
-    phoneConfirmed: true,
+    emailConfirmed: true,
     reviewCount: 12,
     rating: 4.8,
     areaName: '[Pilot Area] Central',
@@ -18,16 +18,16 @@ export const sellers: PublicSeller[] = [
   {
     id: 'u-chidi',
     displayName: 'Chidi O.',
-    phoneConfirmed: true,
+    emailConfirmed: true,
     reviewCount: 3,
     rating: 4.7,
     areaName: '[Pilot Area] North',
   },
-  { id: 'u-amaka', displayName: 'Amaka N.', phoneConfirmed: true, reviewCount: 0, areaName: '[Pilot Area] East' },
+  { id: 'u-amaka', displayName: 'Amaka N.', emailConfirmed: true, reviewCount: 0, areaName: '[Pilot Area] East' },
   {
     id: 'u-ibrahim',
     displayName: 'Ibrahim S.',
-    phoneConfirmed: true,
+    emailConfirmed: true,
     reviewCount: 1,
     rating: 5,
     areaName: '[Pilot Area] West',
@@ -35,7 +35,7 @@ export const sellers: PublicSeller[] = [
   {
     id: 'u-zainab',
     displayName: 'Zainab M.',
-    phoneConfirmed: true,
+    emailConfirmed: true,
     reviewCount: 27,
     rating: 4.6,
     areaName: '[Pilot Area] Central',
