@@ -25,6 +25,22 @@ describe('Create an account', () => {
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/login?next=%2Fsettings')
   })
 
+  it('shows how strong the password is as it is typed, with no rule up front', async () => {
+    renderSignup()
+    await emailInput()
+
+    expect(screen.queryByText(/Password strength/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/8 characters/)).not.toBeInTheDocument()
+
+    await userEvent.type(passwordInput(), 'mango')
+    expect(screen.getByText('Keep going: 8 characters or more')).toBeInTheDocument()
+    await userEvent.type(passwordInput(), 'es7 at Ikeja')
+    expect(screen.getByText('Strong')).toBeInTheDocument()
+    // The meter is the field's hint, so screen readers hear it with the field
+    const hint = document.getElementById(passwordInput().getAttribute('aria-describedby')!)
+    expect(hint).toHaveTextContent('Password strength: Strong')
+  })
+
   it('needs a password of at least 8 characters', async () => {
     renderSignup()
 

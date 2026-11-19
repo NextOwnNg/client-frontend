@@ -10,6 +10,7 @@ import { PasswordField } from '@/components/ui/PasswordField'
 import { useForgotPassword, useResetPassword } from '@/features/account/api'
 import { codeSchema, newPasswordSchema, PASSWORD_MAX } from '@/features/account/auth-schema'
 import { CodeField } from '@/features/account/components/CodeField'
+import { PasswordStrengthMeter } from '@/features/account/components/PasswordStrengthMeter'
 import { ResendCode } from '@/features/account/components/ResendCode'
 import { authCopy } from '@/features/account/copy'
 import { useCountdown } from '@/features/account/use-countdown'
@@ -125,7 +126,7 @@ function ResetStep({ email, initialResendAt, next }: { email: string; initialRes
             <PasswordField
               label="New password"
               autoComplete="new-password"
-              hint="At least 8 characters."
+              hint={field.value ? <PasswordStrengthMeter password={field.value} /> : undefined}
               maxLength={PASSWORD_MAX}
               name={field.name}
               value={field.value}
