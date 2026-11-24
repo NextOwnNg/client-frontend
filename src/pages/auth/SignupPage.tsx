@@ -9,6 +9,7 @@ import { PasswordField } from '@/components/ui/PasswordField'
 import { TextField } from '@/components/ui/TextField'
 import { useSignUp } from '@/features/account/api'
 import { emailSchema, newPasswordSchema, PASSWORD_MAX } from '@/features/account/auth-schema'
+import { PasswordStrengthMeter } from '@/features/account/components/PasswordStrengthMeter'
 import { errorReason, fieldError, fieldErrorsOf, waitSeconds } from '@/lib/api/error-message'
 import { loginPath, safeNext, verifyPath } from '@/lib/auth/next'
 import type { AuthState, VerifyState } from '@/pages/auth/LoginPage'
@@ -81,7 +82,7 @@ export function SignupPage() {
           render={({ field, fieldState }) => (
             <PasswordField
               autoComplete="new-password"
-              hint="At least 8 characters."
+              hint={field.value ? <PasswordStrengthMeter password={field.value} /> : undefined}
               maxLength={PASSWORD_MAX}
               name={field.name}
               value={field.value}
