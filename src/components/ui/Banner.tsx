@@ -25,16 +25,19 @@ export function Banner({
   children,
   action,
   className,
+  role,
 }: {
   tone: BannerTone
   title: string
   children?: ReactNode
   action?: ReactNode
   className?: string
+  /** Overrides the tone's live role: `status` for a standing notice that shouldn't interrupt on page load. */
+  role?: 'status' | 'alert'
 }) {
-  const { className: toneClass, icon: Icon, role } = tones[tone]
+  const { className: toneClass, icon: Icon, role: toneRole } = tones[tone]
   return (
-    <div role={role} className={cx('flex gap-3 rounded-control p-4', toneClass, className)}>
+    <div role={role ?? toneRole} className={cx('flex gap-3 rounded-control p-4', toneClass, className)}>
       <Icon aria-hidden className={cx('mt-0.5 size-5 shrink-0', iconColour[tone])} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <p className="text-body font-semibold">{title}</p>

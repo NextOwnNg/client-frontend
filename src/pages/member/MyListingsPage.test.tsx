@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { routes } from '@/app/router'
 import { apiClient } from '@/lib/api/client'
 import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
-import { mockListings } from '@/mocks/db/listings'
+import { CHANGES_SAMPLE_ID, listingsDb, mockListings } from '@/mocks/db/listings'
 import { renderWithProviders } from '@/test/utils'
 import type { MediaRef, OwnListing } from '@/types/api'
 
@@ -25,7 +25,8 @@ describe('My listings', () => {
 
     expect(tab(/^Active/)).toHaveAttribute('aria-current', 'page')
     await waitFor(() => expect(tab(/^Active/)).toHaveTextContent('3'))
-    expect(tab(/^Draft/)).toHaveTextContent('1')
+    // The unfinished draft and the one sent back for changes
+    expect(tab(/^Draft/)).toHaveTextContent('2')
     expect(await rows()).toHaveLength(3)
   })
 
@@ -71,7 +72,7 @@ describe('My listings', () => {
 
   it('continues or discards a draft, asking before discarding', async () => {
     await openTab('draft')
-    const [row] = await rows()
+    const row = (await rows()).find((r) => r.textContent?.includes('PS4 DualShock controller'))
 
     expect(within(row!).getByRole('link', { name: 'Continue' })).toHaveAttribute(
       'href',
@@ -81,7 +82,8 @@ describe('My listings', () => {
     const dialog = await screen.findByRole('dialog', { name: 'Discard this draft?' })
     await userEvent.click(within(dialog).getByRole('button', { name: 'Discard draft' }))
 
-    expect(await screen.findByRole('heading', { name: 'No drafts' })).toBeInTheDocument()
+    await waitFor(async () => expect(await rows()).toHaveLength(1))
+    expect(screen.queryByText('PS4 DualShock controller')).not.toBeInTheDocument()
   })
 
   it('views, edits and closes an active listing', async () => {
@@ -126,5 +128,77 @@ describe('My listings', () => {
     expect(within(row!).getByRole('link', { name: 'View' })).toBeInTheDocument()
     expect(within(row!).queryByRole('link', { name: 'Edit' })).not.toBeInTheDocument()
     expect(within(row!).queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  describe('listings sent back for changes', () => {
+    const sampleMessage =
+      'The photos are too dark to see the condition of the buttons. Please add two clear photos taken in daylight.'
+    const banner = () => screen.queryByText('1 listing needs changes before it can go live.')
+
+    it('tells the seller on Active that a listing needs changes', async () => {
+      await openTab()
+      await rows()
+
+      expect(banner()).toBeInTheDocument()
+      expect(banner()!.closest('[role="status"]')).not.toBeNull()
+      expect(screen.getByRole('link', { name: 'See it' })).toHaveAttribute('href', '/me/listings?tab=draft')
+    })
+
+    it('shows the listing sent back for changes first in Drafts, with its reason and message', async () => {
+      await openTab('draft')
+      const [first] = await rows()
+
+      expect(banner()).not.toBeInTheDocument()
+      expect(within(first!).getByText('Changes needed')).toBeInTheDocument()
+      expect(within(first!).getByText('Nintendo Switch Lite · Coral')).toBeInTheDocument()
+      expect(within(first!).getByText('Photos missing or unclear')).toBeInTheDocument()
+      expect(within(first!).getByText(sampleMessage)).toBeInTheDocument()
+      expect(within(first!).getByText('Message from NextOwn:', { exact: false })).toBeInTheDocument()
+      expect(within(first!).getByRole('link', { name: 'Edit and resubmit' })).toHaveAttribute(
+        'href',
+        `/listings/${CHANGES_SAMPLE_ID}/edit`,
+      )
+      expect(within(first!).getByRole('button', { name: 'Discard' })).toBeInTheDocument()
+      expect(within(first!).queryByRole('link', { name: 'Continue' })).not.toBeInTheDocument()
+    })
+
+    it('shows the reason alone when there is no message', async () => {
+      listingsDb.change(CHANGES_SAMPLE_ID, {
+        review: {
+          outcome: 'changes_needed',
+          reasonLabel: 'Wrong category',
+          message: null,
+          decidedAt: new Date().toISOString(),
+        },
+      })
+      await openTab('draft')
+      const [first] = await rows()
+
+      expect(within(first!).getByText('Wrong category')).toBeInTheDocument()
+      expect(within(first!).queryByText('Message from NextOwn:', { exact: false })).not.toBeInTheDocument()
+    })
+
+    it('says a resubmitted listing is being checked again', async () => {
+      await apiClient.post(`/listings/${CHANGES_SAMPLE_ID}/publish`)
+      await openTab()
+      const row = (await rows()).find((r) => r.textContent?.includes('Nintendo Switch Lite · Coral'))!
+
+      expect(within(row).getByText('Resubmitted. We’re checking it again.')).toBeInTheDocument()
+      expect(banner()).not.toBeInTheDocument()
+    })
+
+    it('removes the banner once the draft is discarded', async () => {
+      await openTab('draft')
+      const [first] = await rows()
+
+      await userEvent.click(within(first!).getByRole('button', { name: 'Discard' }))
+      const dialog = await screen.findByRole('dialog', { name: 'Discard this draft?' })
+      await userEvent.click(within(dialog).getByRole('button', { name: 'Discard draft' }))
+      await waitFor(async () => expect(await rows()).toHaveLength(1))
+      await userEvent.click(tab(/^Active/))
+      await rows()
+
+      expect(banner()).not.toBeInTheDocument()
+    })
   })
 })

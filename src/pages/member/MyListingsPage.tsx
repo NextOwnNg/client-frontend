@@ -5,8 +5,10 @@ import { ButtonLink } from '@/components/ui/Button'
 import { EmptyState, ErrorState } from '@/components/ui/States'
 import { useRuntimeConfig } from '@/features/config/api'
 import { useMyListings } from '@/features/selling/api'
+import { ChangesNeededBanner } from '@/features/selling/components/ChangesNeededBanner'
 import { OwnListingRow } from '@/features/selling/components/OwnListingRow'
 import { tabOf, type ListingTab } from '@/features/selling/listing-input'
+import { needsChanges } from '@/lib/copy/status'
 import { cx } from '@/lib/cx'
 import { ProfileBackLink } from '@/features/account/components/ProfileBackLink'
 
@@ -57,7 +59,11 @@ export function MyListingsPage() {
   const { data, isPending, isError, refetch } = useMyListings()
   const { data: config } = useRuntimeConfig()
   const count = (tab: ListingTab) => data?.filter((l) => tabOf(l.status) === tab).length ?? 0
-  const items = data?.filter((l) => tabOf(l.status) === current.id) ?? []
+  // Listings sent back for changes come first, so the seller sees what to fix before what to finish
+  const items = (data?.filter((l) => tabOf(l.status) === current.id) ?? []).sort(
+    (a, b) => Number(needsChanges(b)) - Number(needsChanges(a)),
+  )
+  const changesNeeded = data?.filter(needsChanges).length ?? 0
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
@@ -101,6 +107,8 @@ export function MyListingsPage() {
           ))}
         </ul>
       </nav>
+
+      {current.id !== 'draft' && <ChangesNeededBanner count={changesNeeded} />}
 
       {isPending ? (
         <div aria-busy="true" aria-label="Loading your listings" className="flex flex-col gap-3">

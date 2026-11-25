@@ -15,7 +15,9 @@ import { useMe } from '@/features/account/api'
 import { useMeProfile } from '@/features/account/use-me-profile'
 import { useRuntimeConfig } from '@/features/config/api'
 import { useListingAction, useOwnListing } from '@/features/selling/api'
+import { ChangesNeededNotice } from '@/features/selling/components/ChangesNeededNotice'
 import { PreviewStep, PublishResult } from '@/features/selling/components/PreviewStep'
+import { reviewCopy } from '@/features/selling/copy'
 import { BasicsStep } from '@/features/selling/components/BasicsStep'
 import { ConditionStep } from '@/features/selling/components/ConditionStep'
 import { TradeStep } from '@/features/selling/components/TradeStep'
@@ -33,6 +35,7 @@ import { draftKey, moveDraft, useListingDraft } from '@/features/selling/use-lis
 import { toApiError } from '@/lib/api/api-error'
 import { errorMessage, fieldErrorsOf, isNotFound } from '@/lib/api/error-message'
 import { flattenErrors } from '@/lib/forms/form-errors'
+import { needsChanges } from '@/lib/copy/status'
 import { cx } from '@/lib/cx'
 import { useSessionStore } from '@/stores/session'
 import type { ListingInput, Me, OwnListing, PublicSeller, RuntimeConfig } from '@/types/api'
@@ -244,7 +247,8 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
     )
   }
 
-  const submitLabel = published ? 'Save changes' : 'Publish listing'
+  const sentBack = listing ? needsChanges(listing) : false
+  const submitLabel = published ? 'Save changes' : sentBack ? reviewCopy.resubmit : 'Publish listing'
   const submitting = action.isPending || draft.state === 'saving'
   const submitButton = (
     <Button fullWidth isPending={submitting} isDisabled={!id && !published} onPress={() => void submit()}>
@@ -298,6 +302,8 @@ function Wizard({ id, listing, config, me, userId, onCreated }: WizardProps) {
 
       <StepMeter label="Listing steps" steps={wizardSteps} current={step} href={stepHref} />
       <h1 className="text-h2 text-ink tablet:text-h1">{published ? 'Edit listing' : 'List an item'}</h1>
+
+      {sentBack && listing?.review && <ChangesNeededNotice review={listing.review} />}
 
       {listing?.status === 'RESERVED' && (
         <Banner tone="warning" title="This item is reserved">

@@ -5,9 +5,11 @@ import { Seo } from '@/components/seo/Seo'
 import { Banner } from '@/components/ui/Banner'
 import { ButtonLink } from '@/components/ui/Button'
 import { ListingView, type ListingSection } from '@/features/listings/components/ListingView'
+import { reviewCopy } from '@/features/selling/copy'
 import { inputToDetail, type WizardStep } from '@/features/selling/listing-input'
 import { useNow } from '@/hooks/useNow'
 import { copy } from '@/lib/copy/copy'
+import { isResubmission } from '@/lib/copy/status'
 import { PolicyLinks } from '@/features/trust/components/PolicyLinks'
 import type { ListingInput, OwnListing, PublicSeller, RuntimeConfig } from '@/types/api'
 
@@ -29,10 +31,7 @@ type PreviewStepProps = {
   problems: ReactNode
 }
 
-/**
- * UX-13 preview: the real listing detail (FE-LST-06), as buyers will see it, with an Edit link per section and
- * the facts a seller should know before publishing.
- */
+
 export function PreviewStep({ input, listing, seller, config, stepHref, action, problems }: PreviewStepProps) {
   const now = useNow()
   const detail = inputToDetail(input, {
@@ -94,19 +93,22 @@ export function PreviewStep({ input, listing, seller, config, stepHref, action, 
 /** After publishing (FE-LST-07): under review or live, each with what happens next. */
 export function PublishResult({ listing }: { listing: OwnListing }) {
   const live = listing.status === 'ACTIVE'
+  const again = isResubmission(listing)
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center gap-4 py-10 text-center">
-      <Seo title={live ? 'Listing live' : 'Listing under review'} noindex />
+      <Seo title={live ? 'Listing live' : again ? 'Resubmitted for review' : 'Listing under review'} noindex />
       <span className="flex size-14 items-center justify-center rounded-full bg-mint text-action">
         {live ? <PartyPopper aria-hidden className="size-7" /> : <Eye aria-hidden className="size-7" />}
       </span>
       <h1 className="text-h2 text-ink tablet:text-h1">
-        {live ? 'Your listing is live' : 'Your listing is being reviewed'}
+        {live ? 'Your listing is live' : again ? reviewCopy.resubmittedTitle : 'Your listing is being reviewed'}
       </h1>
       <p className="text-body text-muted">
         {live
           ? 'People can now find it on Explore and make offers. We’ll let you know when one arrives.'
-          : 'We check new listings against the community rules, usually within a few hours, and let you know when it’s live. You can still edit or close it.'}
+          : again
+            ? reviewCopy.resubmittedBody
+            : 'We check new listings against the community rules, usually within a few hours, and let you know when it’s live. You can still edit or close it.'}
       </p>
       <div className="mt-2 flex w-full flex-col gap-2 tablet:w-auto tablet:flex-row">
         {live ? (

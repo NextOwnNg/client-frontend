@@ -6,11 +6,15 @@ import { meKey, useMe } from '@/features/account/api'
 import { mockAuth, SAMPLE_CODE, SAMPLE_MEMBER_EMAIL, SAMPLE_MEMBER_ID, SAMPLE_PASSWORD } from '@/mocks/db/auth'
 import { mockFeed } from '@/mocks/db/feed'
 import { mockMessages } from '@/mocks/db/messages'
+import { listingReview } from '@/mocks/db/listing-review'
 import { listingsDb, mockListings } from '@/mocks/db/listings'
 import { mockOffers } from '@/mocks/db/offers'
 import { mockTransactions } from '@/mocks/db/transactions'
 import { mockTrust } from '@/mocks/db/trust'
 import { useDevSettings } from '@/mocks/dev-settings'
+import { reviewReasons } from '@/mocks/fixtures/review-reasons'
+import { needsChanges } from '@/lib/copy/status'
+import type { OwnListing } from '@/types/api'
 
 const tool = 'flex-1 rounded-control bg-white/10 px-2 py-2 font-medium hover:bg-white/20'
 
@@ -43,6 +47,26 @@ export function DevToolbar() {
     void queryClient.invalidateQueries({ queryKey: ['own-listings'] })
     void queryClient.invalidateQueries({ queryKey: ['listings'] })
   }
+
+  // Listing review: the moderators' decisions, acting on the member's newest listing that fits
+  const [reason, setReason] = useState('Photos missing or unclear')
+  const [sellerMessage, setSellerMessage] = useState('')
+  const newest = (fits: (l: OwnListing) => boolean) => (me ? listingsDb.ownedBy(me.id).find(fits)?.id : undefined)
+  const reviewAct = (
+    message: string,
+    none: string,
+    fits: (l: OwnListing) => boolean,
+    decide: (id: string) => boolean,
+  ) => {
+    const id = newest(fits)
+    setNote(id && decide(id) ? message : none)
+    for (const key of ['own-listings', 'listings', 'notifications', 'offers']) {
+      void queryClient.invalidateQueries({ queryKey: [key] })
+    }
+  }
+  const pending = (l: OwnListing) => l.status === 'PENDING_REVIEW'
+  const nothingPending = 'Nothing of yours is under review. Publish a listing first.'
+  const decision = () => ({ reasonLabel: reason, message: sellerMessage.trim() || null })
 
   const offersAct = (message: string, change: () => boolean) => {
     setNote(change() ? message : 'No open offer fits. Open one where the other person can act.')
@@ -197,7 +221,12 @@ export function DevToolbar() {
           <div className="mt-2 flex gap-2">
             <button
               type="button"
-              onClick={() => listingsAct('Listings under review approved.', () => mockListings.approvePending())}
+              onClick={() =>
+                listingsAct('Listings under review approved.', () => {
+                  listingReview.approveAllPending()
+                  void queryClient.invalidateQueries({ queryKey: ['notifications'] })
+                })
+              }
               className={tool}
             >
               Approve reviews
@@ -213,6 +242,83 @@ export function DevToolbar() {
               className={tool}
             >
               Expire a listing
+            </button>
+          </div>
+
+          <p className="mt-3 font-medium">Review your newest listing under review</p>
+          <label className="mt-2 flex flex-col gap-1">
+            Reason
+            <select
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="rounded-control bg-white/10 px-2 py-1.5"
+            >
+              {reviewReasons.map((label) => (
+                <option key={label} value={label} className="text-ink">
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="mt-2 flex flex-col gap-1">
+            Message to seller
+            <textarea
+              value={sellerMessage}
+              maxLength={500}
+              rows={2}
+              onChange={(e) => setSellerMessage(e.target.value)}
+              className="rounded-control bg-white/10 px-2 py-1.5"
+            />
+          </label>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                reviewAct('Approved. The seller was told it’s live.', nothingPending, pending, (id) =>
+                  listingReview.approve(id),
+                )
+              }
+              className={tool}
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                reviewAct('Sent back for changes.', nothingPending, pending, (id) =>
+                  listingReview.askForChanges(id, decision()),
+                )
+              }
+              className={tool}
+            >
+              Ask for changes
+            </button>
+          </div>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                reviewAct(
+                  'Taken down for changes. Its open offers ended.',
+                  'Nothing of yours is live.',
+                  (l) => l.status === 'ACTIVE',
+                  (id) => listingReview.takeDown(id, decision()),
+                )
+              }
+              className={tool}
+            >
+              Take down a live listing
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                reviewAct('Approved after a second look.', 'Nothing of yours needs changes.', needsChanges, (id) =>
+                  listingReview.restore(id),
+                )
+              }
+              className={tool}
+            >
+              Approve after a second look
             </button>
           </div>
         </div>

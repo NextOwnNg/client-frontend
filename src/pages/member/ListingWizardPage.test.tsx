@@ -6,7 +6,7 @@ import { routes } from '@/app/router'
 import { apiClient } from '@/lib/api/client'
 import { copy } from '@/lib/copy/copy'
 import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
-import { mockListings } from '@/mocks/db/listings'
+import { CHANGES_SAMPLE_ID, mockListings } from '@/mocks/db/listings'
 import { server } from '@/test/msw/server'
 import { renderWithProviders } from '@/test/utils'
 import type * as Compress from '@/lib/images/compress'
@@ -350,5 +350,42 @@ describe('Listing wizard: preview and publish', () => {
 
     await waitFor(() => expect(path(router)).toBe('/me/listings?tab=active'))
     expect((await apiClient.get<OwnListing>('/me/listings/l1')).data.askingKobo).toBe(36_000_000)
+  })
+})
+
+describe('Listing wizard: a listing sent back for changes', () => {
+  const message =
+    'The photos are too dark to see the condition of the buttons. Please add two clear photos taken in daylight.'
+
+  it('shows why the listing was sent back while it is being fixed', async () => {
+    await openWizard(`/listings/${CHANGES_SAMPLE_ID}/edit`)
+
+    const notice = await screen.findByText('Changes needed: Photos missing or unclear')
+    const box = notice.closest('[role="status"]') as HTMLElement
+    expect(within(box).getByText(message)).toBeInTheDocument()
+    expect(within(box).getByText(/Make your changes, then resubmit/)).toBeInTheDocument()
+  })
+
+  it('keeps the reason in view on every step', async () => {
+    await openWizard(`/listings/${CHANGES_SAMPLE_ID}/edit?step=condition`)
+
+    expect(await screen.findByText('Changes needed: Photos missing or unclear')).toBeInTheDocument()
+  })
+
+  it('resubmits for review and says it will be checked again', async () => {
+    await openWizard(`/listings/${CHANGES_SAMPLE_ID}/edit?step=preview`)
+
+    expect(screen.queryAllByRole('button', { name: 'Publish listing' })).toHaveLength(0)
+    await userEvent.click((await screen.findAllByRole('button', { name: 'Resubmit for review' }))[0]!)
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Thanks, we’ll check it again' })).toBeInTheDocument()
+    expect(screen.getByText(/We’ll let you know once it’s been reviewed/)).toBeInTheDocument()
+  })
+
+  it('shows no notice on an ordinary draft', async () => {
+    await openWizard('/listings/l-draft-sample/edit?step=preview')
+
+    expect(screen.queryByText(/^Changes needed/)).not.toBeInTheDocument()
+    expect((await screen.findAllByRole('button', { name: 'Publish listing' })).length).toBeGreaterThan(0)
   })
 })

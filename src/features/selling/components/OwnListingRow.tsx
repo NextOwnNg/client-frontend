@@ -6,7 +6,8 @@ import { ButtonLink, PlainButton } from '@/components/ui/Button'
 import { ConfirmModal } from '@/components/ui/ConfirmModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useDiscardDraft, useListingAction } from '@/features/selling/api'
-import { listingStatus } from '@/lib/copy/status'
+import { reviewCopy } from '@/features/selling/copy'
+import { isResubmission, needsChanges, ownListingStatus } from '@/lib/copy/status'
 import { formatWAT } from '@/lib/time/time'
 import type { OwnListing } from '@/types/api'
 
@@ -20,7 +21,7 @@ function metaLine(listing: OwnListing) {
     case 'DRAFT':
       return `Last saved ${date(listing.updatedAt)}`
     case 'PENDING_REVIEW':
-      return 'We’re checking it against the community rules.'
+      return isResubmission(listing) ? reviewCopy.resubmitted : 'We’re checking it against the community rules.'
     case 'RESERVED':
       return 'Reserved for an agreed deal. Agreed terms won’t change if you edit.'
     case 'EXPIRED':
@@ -36,7 +37,8 @@ export function OwnListingRow({ listing, quickSellOptions }: { listing: OwnListi
   const [renewing, setRenewing] = useState(false)
   const action = useListingAction()
   const discard = useDiscardDraft()
-  const status = listingStatus(listing.status)
+  const status = ownListingStatus(listing)
+  const sentBack = needsChanges(listing)
   const cover = listing.photos[0]
   const { id, slug } = listing
   const live = listing.status === 'ACTIVE'
@@ -65,9 +67,31 @@ export function OwnListingRow({ listing, quickSellOptions }: { listing: OwnListi
         </div>
         <p className="truncate text-body font-semibold text-ink">{listing.title.trim() || 'Untitled draft'}</p>
         {listing.modes.length > 0 && <Price kobo={listing.modes.includes('CASH') ? listing.askingKobo : null} />}
-        <p className="text-compact text-muted">{metaLine(listing)}</p>
+        {sentBack ? (
+          <>
+            <p className="text-compact font-semibold text-ink">{listing.review?.reasonLabel}</p>
+            {listing.review?.message && (
+              <blockquote className="border-l-2 border-warning pl-3 text-compact break-words text-ink">
+                <span className="sr-only">{reviewCopy.messageLabel}: </span>
+                {listing.review.message}
+              </blockquote>
+            )}
+          </>
+        ) : (
+          <p className="text-compact text-muted">{metaLine(listing)}</p>
+        )}
         <div className="mt-1 flex flex-wrap gap-2">
-          {listing.status === 'DRAFT' && (
+          {sentBack && (
+            <>
+              <ButtonLink to={`/listings/${id}/edit`} size="sm">
+                {reviewCopy.editAndResubmit}
+              </ButtonLink>
+              <PlainButton variant="tertiary" size="sm" onClick={() => setConfirm('discard')}>
+                Discard
+              </PlainButton>
+            </>
+          )}
+          {listing.status === 'DRAFT' && !sentBack && (
             <>
               <ButtonLink to={`/listings/${id}/edit`} size="sm">
                 Continue
