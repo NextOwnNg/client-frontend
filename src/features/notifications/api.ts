@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query'
+import { ownListingKeys } from '@/features/selling/api'
 import { apiClient } from '@/lib/api/client'
 import { useSessionStore } from '@/stores/session'
 import type { AppNotification, NotificationCounts } from '@/types/api'
@@ -32,18 +33,20 @@ export function useNotifications() {
 }
 
 /** The cached data a notification's page shows, so opening it always reads where things stand now. */
-const targets: [prefix: string, key: string][] = [
-  ['/offers', 'offers'],
-  ['/transactions', 'transactions'],
-  ['/feed', 'feed'],
-  ['/listings', 'listings'],
-  ['/messages', 'conversations'],
+const targets: [prefix: string, keys: QueryKey[]][] = [
+  ['/offers', [['offers']]],
+  ['/transactions', [['transactions']]],
+  ['/feed', [['feed']]],
+  // A listing alert may be about the seller's own listing (review outcomes), which has its own cache
+  ['/listings', [['listings'], ownListingKeys.all]],
+  ['/me/listings', [ownListingKeys.all]],
+  ['/messages', [['conversations']]],
 ]
 
 /** Marks it read and drops its target's cache before the link is followed (FE-NTF-01, ruling R6-8). */
 export function openNotification(queryClient: QueryClient, notification: AppNotification) {
   const target = targets.find(([prefix]) => notification.link.startsWith(prefix))
-  if (target) void queryClient.invalidateQueries({ queryKey: [target[1]] })
+  for (const queryKey of target?.[1] ?? []) void queryClient.invalidateQueries({ queryKey })
   if (notification.read) return
   queryClient.setQueryData<AppNotification[]>(notificationKeys.list, (list) =>
     list?.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),

@@ -160,7 +160,8 @@ export const sellingHandlers: RequestHandler[] = [
     }
 
     const published = listingsDb.update(listing.id, input, {
-      status: listingsDb.goesLive() ? 'ACTIVE' : 'PENDING_REVIEW',
+      // A listing sent back for changes is always checked again, whatever the "go live" setting says
+      status: listingsDb.goesLive() && listing.review?.outcome !== 'changes_needed' ? 'ACTIVE' : 'PENDING_REVIEW',
       publishedAt: new Date().toISOString(),
       slug: listingsDb.newSlug(input.title, listing.id),
       urgencyEndsAt: input.quickSell ? deadline(input.quickSellHours) : null,

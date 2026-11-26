@@ -5,7 +5,9 @@ import { routes } from '@/app/router'
 import { apiClient, idempotencyHeaders } from '@/lib/api/client'
 import { copy } from '@/lib/copy/copy'
 import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
-import { mockOffers } from '@/mocks/db/offers'
+import { listingReview } from '@/mocks/db/listing-review'
+import { listingsDb } from '@/mocks/db/listings'
+import { mockOffers, offersDb } from '@/mocks/db/offers'
 import { renderWithProviders } from '@/test/utils'
 import type { Offer } from '@/types/api'
 
@@ -181,5 +183,25 @@ describe('Offer thread: comparison and closed states (FE-OFF-10..12)', () => {
     expect(screen.getAllByText('No longer available').length).toBeGreaterThan(0)
     expect(screen.getByText('The owner accepted another offer.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Withdraw/ })).not.toBeInTheDocument()
+  })
+
+  it('explains an offer closed because the listing was taken down', async () => {
+    const live = listingsDb.ownedBy(SAMPLE_MEMBER_ID).find((l) => l.status === 'ACTIVE')!
+    const offer = offersDb.create(live.id, 'u-chidi', SAMPLE_MEMBER_ID, {
+      mode: 'CASH',
+      offeredItemId: null,
+      cashKobo: 10_000_000,
+      cashDirection: 'OFFERER_PAYS_OWNER',
+      note: '',
+    })
+    listingReview.takeDown(live.id, { reasonLabel: 'Photos missing or unclear', message: null })
+    mockAuth.signInAs('u-chidi')
+
+    await openThread(offer.id)
+
+    // The status badge and the closed notice both say it
+    expect((await screen.findAllByText('No longer available')).length).toBeGreaterThan(0)
+    expect(screen.getByText('The owner is making changes to this listing.')).toBeInTheDocument()
+    expect(screen.queryByText(/No one decided in time/)).not.toBeInTheDocument()
   })
 })

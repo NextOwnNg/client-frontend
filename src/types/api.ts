@@ -138,6 +138,20 @@ export type ListingInput = {
 }
 
 /** One of the member's own listings, in any state (`GET /me/listings`). */
+/**
+ * The latest review decision on one of the member's own listings, in the server's plain words. It never
+ * carries who decided, internal notes or reason codes. It stays until a new decision replaces it, so a
+ * listing under review with `changes_needed` is a resubmission.
+ */
+export type ListingReviewOutcome = {
+  outcome: 'approved' | 'changes_needed'
+  /** The reason in plain words ("Photos missing or unclear"); null for an approval. */
+  reasonLabel: string | null
+  /** The moderator's message to the seller, up to 500 characters; null when none. */
+  message: string | null
+  decidedAt: string
+}
+
 export type OwnListing = ListingInput & {
   id: string
   slug: string
@@ -145,6 +159,8 @@ export type OwnListing = ListingInput & {
   updatedAt: string
   publishedAt?: string
   urgencyEndsAt?: string
+  /** Null when the listing never went through review. Only the owner gets this. */
+  review: ListingReviewOutcome | null
 }
 
 export type ListingSuggestion =
@@ -421,6 +437,9 @@ export type NotificationKind =
   | 'DISPUTE_OPENED'
   | 'MESSAGE'
   | 'COMMENT'
+  | 'LISTING_APPROVED'
+  | 'LISTING_CHANGES_NEEDED'
+  | 'LISTING_RESTORED'
 
 /** An in-app alert (FE-NTF-01). The text says what happened then; `link` opens where things stand now. */
 export type AppNotification = {

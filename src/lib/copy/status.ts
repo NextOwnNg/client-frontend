@@ -10,7 +10,7 @@ import {
   Timer,
   type LucideIcon,
 } from 'lucide-react'
-import type { ListingStatus } from '@/types/api'
+import type { ListingStatus, OwnListing } from '@/types/api'
 
 export type StatusTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'highlight'
 
@@ -40,4 +40,23 @@ export { conditionLabel } from '@/lib/copy/labels'
 /** Listings that can still receive offers. */
 export function isAvailable(status: ListingStatus): boolean {
   return status === 'ACTIVE'
+}
+
+type Reviewed = Pick<OwnListing, 'status' | 'review'>
+
+/** A draft the review team sent back (a rejection, or a listing taken down after approval). */
+export function needsChanges(listing: Reviewed): boolean {
+  return listing.status === 'DRAFT' && listing.review?.outcome === 'changes_needed'
+}
+
+/** A listing sent back for changes that the seller has resubmitted and is being checked again. */
+export function isResubmission(listing: Reviewed): boolean {
+  return listing.status === 'PENDING_REVIEW' && listing.review?.outcome === 'changes_needed'
+}
+
+const changesNeeded: StatusDisplay = { label: 'Changes needed', tone: 'warning', icon: PencilLine }
+
+/** The owner's view of a listing's state: a draft sent back for changes reads as such, not as a plain draft. */
+export function ownListingStatus(listing: Reviewed): StatusDisplay {
+  return needsChanges(listing) ? changesNeeded : listingStatus(listing.status)
 }

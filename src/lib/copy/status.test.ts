@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { conditionLabel, listingStatus } from '@/lib/copy/status'
+import { conditionLabel, isResubmission, listingStatus, needsChanges, ownListingStatus } from '@/lib/copy/status'
 
 describe('listingStatus', () => {
   it('uses the global state vocabulary', () => {
@@ -26,5 +26,26 @@ describe('conditionLabel', () => {
   it('uses the Brand Kit wording', () => {
     expect(conditionLabel('LIKE_NEW')).toBe('Like new')
     expect(conditionLabel('FOR_PARTS')).toBe('For parts')
+  })
+})
+
+describe('ownListingStatus', () => {
+  const review = {
+    outcome: 'changes_needed',
+    reasonLabel: 'Photos missing or unclear',
+    message: null,
+    decidedAt: '2026-11-25T09:00:00Z',
+  } as const
+
+  it('reads a draft sent back for changes as "Changes needed"', () => {
+    expect(ownListingStatus({ status: 'DRAFT', review })).toMatchObject({ label: 'Changes needed', tone: 'warning' })
+    expect(needsChanges({ status: 'DRAFT', review })).toBe(true)
+  })
+
+  it('keeps an ordinary draft and a resubmission as they were', () => {
+    expect(ownListingStatus({ status: 'DRAFT', review: null }).label).toBe('Draft')
+    expect(ownListingStatus({ status: 'PENDING_REVIEW', review }).label).toBe('Under review')
+    expect(isResubmission({ status: 'PENDING_REVIEW', review })).toBe(true)
+    expect(needsChanges({ status: 'DRAFT', review: { ...review, outcome: 'approved' } })).toBe(false)
   })
 })

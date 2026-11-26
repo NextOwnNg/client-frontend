@@ -293,6 +293,14 @@ export const offersDb = {
     })
   },
 
+  /** Ends every open offer on a listing that left the marketplace, e.g. one taken down after review. */
+  closeOpenOnListing(listingId: string, reason: string) {
+    for (const offer of offers.values()) {
+      if (offer.listingId === listingId && offer.status === 'PENDING') close(offer, 'CLOSED_UNAVAILABLE', reason)
+    }
+    save()
+  },
+
   create(listingId: string, offererId: string, ownerId: string, terms: OfferTerms): StoredOffer {
     const now = new Date().toISOString()
     const offer: StoredOffer = {

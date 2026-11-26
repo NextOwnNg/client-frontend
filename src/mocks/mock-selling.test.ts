@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { isApiError } from '@/lib/api/api-error'
 import { apiClient } from '@/lib/api/client'
 import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
-import { mockListings } from '@/mocks/db/listings'
+import { CHANGES_SAMPLE_ID, mockListings } from '@/mocks/db/listings'
 import type { ListingDetail, ListingSummary, MediaRef, OwnListing, Paginated } from '@/types/api'
 
 const fail = (promise: Promise<unknown>) =>
@@ -164,6 +164,59 @@ describe('mock selling API', () => {
     expect(mine.data.every((l) => l.id !== 'l3')).toBe(true)
 
     expect((await fail(apiClient.patch('/listings/l3', { title: 'Mine now' }))).status).toBe(403)
+  })
+
+  it('gives the sample member a listing sent back for changes', async () => {
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    const { data: mine } = await apiClient.get<OwnListing[]>('/me/listings')
+    const sentBack = mine.find((l) => l.id === CHANGES_SAMPLE_ID)
+
+    expect(sentBack).toMatchObject({
+      status: 'DRAFT',
+      review: {
+        outcome: 'changes_needed',
+        reasonLabel: 'Photos missing or unclear',
+        message:
+          'The photos are too dark to see the condition of the buttons. Please add two clear photos taken in daylight.',
+      },
+    })
+    expect(mine.filter((l) => l.id !== CHANGES_SAMPLE_ID).every((l) => l.review === null)).toBe(true)
+  })
+
+  it('keeps the review when the seller edits the draft', async () => {
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    const before = (await apiClient.get<OwnListing>(`/me/listings/${CHANGES_SAMPLE_ID}`)).data.review
+
+    await apiClient.patch(`/listings/${CHANGES_SAMPLE_ID}`, { title: 'Nintendo Switch Lite · Coral, boxed' })
+
+    const { data } = await apiClient.get<OwnListing>(`/me/listings/${CHANGES_SAMPLE_ID}`)
+    expect(data.title).toBe('Nintendo Switch Lite · Coral, boxed')
+    expect(data.review).toEqual(before)
+  })
+
+  it('always sends a resubmission back for review', async () => {
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    mockListings.publishLive(true)
+
+    const { data } = await apiClient.post<OwnListing>(`/listings/${CHANGES_SAMPLE_ID}/publish`)
+
+    expect(data.status).toBe('PENDING_REVIEW')
+    expect(data.review?.outcome).toBe('changes_needed')
+  })
+
+  it('never shows review data on public reads', async () => {
+    mockAuth.signInAs(SAMPLE_MEMBER_ID)
+    await apiClient.post(`/listings/${CHANGES_SAMPLE_ID}/publish`)
+    mockListings.approvePending()
+    const { data: mine } = await apiClient.get<OwnListing>(`/me/listings/${CHANGES_SAMPLE_ID}`)
+
+    const pages = [
+      (await apiClient.get('/listings')).data,
+      (await apiClient.get(`/listings/${mine.slug}`)).data,
+      (await apiClient.get('/users/u-tolu/listings')).data,
+    ]
+    // `reviewCount` (the seller's ratings) is public; the listing's own review is not
+    expect(JSON.stringify(pages)).not.toMatch(/"review"|reasonLabel|changes_needed/)
   })
 
   it('needs a session for every selling request', async () => {

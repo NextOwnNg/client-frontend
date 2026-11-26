@@ -5,6 +5,8 @@ import { routes } from '@/app/router'
 import { apiClient, idempotencyHeaders } from '@/lib/api/client'
 import { copy } from '@/lib/copy/copy'
 import { mockAuth, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
+import { listingReview } from '@/mocks/db/listing-review'
+import { CHANGES_SAMPLE_ID } from '@/mocks/db/listings'
 import { renderWithProviders } from '@/test/utils'
 import type { NotificationCounts } from '@/types/api'
 
@@ -80,5 +82,21 @@ describe('Notifications (FE-NTF-01, UX-26)', () => {
     await open()
 
     expect(await screen.findByRole('heading', { name: 'No notifications yet' })).toBeInTheDocument()
+  })
+
+  it('opens a "needs changes" alert on the listing in the wizard', async () => {
+    await apiClient.post(`/listings/${CHANGES_SAMPLE_ID}/publish`)
+    listingReview.askForChanges(CHANGES_SAMPLE_ID, {
+      reasonLabel: 'Wrong category',
+      message: 'Please move it to Gaming.',
+    })
+    const { router } = await open()
+
+    const item = await screen.findByRole('link', { name: /Nintendo Switch Lite · Coral needs a few changes/ })
+    expect(item).toHaveTextContent('Wrong category. Please move it to Gaming.')
+    await userEvent.click(item)
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(`/listings/${CHANGES_SAMPLE_ID}/edit`))
+    expect(await screen.findByText('Changes needed: Wrong category')).toBeInTheDocument()
   })
 })

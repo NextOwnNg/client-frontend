@@ -8,6 +8,7 @@ import {
   Handshake,
   Inbox,
   MessageCircle,
+  PencilLine,
   Reply,
   Undo2,
   type LucideIcon,
@@ -34,6 +35,9 @@ const icons: Record<NotificationKind, LucideIcon> = {
   DISPUTE_OPENED: Flag,
   MESSAGE: MessageCircle,
   COMMENT: MessageCircle,
+  LISTING_APPROVED: CircleCheck,
+  LISTING_CHANGES_NEEDED: PencilLine,
+  LISTING_RESTORED: CircleCheck,
 }
 
 /**

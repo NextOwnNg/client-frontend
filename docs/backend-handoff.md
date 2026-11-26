@@ -85,11 +85,11 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 | `GET /listings/:slugOrId` | none | `ListingDetail`. A removed listing is stripped to generic fields. For a member, it includes `viewer: { blockedSeller }`. |
 | `GET /users/:id` | none | `PublicProfile`, with no email, no phone number and no exact location. The trust flag is `emailConfirmed` (it was `phoneConfirmed`). |
 | `GET /users/:id/listings` | none | `Paginated<ListingSummary>`, active listings only |
-| `GET /me/listings`, `GET /me/listings/:id` | none | `OwnListing[]` and `OwnListing`, in every status |
+| `GET /me/listings`, `GET /me/listings/:id` | none | `OwnListing[]` and `OwnListing`, in every status, each with `review` (see [Listing review](#listing-review-the-sellers-side)) |
 | `POST /listings` | `Partial<ListingInput>` | 201 `OwnListing` (a draft) |
 | `PATCH /listings/:id` | `Partial<ListingInput>` | `OwnListing`. Published listings are validated as a whole. |
 | `DELETE /listings/:id` | none | 204, for drafts only |
-| `POST /listings/:id/publish` | none | `OwnListing` with status `ACTIVE` or `PENDING_REVIEW`. 422 with `field_errors`, or 409 `DUPLICATE_ITEM`. |
+| `POST /listings/:id/publish` | none | `OwnListing` with status `ACTIVE` or `PENDING_REVIEW`. A draft sent back for changes always goes to `PENDING_REVIEW`, as a resubmission. 422 with `field_errors`, or 409 `DUPLICATE_ITEM`. |
 | `POST /listings/:id/close` | none | `OwnListing` |
 | `POST /listings/:id/renew` | `{ quickSellHours: number \| null }` | `OwnListing`, for expired listings only |
 | `POST /media` | multipart `file` (JPG, PNG or WebP, up to 10 MB) | 201 `MediaRef { id, url, alt, width, height }` |
@@ -143,9 +143,43 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 - The blocker no longer sees the other person's posts and comments.
 - Existing offers, deals and messages stay readable for both people.
 
+### Listing review: the seller's side
+
+Moderators approve or ask for changes in the admin console (`admin-frontend`, listing review design §6–7). This is what the seller's app needs back.
+
+**`OwnListing.review`** (member's own listings only; never on `ListingDetail`, `ListingSummary` or any public read):
+
+```ts
+type ListingReviewOutcome = {
+  outcome: 'approved' | 'changes_needed'
+  reasonLabel: string | null  // the reason in plain words; null for an approval
+  message: string | null      // the moderator's message to the seller, up to 500 characters
+  decidedAt: string
+}
+// OwnListing gains: review: ListingReviewOutcome | null   (null if it never went through review)
+```
+
+- It is the **latest effective decision**. An overturned approval reads `changes_needed` with the overturn's reason and message. An overturned rejection reads `approved`.
+- It **stays** when the seller edits or resubmits, until a new decision replaces it. So `PENDING_REVIEW` with `changes_needed` means "resubmitted"; the client says "Resubmitted. We're checking it again."
+- It never carries who decided, an internal note or a reason code.
+- The client reads `DRAFT` + `changes_needed` as **Changes needed**: a banner on My listings, the reason and message on the row and in the listing wizard, and "Resubmit for review" in place of "Publish listing".
+
+**Notification kinds.** The server writes the title and body; the client maps the kind to an icon. Opening one shows the current state, as for other notifications.
+
+| Kind | When | Title | Body | Link |
+| :-- | :-- | :-- | :-- | :-- |
+| `LISTING_APPROVED` | Approved | "Your listing is live" | "{title} is on Explore now." | `/me/listings?tab=active` |
+| `LISTING_CHANGES_NEEDED` | Rejected | "{title} needs a few changes" | "{reasonLabel}." then " {message}" if any | `/listings/{id}/edit` |
+| `LISTING_CHANGES_NEEDED` | Approval overturned | "{title} was taken down for changes" | as above | `/listings/{id}/edit` |
+| `LISTING_RESTORED` | Rejection overturned | "{title} is live after all" | "We took a second look and approved it." | `/me/listings?tab=active` |
+
+Approved alerts link to My listings rather than the public listing page, because the public page returns 404 once a listing is taken down.
+
+**Offers when an approval is overturned.** Pending offers on the listing close as **`CLOSED_UNAVAILABLE`** with `closedReason: "The owner is making changes to this listing."` This replaces the admin design's `EXPIRED` (its §6.3): this app shows `EXPIRED` as "No one decided in time", which would be untrue here, while `CLOSED_UNAVAILABLE` already shows as "No longer available" with the server's reason.
+
 ## Open contract questions
 
-1. **Publishing:** is publishing its own call (`POST /listings/:id/publish`, as mocked), or is it `PATCH` with `status`? Which moderation rules send a listing to `PENDING_REVIEW` instead of `ACTIVE`?
+1. **Publishing:** is publishing its own call (`POST /listings/:id/publish`, as mocked), or is it `PATCH` with `status`? Which moderation rules send a listing to `PENDING_REVIEW` instead of `ACTIVE`? A draft sent back for changes should always go back to `PENDING_REVIEW` when resubmitted.
 2. **Signed uploads:** the client posts multipart to `/media`. If uploads go straight to object storage, the client needs a `POST /media/upload-url` → `{ uploadUrl, mediaId, headers }` step, plus a confirm call. Do uploads use an `Idempotency-Key`?
 3. **Image variants and Save-Data (PRD §8):** the client shows one URL per photo. For smaller variants it needs either a `srcset` list per image or a sizing parameter on the CDN URL. With that in place, the client will send small variants when `navigator.connection.saveData` is on. It already skips hover prefetching then.
 4. **Session cookie:** the cookie's name, `SameSite`, its domain (API and app on sibling subdomains?), its lifetime, and whether the session renews on activity. The client handles a 401 at any point by showing a sign-in sheet that keeps the draft.
@@ -160,6 +194,10 @@ Paths are relative to the API base. "Member" means a session is required; a requ
 11. **Profile photos:** `PATCH /me { avatarId }` takes an uploaded media id. Should profile photos be moderated before they show?
 12. **Evidence shape:** reports send `evidenceIds: string[]`, and disputes send `evidence: MediaRef[]`. Which one should the API take? The client will align both to it.
 13. **Runtime config:** the PRD lists support contacts in `/config`, and the mock has none. The safety pages point people to in-app reports until contacts exist.
+14. **Listing review: resubmission limit.** Should resubmitting a listing sent back for changes have a limit, or a cooldown? The client has none today.
+15. **Listing review: buyers on a takedown.** When an approval is overturned and offers close, are the buyers notified with a reason, or is the offer screen ("No longer available", with the reason) enough? Please also confirm `CLOSED_UNAVAILABLE` over `EXPIRED` for these offers.
+16. **Listing review: email.** In-app only, or also email for "changes needed"? Sign-in moved to email, so the backend can send it.
+17. **Listing review: what counts as "edited".** A rejection can only be overturned while the seller hasn't edited the draft. The wizard autosaves every change, so opening the draft and typing one character would block an overturn. Suggest that only a resubmission, or a change to a listing field the moderator judged, counts.
 
 ## Accessibility checklist for VoiceOver and TalkBack
 
@@ -173,3 +211,4 @@ These still need someone to run them on real devices. The automated parts alread
 - **Messages:** new messages from the other person are announced politely, and a blocked thread reads its notice instead of a composer.
 - **Report, Block and Appeal:** the reason radio cards read their title and description, the block confirmation states its effect, and the case reference is announced on success.
 - **Status badges:** every status is read as text, never as colour alone.
+- **Listing review:** a "Changes needed" row reads its reason and the moderator's message (introduced as "Message from NextOwn"); the My listings banner is announced politely, and its link names where it goes.

@@ -2,7 +2,15 @@ import { detailToInput, emptyListingInput, inputToDetail } from '@/features/sell
 import { authDb, SAMPLE_MEMBER_ID } from '@/mocks/db/auth'
 import { runtimeConfig } from '@/mocks/fixtures/config'
 import { listings as fixtures } from '@/mocks/fixtures/listings'
-import type { ListingDetail, ListingInput, ListingStatus, ListingSummary, OwnListing, PublicSeller } from '@/types/api'
+import type {
+  ListingDetail,
+  ListingInput,
+  ListingReviewOutcome,
+  ListingStatus,
+  ListingSummary,
+  OwnListing,
+  PublicSeller,
+} from '@/types/api'
 
 /**
  * Every listing the mock API knows: the fictional fixtures plus anything members create in the wizard.
@@ -10,7 +18,17 @@ import type { ListingDetail, ListingInput, ListingStatus, ListingSummary, OwnLis
  * In the browser, listings that were created or changed are kept in storage so drafts survive a reload.
  */
 
-type MockListing = { detail: ListingDetail; input?: ListingInput; ownerId: string; updatedAt: string }
+/** `review` is the latest review decision, shown to the owner only (never on the public detail). */
+type MockListing = {
+  detail: ListingDetail
+  input?: ListingInput
+  ownerId: string
+  updatedAt: string
+  review?: ListingReviewOutcome | null
+}
+
+/** The sample member's listing that the review team sent back for changes. */
+export const CHANGES_SAMPLE_ID = 'l-changes-sample'
 
 const STORAGE_KEY = 'nextown-mock-listings'
 const persistent = import.meta.env.MODE !== 'test'
@@ -27,6 +45,21 @@ function seed(): Map<string, MockListing> {
     'l-draft-sample',
     build({ id: 'l-draft-sample', slug: 'l-draft-sample', status: 'DRAFT' }, draftInput, SAMPLE_MEMBER_ID),
   )
+  // A complete listing the review team sent back, so the "changes needed" round can be shown and resubmitted
+  const switchLite = fixtures.find((l) => l.slug === 'nintendo-switch-docked')!
+  const sentBack = build(
+    { id: CHANGES_SAMPLE_ID, slug: CHANGES_SAMPLE_ID, status: 'DRAFT' },
+    { ...detailToInput(switchLite, runtimeConfig), title: 'Nintendo Switch Lite · Coral' },
+    SAMPLE_MEMBER_ID,
+  )
+  sentBack.review = {
+    outcome: 'changes_needed',
+    reasonLabel: 'Photos missing or unclear',
+    message:
+      'The photos are too dark to see the condition of the buttons. Please add two clear photos taken in daylight.',
+    decidedAt: new Date(Date.now() - HOUR).toISOString(),
+  }
+  map.set(CHANGES_SAMPLE_ID, sentBack)
   return map
 }
 
@@ -102,6 +135,8 @@ function load() {
 }
 load()
 
+const withReview = (record: MockListing, review: ListingReviewOutcome | null): MockListing => ({ ...record, review })
+
 const toOwn = (record: MockListing): OwnListing => {
   const { detail } = record
   return {
@@ -112,6 +147,7 @@ const toOwn = (record: MockListing): OwnListing => {
     updatedAt: record.updatedAt,
     publishedAt: detail.status === 'DRAFT' ? undefined : detail.publishedAt,
     urgencyEndsAt: detail.urgencyEndsAt,
+    review: record.review ?? null,
   }
 }
 
@@ -131,6 +167,8 @@ export type ListingChanges = {
   publishedAt?: string
   urgencyEndsAt?: string | null
   slug?: string
+  /** A new review decision; when left out, the listing keeps its current one. */
+  review?: ListingReviewOutcome | null
 }
 
 export const listingsDb = {
@@ -171,19 +209,23 @@ export const listingsDb = {
     const record = store.get(id)!
     const { detail } = record
     const urgencyEndsAt = changes.urgencyEndsAt === null ? undefined : (changes.urgencyEndsAt ?? detail.urgencyEndsAt)
+    const review = changes.review !== undefined ? changes.review : (record.review ?? null)
     store.set(
       id,
-      build(
-        {
-          id,
-          slug: changes.slug ?? detail.slug,
-          status: changes.status ?? detail.status,
-          publishedAt: changes.publishedAt ?? (detail.status === 'DRAFT' ? undefined : detail.publishedAt),
-          urgencyEndsAt,
-          sample: detail.sample,
-        },
-        input,
-        record.ownerId,
+      withReview(
+        build(
+          {
+            id,
+            slug: changes.slug ?? detail.slug,
+            status: changes.status ?? detail.status,
+            publishedAt: changes.publishedAt ?? (detail.status === 'DRAFT' ? undefined : detail.publishedAt),
+            urgencyEndsAt,
+            sample: detail.sample,
+          },
+          input,
+          record.ownerId,
+        ),
+        review,
       ),
     )
     save(id)
@@ -197,6 +239,12 @@ export const listingsDb = {
 
   newSlug(title: string, id: string) {
     return `${slugify(title)}-${id.slice(-4)}`
+  },
+
+  /** Changes state, review or dates without touching what the owner entered. */
+  change(id: string, changes: ListingChanges) {
+    const record = store.get(id)
+    if (record) listingsDb.update(id, toOwnInput(record), changes)
   },
 
   /** Changes only the state, e.g. when an accepted offer reserves the item. */
